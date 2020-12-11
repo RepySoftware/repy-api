@@ -1,6 +1,8 @@
-import { AllowNull, Column, CreatedAt, Default, Table, Unique, UpdatedAt } from "sequelize-typescript";
-import { RoleType } from "../../common/enums/role-type";
+import { AllowNull, BelongsTo, Column, CreatedAt, DataType, Default, ForeignKey, Table, Unique, UpdatedAt } from "sequelize-typescript";
+import { UserType } from "../../common/enums/user-type";
 import { Entity } from "../abstraction/entity";
+import { Customer } from "./customer";
+import { SupplierEmployee } from "./supplier-employee";
 
 @Table({
     name: { plural: 'Users' },
@@ -15,30 +17,35 @@ export class User extends Entity<User> {
     @AllowNull(false)
     @Unique
     @Column
+    public username: string;
+
+    @Unique
+    @Column
     public email: string;
 
     @AllowNull(false)
     @Column
     public password: string;
 
+    @AllowNull(false)
     @Column
-    public documentNumber?: string;
+    public type: UserType;
 
-    @Column
-    public phone?: string;
+    @ForeignKey(() => SupplierEmployee)
+    @Column(DataType.BIGINT)
+    public supplierEmployeeId: number;
+    @BelongsTo(() => SupplierEmployee, 'supplierEmployeeId')
+    public supplierEmployee: SupplierEmployee;
+
+    @ForeignKey(() => Customer)
+    @Column(DataType.BIGINT)
+    public customerId: number;
+    @BelongsTo(() => Customer, 'customerId')
+    public customer: Customer;
 
     @AllowNull(false)
-    @Default('[]')
-    @Column({
-        field: 'roles'
-    })
-    private _roles: string;
-    public get roles(): RoleType[] {
-        return JSON.parse(this._roles);
-    }
-    public set roles(value: RoleType[]) {
-        this._roles = JSON.stringify(value);
-    }
+    @Column
+    public isActive: boolean;
 
     @AllowNull(false)
     @CreatedAt
@@ -50,3 +57,17 @@ export class User extends Entity<User> {
     @Column
     public updatedAt: Date;
 }
+
+
+// @AllowNull(false)
+    // @Default('[]')
+    // @Column({
+    //     field: 'roles'
+    // })
+    // private _roles: string;
+    // public get roles(): RoleType[] {
+    //     return JSON.parse(this._roles);
+    // }
+    // public set roles(value: RoleType[]) {
+    //     this._roles = JSON.stringify(value);
+    // }
