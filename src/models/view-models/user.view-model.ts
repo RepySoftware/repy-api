@@ -1,4 +1,4 @@
-import { RoleType } from "../../common/enums/role-type";
+import { RoleType } from "../../common/enums/user-type";
 import { User } from "../entities/user";
 import * as moment from 'moment-timezone';
 

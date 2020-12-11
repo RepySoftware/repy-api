@@ -7,7 +7,7 @@ import { AuthException } from "../common/exceptions/auth.exception";
 import * as jwt from 'jsonwebtoken';
 import { CONFIG } from "../config";
 import { TokenPayload } from "../common/helpers/token.helper";
-import { RoleType } from "../common/enums/role-type";
+import { RoleType } from "../common/enums/user-type";
 import { User } from "../models/entities/user";
 import { UserViewModel } from "../models/view-models/user.view-model";
 

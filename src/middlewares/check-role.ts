@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { NotFoundException } from "../common/exceptions/not-fount.exception";
-import { RoleType } from "../common/enums/role-type";
+import { RoleType } from "../common/enums/user-type";
 import { AuthException } from "../common/exceptions/auth.exception";
 import { User } from "../models/entities/user";
 
