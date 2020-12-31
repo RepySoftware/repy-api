@@ -4,6 +4,8 @@ import { AddressViewModel } from "./address.view-model";
 import { DeviceGasLevelViewModel } from "./device-gas-level.view-mode";
 import * as moment from 'moment-timezone';
 import { DEFAULT_DATETIME_FORMAT } from "../../config";
+import { SupplierViewModel } from "./supplier.view-model";
+import { NotificationConfigurationViewModel } from "./notification-configuration.view-model";
 
 export class DeviceViewModel {
 

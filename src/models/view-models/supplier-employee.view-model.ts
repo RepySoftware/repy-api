@@ -2,6 +2,7 @@ import { SupplierEmployeeRole } from "../../common/enums/supplier-employee-role"
 import { SupplierEmployee } from "../entities/supplier-employee";
 import * as moment from 'moment-timezone';
 import { DEFAULT_DATETIME_FORMAT } from "../../config";
+import { SupplierViewModel } from "./supplier.view-model";
 
 export class SupplierEmployeeViewModel {
 

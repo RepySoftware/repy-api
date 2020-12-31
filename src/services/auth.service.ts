@@ -1,15 +1,14 @@
 import { injectable } from "inversify";
 import { LoginInputModel } from "../models/input-models/login.input-model";
-import { UserTokenViewModel } from "../models/view-models/user-token.view-model";
 import { NotFoundException } from "../common/exceptions/not-fount.exception";
 import * as bcrypt from 'bcryptjs';
 import { AuthException } from "../common/exceptions/auth.exception";
 import * as jwt from 'jsonwebtoken';
 import { CONFIG } from "../config";
 import { TokenPayload } from "../common/helpers/token.helper";
-import { RoleType } from "../common/enums/user-type";
 import { User } from "../models/entities/user";
 import { UserViewModel } from "../models/view-models/user.view-model";
+import { UserTokenViewModel } from "../models/view-models/user-token.view-model";
 
 @injectable()
 export class AuthService {
@@ -25,12 +24,6 @@ export class AuthService {
 
         if (!bcrypt.compareSync(input.password, user.password))
             throw new AuthException('E-mail ou senha inválida');
-
-        if (input.strategy == 'admin' && !(
-            user.roles && (user.roles.includes(RoleType.SUPPORTER) || user.roles.includes(RoleType.ADMIN))
-        )) {
-            throw new AuthException('Usuário sem permissão');
-        }
 
         return {
             user: UserViewModel.fromEntity(user),
