@@ -57,17 +57,3 @@ export class User extends Entity<User> {
     @Column
     public updatedAt: Date;
 }
-
-
-// @AllowNull(false)
-    // @Default('[]')
-    // @Column({
-    //     field: 'roles'
-    // })
-    // private _roles: string;
-    // public get roles(): RoleType[] {
-    //     return JSON.parse(this._roles);
-    // }
-    // public set roles(value: RoleType[]) {
-    //     this._roles = JSON.stringify(value);
-    // }
