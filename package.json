@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/igorwfaoro/repy-api.git"
+    "url": "git+https://github.com/Seigas/seigas-repy-api.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/igorwfaoro/repy-api/issues"
+    "url": "https://github.com/Seigas/seigas-repy-api/issues"
   },
-  "homepage": "https://github.com/igorwfaoro/repy-api#readme",
+  "homepage": "https://github.com/Seigas/seigas-repy-api#readme",
   "dependencies": {
     "axios": "^0.21.0",
     "bcrypt": "^5.0.0",

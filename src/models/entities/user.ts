@@ -1,8 +1,9 @@
-import { AllowNull, BelongsTo, Column, CreatedAt, DataType, Default, ForeignKey, Table, Unique, UpdatedAt } from "sequelize-typescript";
+import { AllowNull, BelongsTo, Column, CreatedAt, DataType, Default, ForeignKey, HasMany, Table, Unique, UpdatedAt } from "sequelize-typescript";
 import { UserType } from "../../common/enums/user-type";
 import { Entity } from "../abstraction/entity";
 import { Customer } from "./customer";
 import { SupplierEmployee } from "./supplier-employee";
+import { UserDevice } from "./user-device";
 
 @Table({
     name: { plural: 'Users' },
@@ -33,15 +34,15 @@ export class User extends Entity<User> {
 
     @ForeignKey(() => SupplierEmployee)
     @Column(DataType.BIGINT)
-    public supplierEmployeeId: number;
+    public supplierEmployeeId?: number;
     @BelongsTo(() => SupplierEmployee, 'supplierEmployeeId')
-    public supplierEmployee: SupplierEmployee;
+    public supplierEmployee?: SupplierEmployee;
 
     @ForeignKey(() => Customer)
     @Column(DataType.BIGINT)
-    public customerId: number;
+    public customerId?: number;
     @BelongsTo(() => Customer, 'customerId')
-    public customer: Customer;
+    public customer?: Customer;
 
     @AllowNull(false)
     @Column
@@ -56,4 +57,7 @@ export class User extends Entity<User> {
     @UpdatedAt
     @Column
     public updatedAt: Date;
+
+    @HasMany(() => UserDevice)
+    public userDevices: UserDevice[];
 }

@@ -1,6 +1,7 @@
 import { AllowNull, BelongsTo, Column, CreatedAt, DataType, ForeignKey, Table, Unique, UpdatedAt } from "sequelize-typescript";
 import { DeviceType } from "../../common/enums/device-type";
 import { Entity } from "../abstraction/entity";
+import { Address } from "./address";
 import { DeviceGasLevel } from "./device-gas-level";
 import { NotificationConfiguration } from "./notification-configuration";
 import { Supplier } from "./supplier";
@@ -23,6 +24,13 @@ export class Device extends Entity<Device> {
     @AllowNull(false)
     @Column
     public name: string;
+
+    @ForeignKey(() => Address)
+    @AllowNull(false)
+    @Column(DataType.BIGINT)
+    public addressId: number;
+    @BelongsTo(() => Address, 'addressId')
+    public address: Address;
 
     @ForeignKey(() => Supplier)
     @AllowNull(false)

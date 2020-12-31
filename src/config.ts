@@ -10,3 +10,5 @@ export const CONFIG: {
     JWT_SECRET: string
 
 } = process.env as any;
+
+export const DEFAULT_DATETIME_FORMAT: string = 'YYYY-MM-DD HH:mm:ss';

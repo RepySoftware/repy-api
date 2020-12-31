@@ -1,16 +1,24 @@
-import { RoleType } from "../../common/enums/user-type";
+import { UserType } from "../../common/enums/user-type";
 import { User } from "../entities/user";
 import * as moment from 'moment-timezone';
+import { SupplierEmployeeViewModel } from "./supplier-employee.view-model";
+import { CustomerViewModel } from "./customer.view-model";
+import { UserDeviceViewModel } from "./user-device.view-model";
+import { DEFAULT_DATETIME_FORMAT } from "../../config";
 
 export class UserViewModel {
+
     public id: number;
     public name: string;
+    public username: string;
     public email: string;
-    public documentNumber?: string;
-    public phone?: string;
-    public roles: RoleType[];
+    public type: UserType;
+    public supplierEmployee?: SupplierEmployeeViewModel;
+    public customer?: CustomerViewModel;
+    public isActive: boolean;
     public createdAt: string;
     public updatedAt: string;
+    public userDevices: UserDeviceViewModel[];
 
     public static fromEntity(u: User): UserViewModel {
 
@@ -18,12 +26,15 @@ export class UserViewModel {
 
         user.id = u.id;
         user.name = u.name;
+        user.username = u.username;
         user.email = u.email;
-        user.documentNumber = u.documentNumber;
-        user.phone = u.phone;
-        user.roles = u.roles;
-        user.createdAt = moment(u.createdAt).format('YYYY-MM-DD HH:m:ss');
-        user.updatedAt = moment(u.updatedAt).format('YYYY-MM-DD HH:m:ss');
+        user.type = u.type;
+        user.supplierEmployee = u.supplierEmployee ? SupplierEmployeeViewModel.fromEntity(u.supplierEmployee) : null;
+        user.customer = u.customer ? CustomerViewModel.fromEntity(u.customer) : null;
+        user.isActive = u.isActive;
+        user.createdAt = moment(u.createdAt).format(DEFAULT_DATETIME_FORMAT);
+        user.updatedAt = moment(u.updatedAt).format(DEFAULT_DATETIME_FORMAT);
+        user.userDevices = u.userDevices ? u.userDevices.map(UserDeviceViewModel.fromEntity) : null;
 
         return user;
     }
