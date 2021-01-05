@@ -19,7 +19,7 @@ export class DeviceGasLevelViewModel {
         const device = new DeviceGasLevelViewModel();
 
         device.id = dgl.id;
-        device.cylinder = CylinderViewModel.fromEntity(dgl.cylinder);
+        device.cylinder = dgl.cylinder ? CylinderViewModel.fromEntity(dgl.cylinder) : null;
         device.currentWeight = dgl.currentWeight;
         device.cylinderWeight = dgl.cylinderWeight;
         device.contentWeight = dgl.contentWeight;

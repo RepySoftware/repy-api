@@ -13,7 +13,7 @@ export class UserDeviceViewModel {
         const userDevice = new UserDeviceViewModel();
 
         userDevice.id = ud.id;
-        userDevice.device = DeviceViewModel.fromEntity(ud.device);
+        userDevice.device = ud.device ? DeviceViewModel.fromEntity(ud.device) : null;
         userDevice.role = ud.role;
 
         return userDevice;

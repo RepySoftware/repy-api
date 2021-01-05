@@ -19,7 +19,7 @@ export class SupplierViewModel {
         supplier.id = s.id;
         supplier.documentNumber = s.documentNumber;
         supplier.phoneNumber = s.phoneNumber;
-        supplier.address = AddressViewModel.fromEntity(s.address);
+        supplier.address = s.address ? AddressViewModel.fromEntity(s.address) : null;
         supplier.createdAt = moment(s.createdAt).format(DEFAULT_DATETIME_FORMAT);
         supplier.updatedAt = moment(s.updatedAt).format(DEFAULT_DATETIME_FORMAT);
 

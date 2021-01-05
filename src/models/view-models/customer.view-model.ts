@@ -19,7 +19,7 @@ export class CustomerViewModel {
         customer.id = c.id;
         customer.documentNumber = c.documentNumber;
         customer.phoneNumber = c.phoneNumber;
-        customer.address = AddressViewModel.fromEntity(c.address);
+        customer.address = c.address ? AddressViewModel.fromEntity(c.address) : null;
         customer.createdAt = moment(c.createdAt).format(DEFAULT_DATETIME_FORMAT);
         customer.updatedAt = moment(c.updatedAt).format(DEFAULT_DATETIME_FORMAT);
 

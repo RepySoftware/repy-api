@@ -1,10 +1,11 @@
-import { AllowNull, BelongsTo, Column, CreatedAt, DataType, ForeignKey, Table, Unique, UpdatedAt } from "sequelize-typescript";
+import { AllowNull, BelongsTo, Column, CreatedAt, DataType, ForeignKey, HasMany, Table, Unique, UpdatedAt } from "sequelize-typescript";
 import { DeviceType } from "../../common/enums/device-type";
 import { Entity } from "../abstraction/entity";
 import { Address } from "./address";
 import { DeviceGasLevel } from "./device-gas-level";
 import { NotificationConfiguration } from "./notification-configuration";
 import { Supplier } from "./supplier";
+import { UserDevice } from "./user-device";
 
 @Table({
     name: { plural: 'Devices' }
@@ -44,11 +45,10 @@ export class Device extends Entity<Device> {
     public type: DeviceType;
 
     @ForeignKey(() => NotificationConfiguration)
-    @AllowNull(false)
     @Column(DataType.BIGINT)
-    public notificationConfigurationId: number;
+    public notificationConfigurationId?: number;
     @BelongsTo(() => NotificationConfiguration, 'notificationConfigurationId')
-    public notificationConfiguration: NotificationConfiguration;
+    public notificationConfiguration?: NotificationConfiguration;
 
     @AllowNull(false)
     @CreatedAt
@@ -65,4 +65,7 @@ export class Device extends Entity<Device> {
     public deviceGasLevelId: number;
     @BelongsTo(() => DeviceGasLevel, 'deviceGasLevelId')
     public deviceGasLevel: DeviceGasLevel;
+
+    @HasMany(() => UserDevice)
+    public usersDevice: UserDevice[];
 }

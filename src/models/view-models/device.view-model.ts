@@ -29,13 +29,13 @@ export class DeviceViewModel {
         device.deviceKey = d.deviceKey;
         device.token = d.token;
         device.name = d.name;
-        device.address = AddressViewModel.fromEntity(d.address);
-        device.supplier = SupplierViewModel.fromEntity(d.supplier);
+        device.address = d.address ? AddressViewModel.fromEntity(d.address) : null;
+        device.supplier = d.supplier ? SupplierViewModel.fromEntity(d.supplier) : null;
         device.type = d.type;
-        device.notificationConfiguration = NotificationConfigurationViewModel.fromEntity(d.notificationConfiguration);
+        device.notificationConfiguration = d.notificationConfiguration ? NotificationConfigurationViewModel.fromEntity(d.notificationConfiguration) : null;
         device.createdAt = moment(d.createdAt).format(DEFAULT_DATETIME_FORMAT);
         device.updatedAt = moment(d.updatedAt).format(DEFAULT_DATETIME_FORMAT);
-        device.deviceGasLevel = DeviceGasLevelViewModel.fromEntity(d.deviceGasLevel);
+        device.deviceGasLevel = d.deviceGasLevel ? DeviceGasLevelViewModel.fromEntity(d.deviceGasLevel) : null;
 
         return device;
     }
