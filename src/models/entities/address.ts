@@ -2,7 +2,8 @@ import { AllowNull, Column, Table } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
 
 @Table({
-    name: { plural: 'Addresses' },
+    tableName: 'Addresses',
+    timestamps: false
 })
 export class Address extends Entity<Address> {
 

@@ -10,7 +10,7 @@ const deviceService = ServicesCollection.resolve(DeviceService);
 
 DevicesController.get('/', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const devices = await deviceService.get(String(req.query.strategy), TokenHelper.getPayload(res).userId, req.query);
+        const devices = await deviceService.get(req.query.strategy ? String(req.query.strategy) : null, TokenHelper.getPayload(res).userId, req.query);
         res.json(devices);
     } catch (error) {
         next(error);

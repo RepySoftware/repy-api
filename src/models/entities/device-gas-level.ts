@@ -3,7 +3,8 @@ import { Entity } from "../abstraction/entity";
 import { Cylinder } from "./cylinder";
 
 @Table({
-    name: { plural: 'DevicesGasLevels' }
+    tableName: 'DevicesGasLevels',
+    timestamps: false
 })
 export class DeviceGasLevel extends Entity<DeviceGasLevel> {
 

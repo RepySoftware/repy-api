@@ -4,7 +4,7 @@ import { Entity } from "../abstraction/entity";
 import { Supplier } from "./supplier";
 
 @Table({
-    name: { plural: 'SupplierEmployees' },
+    tableName: 'SupplierEmployees',
     timestamps: true
 })
 export class SupplierEmployee extends Entity<SupplierEmployee> {

@@ -5,7 +5,8 @@ import { Device } from "./device";
 import { User } from "./user";
 
 @Table({
-    name: { plural: 'UsersDevices' }
+    tableName: 'UsersDevices',
+    timestamps: false
 })
 export class UserDevice extends Entity<UserDevice> {
 

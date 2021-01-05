@@ -6,8 +6,8 @@ import { SupplierEmployee } from "./supplier-employee";
 import { UserDevice } from "./user-device";
 
 @Table({
-    name: { plural: 'Users' },
-    timestamps: true,
+    tableName: 'Users',
+    timestamps: true
 })
 export class User extends Entity<User> {
 
@@ -43,6 +43,10 @@ export class User extends Entity<User> {
     public customerId?: number;
     @BelongsTo(() => Customer, 'customerId')
     public customer?: Customer;
+
+    @AllowNull(false)
+    @Column
+    public isAdmin: boolean;
 
     @AllowNull(false)
     @Column

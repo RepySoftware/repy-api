@@ -2,7 +2,8 @@ import { AllowNull, Column, Default, Table } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
 
 @Table({
-    name: { plural: 'NotificationsConfigurations' }
+    tableName: 'NotificationsConfigurations',
+    timestamps: false
 })
 export class NotificationConfiguration extends Entity<NotificationConfiguration> {
 
