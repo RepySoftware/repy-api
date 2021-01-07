@@ -35,4 +35,9 @@ export class DeviceGasLevel extends Entity<DeviceGasLevel> {
     @AllowNull(false)
     @Column
     public lastWeightUpdate: Date;
+
+    public calculePercentage(): number {
+        // TODO: calcular %
+        return 32;
+    }
 }

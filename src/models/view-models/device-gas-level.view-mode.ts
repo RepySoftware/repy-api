@@ -14,6 +14,8 @@ export class DeviceGasLevelViewModel {
     public setTare: boolean;
     public lastWeightUpdate: string;
 
+    public percentage: number;
+
     public static fromEntity(dgl: DeviceGasLevel): DeviceGasLevelViewModel {
 
         const device = new DeviceGasLevelViewModel();
@@ -26,6 +28,7 @@ export class DeviceGasLevelViewModel {
         device.percentageToNotify = dgl.percentageToNotify;
         device.setTare = dgl.setTare;
         device.lastWeightUpdate = moment(dgl.lastWeightUpdate).format(DEFAULT_DATETIME_FORMAT);
+        device.percentage = dgl.calculePercentage();
 
         return device;
     }
