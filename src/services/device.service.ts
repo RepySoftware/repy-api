@@ -19,12 +19,10 @@ export class DeviceService {
         return devices.map(DeviceViewModel.fromEntity);
     }
 
-    public async getById(id: number, userId: number): Promise<DeviceViewModel> {
-
-        await this.validateUserDevice(id, userId);
+    public async getByKey(key: string, userId: number): Promise<DeviceViewModel> {
 
         const device: Device = await Device.findOne({
-            where: { id },
+            where: { deviceKey: key },
             include: [
                 {
                     model: Address,
@@ -39,6 +37,8 @@ export class DeviceService {
 
         if (!device)
             throw new NotFoundException('Dispositivo não encontrado');
+
+        await this.validateUserDevice(device.id, userId);
 
         return DeviceViewModel.fromEntity(device);
     }
