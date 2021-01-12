@@ -17,4 +17,13 @@ DevicesController.get('/', [checkToken], async (req: Request, res: Response, nex
     }
 });
 
+DevicesController.get('/:id', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const device = await deviceService.getById(Number(req.params.id), TokenHelper.getPayload(res).userId);
+        res.json(device);
+    } catch (error) {
+        next(error);
+    }
+});
+
 export { DevicesController };
