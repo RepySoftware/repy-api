@@ -19,8 +19,8 @@ export class SupplierEmployeeViewModel {
         employee.id = se.id;
         employee.supplier = se.supplier ? SupplierViewModel.fromEntity(se.supplier) : null;
         employee.role = se.role;
-        employee.createdAt = moment(se.createdAt).format(DEFAULT_DATETIME_FORMAT);
-        employee.updatedAt = moment(se.updatedAt).format(DEFAULT_DATETIME_FORMAT);
+        employee.createdAt = moment.utc(se.createdAt).local().format(DEFAULT_DATETIME_FORMAT);
+        employee.updatedAt = moment.utc(se.updatedAt).local().format(DEFAULT_DATETIME_FORMAT);
 
         return employee;
     }

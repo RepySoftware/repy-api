@@ -9,6 +9,7 @@ import { DeviceGasLevel } from "../models/entities/device-gas-level";
 import { User } from "../models/entities/user";
 import { NotAuthorizedException } from "../common/exceptions/not-authorized.exception";
 import { UserDevice } from "../models/entities/user-device";
+import { Cylinder } from "../models/entities/cylinder";
 
 @injectable()
 export class DeviceService {
@@ -30,7 +31,13 @@ export class DeviceService {
                 },
                 {
                     model: DeviceGasLevel,
-                    as: 'deviceGasLevel'
+                    as: 'deviceGasLevel',
+                    include: [
+                        {
+                            model: Cylinder,
+                            as: 'cylinder'
+                        }
+                    ]
                 }
             ]
         });

@@ -32,8 +32,8 @@ export class UserViewModel {
         user.supplierEmployee = u.supplierEmployee ? SupplierEmployeeViewModel.fromEntity(u.supplierEmployee) : null;
         user.customer = u.customer ? CustomerViewModel.fromEntity(u.customer) : null;
         user.isActive = u.isActive;
-        user.createdAt = moment(u.createdAt).format(DEFAULT_DATETIME_FORMAT);
-        user.updatedAt = moment(u.updatedAt).format(DEFAULT_DATETIME_FORMAT);
+        user.createdAt = moment.utc(u.createdAt).local().format(DEFAULT_DATETIME_FORMAT);
+        user.updatedAt = moment.utc(u.updatedAt).local().format(DEFAULT_DATETIME_FORMAT);
         user.userDevices = u.userDevices ? u.userDevices.map(UserDeviceViewModel.fromEntity) : null;
 
         return user;

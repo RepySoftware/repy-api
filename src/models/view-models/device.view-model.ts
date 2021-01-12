@@ -17,6 +17,7 @@ export class DeviceViewModel {
     public supplier: SupplierViewModel;
     public type: DeviceType;
     public notificationConfiguration: NotificationConfigurationViewModel;
+    public isOnline: boolean;
     public createdAt: string;
     public updatedAt: string;
     public deviceGasLevel: DeviceGasLevelViewModel;
@@ -33,8 +34,9 @@ export class DeviceViewModel {
         device.supplier = d.supplier ? SupplierViewModel.fromEntity(d.supplier) : null;
         device.type = d.type;
         device.notificationConfiguration = d.notificationConfiguration ? NotificationConfigurationViewModel.fromEntity(d.notificationConfiguration) : null;
-        device.createdAt = moment(d.createdAt).format(DEFAULT_DATETIME_FORMAT);
-        device.updatedAt = moment(d.updatedAt).format(DEFAULT_DATETIME_FORMAT);
+        device.isOnline = d.isOnline();
+        device.createdAt = moment.utc(d.createdAt).local().format(DEFAULT_DATETIME_FORMAT);
+        device.updatedAt = moment.utc(d.updatedAt).local().format(DEFAULT_DATETIME_FORMAT);
         device.deviceGasLevel = d.deviceGasLevel ? DeviceGasLevelViewModel.fromEntity(d.deviceGasLevel) : null;
 
         return device;

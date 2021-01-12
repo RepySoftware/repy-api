@@ -6,6 +6,8 @@ import { DeviceGasLevel } from "./device-gas-level";
 import { NotificationConfiguration } from "./notification-configuration";
 import { Supplier } from "./supplier";
 import { UserDevice } from "./user-device";
+import * as moment from 'moment-timezone';
+import { DeviceIsOnline } from "../abstraction/device-is-online";
 
 @Table({
     tableName: 'Devices',
@@ -69,4 +71,16 @@ export class Device extends Entity<Device> {
 
     @HasMany(() => UserDevice)
     public usersDevice: UserDevice[];
+
+    private deviceByType(): DeviceGasLevel | any {
+        switch (this.type) {
+            case DeviceType.gasLevel: return this.deviceGasLevel;
+            default: return null;
+        }
+    }
+
+    public isOnline(): boolean {
+        const device: DeviceIsOnline = this.deviceByType();
+        return device ? device.isOnline(this) : moment().diff(moment.utc(this.updatedAt).local()) < 30000;;
+    }
 }

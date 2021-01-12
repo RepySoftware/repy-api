@@ -23,11 +23,11 @@ export class DeviceGasLevelViewModel {
         device.id = dgl.id;
         device.cylinder = dgl.cylinder ? CylinderViewModel.fromEntity(dgl.cylinder) : null;
         device.currentWeight = dgl.currentWeight;
-        device.cylinderWeight = dgl.cylinderWeight;
-        device.contentWeight = dgl.contentWeight;
+        device.cylinderWeight = dgl.getCylinderWeight();
+        device.contentWeight = dgl.getContentWeight();
         device.percentageToNotify = dgl.percentageToNotify;
         device.setTare = dgl.setTare;
-        device.lastWeightUpdate = moment(dgl.lastWeightUpdate).format(DEFAULT_DATETIME_FORMAT);
+        device.lastWeightUpdate = moment.utc(dgl.lastWeightUpdate).local().format(DEFAULT_DATETIME_FORMAT);
         device.percentage = dgl.calculePercentage();
 
         return device;
