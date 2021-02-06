@@ -26,4 +26,14 @@ DevicesController.get('/getByKey/:deviceKey', [checkToken], async (req: Request,
     }
 });
 
+
+DevicesController.post('/syncData', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await deviceService.syncData(req.body);
+        res.json(result);
+    } catch (error) {
+        next(error);
+    }
+});
+
 export { DevicesController };

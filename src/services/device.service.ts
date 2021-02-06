@@ -10,6 +10,9 @@ import { User } from "../models/entities/user";
 import { NotAuthorizedException } from "../common/exceptions/not-authorized.exception";
 import { UserDevice } from "../models/entities/user-device";
 import { Cylinder } from "../models/entities/cylinder";
+import { DeviceSyncDataInputModel } from "../models/input-models/abstraction/device-sync-data.input-model";
+import { DeviceSyncDataViewModel } from "../models/view-models/abstraction/device-sync-data.view-model";
+import { DeviceSyncDataStrategy } from "./strategies/device-sync-data.strategy";
 
 @injectable()
 export class DeviceService {
@@ -48,6 +51,23 @@ export class DeviceService {
         await this.validateUserDevice(device.id, userId);
 
         return DeviceViewModel.fromEntity(device);
+    }
+
+    public async syncData(input: DeviceSyncDataInputModel): Promise<DeviceSyncDataViewModel> {
+
+        const device: Device = Device.findOne({
+            where: {
+                deviceKey: input.deviceKey,
+                token: input.deviceToken
+            }
+        });
+
+        if (!device)
+            throw new NotFoundException('Dispositivo não encontrado');
+
+        const result = await (new DeviceSyncDataStrategy(device.type).call(input));
+
+        return result;
     }
 
     private async validateUserDevice(deviceId: number, userId: number): Promise<void> {
