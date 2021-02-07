@@ -10,7 +10,14 @@ const authService = ServicesCollection.resolve(AuthService);
 
 AuthController.post('/login', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const userToken = await authService.login(req.body);
+
+        const { strategy } = req.query;
+
+        const userToken = await authService.login({
+            ...req.body,
+            strategy
+        });
+
         res.json(userToken);
     } catch (error) {
         next(error);

@@ -1,29 +1,20 @@
 import { injectable } from "inversify";
 import { LoginInputModel } from "../models/input-models/login.input-model";
 import { NotFoundException } from "../common/exceptions/not-fount.exception";
-import * as bcrypt from 'bcryptjs';
-import { AuthException } from "../common/exceptions/auth.exception";
 import * as jwt from 'jsonwebtoken';
 import { CONFIG } from "../config";
 import { TokenPayload } from "../common/helpers/token.helper";
 import { User } from "../models/entities/user";
 import { UserViewModel } from "../models/view-models/user.view-model";
 import { UserTokenViewModel } from "../models/view-models/user-token.view-model";
+import { LoginStrategy } from "./strategies/login.strategy";
 
 @injectable()
 export class AuthService {
 
     public async login(input: LoginInputModel): Promise<UserTokenViewModel> {
 
-        const user: User = await User.findOne({
-            where: { email: input.email }
-        });
-
-        if (!user)
-            throw new NotFoundException('Usuário não encontrado');
-
-        if (!bcrypt.compareSync(input.password, user.password))
-            throw new AuthException('E-mail ou senha inválida');
+        const user = await (new LoginStrategy(input.strategy).call(input));
 
         return {
             user: UserViewModel.fromEntity(user),

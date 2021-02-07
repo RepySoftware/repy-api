@@ -1,9 +1,6 @@
-import { AllowNull, BelongsTo, Column, CreatedAt, DataType, Default, ForeignKey, HasMany, Table, Unique, UpdatedAt } from "sequelize-typescript";
-import { UserType } from "../../common/enums/user-type";
+import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, Table, Unique, UpdatedAt } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
-import { Customer } from "./customer";
-import { SupplierEmployee } from "./supplier-employee";
-import { UserDevice } from "./user-device";
+import { Person } from "./person";
 
 @Table({
     tableName: 'Users',
@@ -11,38 +8,21 @@ import { UserDevice } from "./user-device";
 })
 export class User extends Entity<User> {
 
+    @ForeignKey(() => Person)
     @AllowNull(false)
     @Column
-    public name: string;
+    public personId: number;
+    @BelongsTo(() => Person, 'personId')
+    public person: Person;
 
     @AllowNull(false)
     @Unique
     @Column
     public username: string;
 
-    @Unique
-    @Column
-    public email: string;
-
     @AllowNull(false)
     @Column
     public password: string;
-
-    @AllowNull(false)
-    @Column
-    public type: UserType;
-
-    @ForeignKey(() => SupplierEmployee)
-    @Column(DataType.BIGINT)
-    public supplierEmployeeId?: number;
-    @BelongsTo(() => SupplierEmployee, 'supplierEmployeeId')
-    public supplierEmployee?: SupplierEmployee;
-
-    @ForeignKey(() => Customer)
-    @Column(DataType.BIGINT)
-    public customerId?: number;
-    @BelongsTo(() => Customer, 'customerId')
-    public customer?: Customer;
 
     @AllowNull(false)
     @Column
@@ -61,7 +41,4 @@ export class User extends Entity<User> {
     @UpdatedAt
     @Column
     public updatedAt: Date;
-
-    @HasMany(() => UserDevice)
-    public userDevices: UserDevice[];
 }

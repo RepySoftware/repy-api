@@ -31,6 +31,9 @@ export class Address extends Entity<Address> {
     public number: string;
 
     @Column
+    public complement: string;
+
+    @Column
     public referencePoint: string;
 
     @AllowNull(false)

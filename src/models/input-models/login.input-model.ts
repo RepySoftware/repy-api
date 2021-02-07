@@ -1,5 +1,5 @@
 export interface LoginInputModel {
-    email: string;
+    username: string;
     password: string;
     strategy?: 'admin' | 'user'
 }

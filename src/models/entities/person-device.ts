@@ -1,30 +1,30 @@
 import { AllowNull, BelongsTo, Column, DataType, ForeignKey, Table } from "sequelize-typescript";
-import { UserDeviceRole } from "../../common/enums/user-device-role";
+import { PersonDeviceRole } from "../../common/enums/person-device-role";
 import { Entity } from "../abstraction/entity";
 import { Device } from "./device";
-import { User } from "./user";
+import { Person } from "./person";
 
 @Table({
-    tableName: 'UsersDevices',
+    tableName: 'PersonsDevices',
     timestamps: false
 })
-export class UserDevice extends Entity<UserDevice> {
+export class PersonDevice extends Entity<PersonDevice> {
 
     @AllowNull(false)
-    @ForeignKey(() => User)
-    @Column(DataType.BIGINT)
-    public userId: number;
-    @BelongsTo(() => User, 'userId')
-    public user: User;
+    @ForeignKey(() => Person)
+    @Column
+    public personId: number;
+    @BelongsTo(() => Person, 'personId')
+    public person: Person;
 
     @AllowNull(false)
     @ForeignKey(() => Device)
-    @Column(DataType.BIGINT)
+    @Column
     public deviceId: number;
     @BelongsTo(() => Device, 'deviceId')
     public device: Device;
 
     @AllowNull(false)
     @Column
-    public role: UserDeviceRole;
+    public role: PersonDeviceRole;
 }

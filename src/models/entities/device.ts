@@ -4,10 +4,10 @@ import { Entity } from "../abstraction/entity";
 import { Address } from "./address";
 import { DeviceGasLevel } from "./device-gas-level";
 import { NotificationConfiguration } from "./notification-configuration";
-import { Supplier } from "./supplier";
-import { UserDevice } from "./user-device";
 import * as moment from 'moment-timezone';
 import { DeviceIsOnline } from "../abstraction/device-is-online";
+import { Person } from "./person";
+import { PersonDevice } from "./person-device";
 
 @Table({
     tableName: 'Devices',
@@ -31,24 +31,31 @@ export class Device extends Entity<Device> {
 
     @ForeignKey(() => Address)
     @AllowNull(false)
-    @Column(DataType.BIGINT)
+    @Column
     public addressId: number;
     @BelongsTo(() => Address, 'addressId')
     public address: Address;
 
-    @ForeignKey(() => Supplier)
+    @ForeignKey(() => Person)
     @AllowNull(false)
-    @Column(DataType.BIGINT)
-    public supplierId: number;
-    @BelongsTo(() => Supplier, 'supplierId')
-    public supplier: Supplier;
+    @Column
+    public personId: number;
+    @BelongsTo(() => Person, 'personId')
+    public person: Person;
+
+    @ForeignKey(() => Person)
+    @AllowNull(false)
+    @Column
+    public personSupplierId: number;
+    @BelongsTo(() => Person, 'personSupplierId')
+    public personSupplier: Person;
 
     @AllowNull(false)
     @Column
     public type: DeviceType;
 
     @ForeignKey(() => NotificationConfiguration)
-    @Column(DataType.BIGINT)
+    @Column
     public notificationConfigurationId?: number;
     @BelongsTo(() => NotificationConfiguration, 'notificationConfigurationId')
     public notificationConfiguration?: NotificationConfiguration;
@@ -64,17 +71,17 @@ export class Device extends Entity<Device> {
     public updatedAt: Date;
 
     @ForeignKey(() => DeviceGasLevel)
-    @Column(DataType.BIGINT)
+    @Column
     public deviceGasLevelId: number;
     @BelongsTo(() => DeviceGasLevel, 'deviceGasLevelId')
     public deviceGasLevel: DeviceGasLevel;
 
-    @HasMany(() => UserDevice)
-    public usersDevice: UserDevice[];
+    @HasMany(() => PersonDevice)
+    public usersDevice: PersonDevice[];
 
     private deviceByType(): DeviceGasLevel | any {
         switch (this.type) {
-            case DeviceType.gasLevel: return this.deviceGasLevel;
+            case DeviceType.GAS_LEVEL: return this.deviceGasLevel;
             default: return null;
         }
     }

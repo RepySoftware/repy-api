@@ -1,3 +1,3 @@
 export enum DeviceType {
-    gasLevel = 'gasLevel'
+    GAS_LEVEL = 'GAS_LEVEL'
 }

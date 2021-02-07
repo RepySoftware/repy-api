@@ -8,11 +8,12 @@ import { Address } from "../models/entities/address";
 import { DeviceGasLevel } from "../models/entities/device-gas-level";
 import { User } from "../models/entities/user";
 import { NotAuthorizedException } from "../common/exceptions/not-authorized.exception";
-import { UserDevice } from "../models/entities/user-device";
 import { Cylinder } from "../models/entities/cylinder";
 import { DeviceSyncDataInputModel } from "../models/input-models/abstraction/device-sync-data.input-model";
 import { DeviceSyncDataViewModel } from "../models/view-models/abstraction/device-sync-data.view-model";
 import { DeviceSyncDataStrategy } from "./strategies/device-sync-data.strategy";
+import { Person } from "../models/entities/person";
+import { PersonDevice } from "../models/entities/person-device";
 
 @injectable()
 export class DeviceService {
@@ -48,7 +49,7 @@ export class DeviceService {
         if (!device)
             throw new NotFoundException('Dispositivo não encontrado');
 
-        await this.validateUserDevice(device.id, userId);
+        await this.validatePersonDevice(device.id, userId);
 
         return DeviceViewModel.fromEntity(device);
     }
@@ -70,21 +71,26 @@ export class DeviceService {
         return result;
     }
 
-    private async validateUserDevice(deviceId: number, userId: number): Promise<void> {
+    private async validatePersonDevice(deviceId: number, userId: number): Promise<void> {
 
         const user: User = await User.findOne({
             where: { id: userId },
-            include: []
+            include: [
+                {
+                    model: Person,
+                    as: 'person'
+                }
+            ]
         });
 
         if (user.isAdmin) {
             return;
         } else {
-            const userDevice: UserDevice = await UserDevice.findOne({
-                where: { deviceId, userId }
+            const personDevice: PersonDevice = await PersonDevice.findOne({
+                where: { deviceId, personId: user.person.id }
             });
 
-            if (userDevice) {
+            if (personDevice) {
                 return;
             }
         }

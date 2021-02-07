@@ -9,6 +9,7 @@ export class AddressViewModel {
     public region: string;
     public country: string;
     public number: string;
+    public complement: string;
     public referencePoint: string;
     public latitude: string;
     public longitude: string;
@@ -24,6 +25,7 @@ export class AddressViewModel {
         address.region = a.region;
         address.country = a.country;
         address.number = a.number;
+        address.complement = a.complement;
         address.referencePoint = a.referencePoint;
         address.latitude = a.latitude;
         address.longitude = a.longitude;

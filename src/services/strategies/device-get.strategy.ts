@@ -1,14 +1,14 @@
 import { Includeable, Op } from "sequelize";
-import { RoleType } from "../../common/enums/role-type";
-import { UserType } from "../../common/enums/user-type";
+import { AccessControlRole } from "../../common/enums/access-control-role";
+import { PersonRole } from "../../common/enums/person-role";
 import { NotFoundException } from "../../common/exceptions/not-fount.exception";
-import { CustomException } from "../../common/exceptions/setup/custom.exception";
 import { verifyUserRole } from "../../middlewares/check-role";
 import { Address } from "../../models/entities/address";
 import { Device } from "../../models/entities/device";
 import { DeviceGasLevel } from "../../models/entities/device-gas-level";
+import { Person } from "../../models/entities/person";
+import { PersonDevice } from "../../models/entities/person-device";
 import { User } from "../../models/entities/user";
-import { UserDevice } from "../../models/entities/user-device";
 import { DeviceFilter } from "../../models/input-models/filter/device.filter";
 import { Strategy } from "../abstraction/strategy";
 
@@ -26,13 +26,19 @@ export class DeviceGetStrategy extends Strategy<{ userId: number, filter: Device
     ];
 
     constructor(type: string) {
-        super(type || 'default', ['default', 'all', 'user', 'supplier']);
+        super(type || 'default', ['default', 'all', 'customer', 'supplierEmployee']);
     }
 
     private async default(params: { userId: number, filter: DeviceFilter }): Promise<Device[]> {
 
         const user: User = await User.findOne({
-            where: { id: params.userId }
+            where: { id: params.userId },
+            include: [
+                {
+                    model: Person,
+                    as: 'person'
+                }
+            ]
         });
 
         if (!user)
@@ -40,17 +46,17 @@ export class DeviceGetStrategy extends Strategy<{ userId: number, filter: Device
 
         if (user.isAdmin)
             return this.all(params);
-        else if (user.type == UserType.customer)
-            return this.user(params);
-        else if (user.type == UserType.employee)
-            return this.supplier(params);
+        else if (user.person.isCustomer())
+            return this.customer(params);
+        else if (user.person.isSupplierEmployee())
+            return this.supplierEmployee(params);
         else
-            throw new CustomException(400, 'Usuário não possui tipo definido');
+            return [];
     }
 
     private async all(params: { userId: number, filter: DeviceFilter }): Promise<Device[]> {
 
-        await verifyUserRole(params.userId, RoleType.admin);
+        await verifyUserRole(params.userId, AccessControlRole.ADMIN);
 
         const devices: Device[] = await Device.findAll({
             include: [
@@ -60,24 +66,35 @@ export class DeviceGetStrategy extends Strategy<{ userId: number, filter: Device
         return devices;
     }
 
-    private async user(params: { userId: number, filter: DeviceFilter }): Promise<Device[]> {
+    private async customer(params: { userId: number, filter: DeviceFilter }): Promise<Device[]> {
 
-        const devicesIds: { deviceId: number }[] = await UserDevice.findAll({
+        const user: User = await User.findOne({
             where: {
-                userId: params.userId
+                id: params.userId
             },
-            attributes: ['deviceId']
+            include: [
+                {
+                    model: Person,
+                    as: 'person',
+                    include: [
+                        {
+                            model: PersonDevice,
+                            as: 'personDevices'
+                        }
+                    ]
+                }
+            ]
         });
 
         const devices: Device[] = await Device.findAll({
             where: {
-                id: { [Op.in]: devicesIds.map(di => di.deviceId) }
+                id: { [Op.in]: user.person.personDevices.map(di => di.deviceId) }
             },
             include: [
                 ...this._defaultDeviceIncludes,
                 {
-                    model: UserDevice,
-                    as: 'usersDevice'
+                    model: PersonDevice,
+                    as: 'personDevice'
                 }
             ]
         });
@@ -85,9 +102,9 @@ export class DeviceGetStrategy extends Strategy<{ userId: number, filter: Device
         return devices;
     }
 
-    private async supplier(params: { userId: number, filter: DeviceFilter }): Promise<Device[]> {
+    private async supplierEmployee(params: { userId: number, filter: DeviceFilter }): Promise<Device[]> {
 
-        await verifyUserRole(params.userId, RoleType.employee);
+        await verifyUserRole(params.userId, AccessControlRole.SUPPLIER_EMPLOYEE);
 
         const devices: Device[] = await Device.findAll({
             include: [
