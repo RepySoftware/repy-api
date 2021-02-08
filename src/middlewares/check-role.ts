@@ -48,6 +48,7 @@ export function checkRole(roles: AccessControlRole | AccessControlRole[]) {
 
         try {
             await verifyUserRole(id, roles);
+            next();
         } catch (error) {
             next(error);
         }

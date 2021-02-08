@@ -1,8 +1,5 @@
-import { AllowNull, BelongsTo, Column, CreatedAt, DataType, ForeignKey, Table, UpdatedAt } from "sequelize-typescript";
-import { PersonRole } from "../../common/enums/person-role";
-import { PersonType } from "../../common/enums/person-type";
+import { AllowNull, BelongsTo, Column, ForeignKey, Table } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
-import { Address } from "./address";
 import { Person } from "./person";
 
 @Table({
