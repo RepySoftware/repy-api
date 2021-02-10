@@ -29,13 +29,19 @@ export async function verifyUserRole(userId: number, roles: AccessControlRole | 
     }
 
     if (r.includes(AccessControlRole.CUSTOMER)) {
-        if (!user.person.isCustomer()) {
+        if (!user.person.isCustomer) {
             throw new AuthException('Não autorizado');
         }
     }
 
-    if (r.includes(AccessControlRole.SUPPLIER_EMPLOYEE)) {
-        if (!user.person.isSupplierEmployee()) {
+    if (r.includes(AccessControlRole.MANAGER)) {
+        if (!user.person.isManager) {
+            throw new AuthException('Não autorizado');
+        }
+    }
+
+    if (r.includes(AccessControlRole.DRIVER)) {
+        if (!user.person.isDriver) {
             throw new AuthException('Não autorizado');
         }
     }

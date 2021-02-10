@@ -10,7 +10,7 @@ import { PersonException } from "../../common/exceptions/person.exception";
 export class LoginStrategy extends Strategy<LoginInputModel, Promise<User>> {
 
     constructor(type: string) {
-        super(type, ['supplierEmployee', 'customer', 'driver']);
+        super(type, ['manager', 'customer', 'driver']);
     }
 
     private verifyPassword(inputPassword: string, userPassword: string): void {
@@ -36,39 +36,39 @@ export class LoginStrategy extends Strategy<LoginInputModel, Promise<User>> {
         return user;
     }
 
-    public async supplierEmployee(input: LoginInputModel): Promise<User> {
+    public async manager(input: LoginInputModel): Promise<User> {
 
         const user = await this.getUser(input);
 
-        if (!user.person.isSupplierEmployee())
-            throw new PersonException('Usuário não é um fornecedor');
+        if (!user.person.isManager)
+            throw new PersonException('Usuário não é um administrador');
 
         this.verifyPassword(input.password, user.password);
 
         return user;
     }
 
-    public async customer(input: LoginInputModel): Promise<User> {
+    // public async customer(input: LoginInputModel): Promise<User> {
 
-        const user = await this.getUser(input);
+    //     const user = await this.getUser(input);
 
-        if (!user.person.isCustomer())
-            throw new PersonException('Usuário não é um fornecedor');
+    //     if (!user.person.isCustomer())
+    //         throw new PersonException('Usuário não é um fornecedor');
 
-        this.verifyPassword(input.password, user.password);
+    //     this.verifyPassword(input.password, user.password);
 
-        return user;
-    }
+    //     return user;
+    // }
 
-    public async driver(input: LoginInputModel): Promise<User> {
+    // public async driver(input: LoginInputModel): Promise<User> {
 
-        const user = await this.getUser(input);
+    //     const user = await this.getUser(input);
 
-        if (!user.person.isDriver())
-            throw new PersonException('Usuário não é um fornecedor');
+    //     if (!user.person.isDriver())
+    //         throw new PersonException('Usuário não é um fornecedor');
 
-        this.verifyPassword(input.password, user.password);
+    //     this.verifyPassword(input.password, user.password);
 
-        return user;
-    }
+    //     return user;
+    // }
 }

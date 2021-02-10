@@ -1,9 +1,9 @@
-import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, HasMany, Table, UpdatedAt } from "sequelize-typescript";
-import { PersonRole } from "../../common/enums/person-role";
+import { AllowNull, BelongsTo, BelongsToMany, Column, CreatedAt, ForeignKey, HasMany, Table, UpdatedAt } from "sequelize-typescript";
 import { PersonType } from "../../common/enums/person-type";
 import { Entity } from "../abstraction/entity";
 import { Address } from "./address";
-import { PersonDevice } from "./person-device";
+import { Company } from "./company";
+import { Device } from "./device";
 import { PersonPhone } from "./person-phone";
 
 @Table({
@@ -15,16 +15,6 @@ export class Person extends Entity<Person> {
     @AllowNull(false)
     @Column
     public type: PersonType;
-
-    @AllowNull(false)
-    @Column({ field: 'roles' })
-    private _roles: string;
-    public get roles(): PersonRole[] {
-        return <PersonRole[]>this._roles.split(';').filter(x => !!x);
-    }
-    public set roles(value: PersonRole[]) {
-        this._roles = value.join(';');
-    }
 
     @AllowNull(false)
     @Column
@@ -47,12 +37,28 @@ export class Person extends Entity<Person> {
     @BelongsTo(() => Address, 'addressId')
     public address: Address;
 
-    @ForeignKey(() => Person)
+    @ForeignKey(() => Company)
     @AllowNull(false)
     @Column
-    public personSupplierId: number;
-    @BelongsTo(() => Person, 'personSupplierId')
-    public personSupplier: Person;
+    public companyId: number;
+    @BelongsTo(() => Company, 'companyId')
+    public company: Company;
+
+    @AllowNull(false)
+    @Column
+    public isSupplier: boolean;
+
+    @AllowNull(false)
+    @Column
+    public isCustomer: boolean;
+
+    @AllowNull(false)
+    @Column
+    public isManager: boolean;
+
+    @AllowNull(false)
+    @Column
+    public isDriver: boolean;
 
     @AllowNull(false)
     @CreatedAt
@@ -65,24 +71,8 @@ export class Person extends Entity<Person> {
     public updatedAt: Date;
 
     @HasMany(() => PersonPhone)
-    personPhones: PersonPhone[];
+    public personPhones: PersonPhone[];
 
-    @HasMany(() => PersonDevice)
-    personDevices: PersonDevice[];
-
-    public isSupplier(): boolean {
-        return this.roles.includes(PersonRole.SUPPLIER);
-    }
-
-    public isCustomer(): boolean {
-        return this.roles.includes(PersonRole.CUSTOMER);
-    }
-
-    public isSupplierEmployee(): boolean {
-        return this.roles.includes(PersonRole.SUPPLIER_MANAGER || PersonRole.SUPPLIER_AGENT);
-    }
-
-    public isDriver(): boolean {
-        return this.roles.includes(PersonRole.DRIVER);
-    }
+    @HasMany(() => Device)
+    public devices: Device[];
 }

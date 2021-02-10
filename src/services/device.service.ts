@@ -13,7 +13,6 @@ import { DeviceSyncDataInputModel } from "../models/input-models/abstraction/dev
 import { DeviceSyncDataViewModel } from "../models/view-models/abstraction/device-sync-data.view-model";
 import { DeviceSyncDataStrategy } from "./strategies/device-sync-data.strategy";
 import { Person } from "../models/entities/person";
-import { PersonDevice } from "../models/entities/person-device";
 
 @injectable()
 export class DeviceService {
@@ -86,11 +85,14 @@ export class DeviceService {
         if (user.isAdmin) {
             return;
         } else {
-            const personDevice: PersonDevice = await PersonDevice.findOne({
-                where: { deviceId, personId: user.person.id }
+            const device: Device = await Device.findOne({
+                where: {
+                    id: deviceId,
+                    personId: user.person.id
+                }
             });
 
-            if (personDevice) {
+            if (device) {
                 return;
             }
         }

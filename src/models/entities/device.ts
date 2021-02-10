@@ -7,7 +7,6 @@ import { NotificationConfiguration } from "./notification-configuration";
 import * as moment from 'moment-timezone';
 import { DeviceIsOnline } from "../abstraction/device-is-online";
 import { Person } from "./person";
-import { PersonDevice } from "./person-device";
 
 @Table({
     tableName: 'Devices',
@@ -43,13 +42,6 @@ export class Device extends Entity<Device> {
     @BelongsTo(() => Person, 'personId')
     public person: Person;
 
-    @ForeignKey(() => Person)
-    @AllowNull(false)
-    @Column
-    public personSupplierId: number;
-    @BelongsTo(() => Person, 'personSupplierId')
-    public personSupplier: Person;
-
     @AllowNull(false)
     @Column
     public type: DeviceType;
@@ -75,9 +67,6 @@ export class Device extends Entity<Device> {
     public deviceGasLevelId: number;
     @BelongsTo(() => DeviceGasLevel, 'deviceGasLevelId')
     public deviceGasLevel: DeviceGasLevel;
-
-    @HasMany(() => PersonDevice)
-    public usersDevice: PersonDevice[];
 
     private deviceByType(): DeviceGasLevel | any {
         switch (this.type) {

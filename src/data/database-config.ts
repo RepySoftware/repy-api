@@ -8,8 +8,8 @@ import { DeviceGasLevel } from "../models/entities/device-gas-level";
 import { Device } from "../models/entities/device";
 import { NotificationConfiguration } from "../models/entities/notification-configuration";
 import { Person } from "../models/entities/person";
-import { PersonDevice } from "../models/entities/person-device";
 import { PersonPhone } from "../models/entities/person-phone";
+import { Company } from "../models/entities/company";
 
 @injectable()
 export class Database {
@@ -26,10 +26,10 @@ export class Database {
 
         this.sequelize.addModels([
             Address,
+            Company,
             Cylinder,
             DeviceGasLevel,
             Device,
-            PersonDevice,
             PersonPhone,
             Person,
             NotificationConfiguration,
