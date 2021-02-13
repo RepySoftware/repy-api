@@ -28,4 +28,22 @@ PersonsController.get('/:personId', [checkToken, checkRole(AccessControlRole.MAN
     }
 });
 
+PersonsController.post('/', [checkToken, checkRole(AccessControlRole.MANAGER)], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const person = await personService.create(req.body, TokenHelper.getPayload(res).userId);
+        res.json(person);
+    } catch (error) {
+        next(error);
+    }
+});
+
+PersonsController.put('/', [checkToken, checkRole(AccessControlRole.MANAGER)], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const person = await personService.update(req.body, TokenHelper.getPayload(res).userId);
+        res.json(person);
+    } catch (error) {
+        next(error);
+    }
+});
+
 export { PersonsController };

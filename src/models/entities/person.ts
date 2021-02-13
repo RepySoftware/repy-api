@@ -31,11 +31,10 @@ export class Person extends Entity<Person> {
     public email: string;
 
     @ForeignKey(() => Address)
-    @AllowNull(false)
     @Column
-    public addressId: number;
+    public addressId?: number;
     @BelongsTo(() => Address, 'addressId')
-    public address: Address;
+    public address?: Address;
 
     @ForeignKey(() => Company)
     @AllowNull(false)

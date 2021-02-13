@@ -8,11 +8,10 @@ export class AddressViewModel {
     public city: string;
     public region: string;
     public country: string;
-    public number: string;
     public complement: string;
     public referencePoint: string;
-    public latitude: string;
-    public longitude: string;
+    public latitude: number;
+    public longitude: number;
 
     public static fromEntity(a: Address): AddressViewModel {
 
@@ -24,7 +23,6 @@ export class AddressViewModel {
         address.city = a.city;
         address.region = a.region;
         address.country = a.country;
-        address.number = a.number;
         address.complement = a.complement;
         address.referencePoint = a.referencePoint;
         address.latitude = a.latitude;

@@ -1,15 +1,23 @@
-import { injectable } from "inversify";
-import { Op, WhereOptions } from "sequelize";
+import { inject, injectable } from "inversify";
+import { Op, Transaction, WhereOptions } from "sequelize";
 import { NotFoundException } from "../common/exceptions/not-fount.exception";
+import { PersonException } from "../common/exceptions/person.exception";
+import { StringHelper } from "../common/helpers/string.helper";
+import { Database } from "../data/database-config";
 import { Address } from "../models/entities/address";
 import { Person } from "../models/entities/person";
 import { PersonPhone } from "../models/entities/person-phone";
 import { User } from "../models/entities/user";
 import { PersonFilter } from "../models/input-models/filter/person.filter";
+import { PersonInputModel } from "../models/input-models/person.input-model";
 import { PersonViewModel } from "../models/view-models/person.view-model";
 
 @injectable()
 export class PersonService {
+
+    constructor(
+        @inject(Database) private _database: Database
+    ) { }
 
     private async getUserPerson(userId: number): Promise<User> {
 
@@ -89,5 +97,177 @@ export class PersonService {
             throw new NotFoundException('Pessoa não encontrada');
 
         return PersonViewModel.fromEntity(person);
+    }
+
+    public async create(input: PersonInputModel, userId: number): Promise<PersonViewModel> {
+
+        this.verifyInputPerson(input);
+
+        const user = await this.getUserPerson(userId);
+
+        const transaction: Transaction = await this._database.sequelize.transaction();
+
+        try {
+
+            let address: Address = null;
+
+            if (input.address) {
+
+                address = new Address({
+                    description: input.address.description,
+                    zipCode: input.address.zipCode,
+                    city: input.address.city,
+                    region: input.address.region,
+                    country: input.address.country,
+                    complement: input.address.complement,
+                    referencePoint: input.address.referencePoint,
+                    latitude: input.address.latitude,
+                    longitude: input.address.longitude
+                });
+
+                await address.save({ transaction });
+            }
+
+            const person = new Person({
+                type: input.type,
+                documentNumber: input.documentNumber,
+                name: input.name,
+                tradeName: input.tradeName,
+                email: input.email,
+                addressId: address ? address.id : null,
+                companyId: user.person.companyId,
+                isSupplier: false,
+                isCustomer: input.isCustomer || false,
+                isManager: input.isManager || false,
+                isDriver: input.isDriver || false
+            });
+
+            await person.save({ transaction });
+
+            for (let p of input.personPhones) {
+                await new PersonPhone({
+                    personId: person.id,
+                    phone: StringHelper.getOnlyNumbers(p.phone)
+                }).save({ transaction });
+            }
+
+            await transaction.commit();
+
+            return await this.getById(person.id, userId);
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
+    public async update(input: PersonInputModel, userId: number): Promise<PersonViewModel> {
+
+        this.verifyInputPerson(input);
+
+        const user = await this.getUserPerson(userId);
+
+        const person: Person = await Person.findOne({
+            where: {
+                companyId: user.person.companyId,
+                id: input.id
+            },
+            include: [
+                {
+                    model: Address,
+                    as: 'address'
+                },
+                {
+                    model: PersonPhone,
+                    as: 'personPhones'
+                }
+            ]
+        });
+
+        if (!person)
+            throw new NotFoundException('Pessoa não encontrada');
+
+        const transaction: Transaction = await this._database.sequelize.transaction();
+
+        try {
+
+            if (!input.address) {
+                await person.address.destroy({ transaction });
+                person.addressId = null;
+            } else {
+
+                if (!person.addressId) {
+                    const address = new Address({
+                        description: input.address.description,
+                        zipCode: input.address.zipCode,
+                        city: input.address.city,
+                        region: input.address.region,
+                        country: input.address.country,
+                        complement: input.address.complement,
+                        referencePoint: input.address.referencePoint,
+                        latitude: input.address.latitude,
+                        longitude: input.address.longitude
+                    });
+
+                    await address.save({ transaction });
+
+                    person.addressId = address.id;
+                } else {
+                    person.address.description = input.address.description;
+                    person.address.zipCode = input.address.zipCode;
+                    person.address.city = input.address.city;
+                    person.address.region = input.address.region;
+                    person.address.country = input.address.country;
+                    person.address.complement = input.address.complement;
+                    person.address.referencePoint = input.address.referencePoint;
+                    person.address.latitude = input.address.latitude;
+                    person.address.longitude = input.address.longitude;
+
+                    await person.address.save({ transaction });
+                }
+            }
+
+            person.type = input.type;
+            person.documentNumber = input.documentNumber;
+            person.name = input.name;
+            person.tradeName = input.tradeName;
+            person.email = input.email;
+            person.companyId = user.person.companyId;
+            person.isSupplier = false;
+            person.isCustomer = input.isCustomer || false;
+            person.isManager = input.isManager || false;
+            person.isDriver = input.isDriver || false;
+
+            await person.save({ transaction });
+
+            const phonesToDelete = person.personPhones.filter(pp => !input.personPhones.find(x => x.id == pp.id));
+            if (phonesToDelete.length > 0) {
+                await PersonPhone.destroy({
+                    where: {
+                        id: { [Op.in]: phonesToDelete.map(pp => pp.id) }
+                    },
+                    transaction
+                });
+            }
+
+            const phonesToAdd = input.personPhones.filter(pp => !pp.id);
+            for (let p of phonesToAdd) {
+                await new PersonPhone({
+                    personId: person.id,
+                    phone: StringHelper.getOnlyNumbers(p.phone)
+                }).save({ transaction });
+            }
+
+            await transaction.commit();
+
+            return await this.getById(person.id, userId);
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
+    private verifyInputPerson(input: PersonInputModel): void {
+        if (input.isCustomer && !input.address)
+            throw new PersonException('Endereço é obrigatório para cliente');
     }
 }

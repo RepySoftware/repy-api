@@ -11,9 +11,8 @@ export class Address extends Entity<Address> {
     @Column
     public description: string;
 
-    @AllowNull(false)
     @Column
-    public zipCode: string;
+    public zipCode?: string;
 
     @AllowNull(false)
     @Column
@@ -28,9 +27,6 @@ export class Address extends Entity<Address> {
     public country: string;
 
     @Column
-    public number: string;
-
-    @Column
     public complement: string;
 
     @Column
@@ -38,9 +34,9 @@ export class Address extends Entity<Address> {
 
     @AllowNull(false)
     @Column
-    public latitude: string;
+    public latitude: number;
 
     @AllowNull(false)
     @Column
-    public longitude: string;
+    public longitude: number;
 }
