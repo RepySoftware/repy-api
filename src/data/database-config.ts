@@ -10,6 +10,14 @@ import { NotificationConfiguration } from "../models/entities/notification-confi
 import { Person } from "../models/entities/person";
 import { PersonPhone } from "../models/entities/person-phone";
 import { Company } from "../models/entities/company";
+import { CompanyBranchItemPrice } from "../models/entities/company-branch-item-price";
+import { CompanyBranchItem } from "../models/entities/company-branch-item";
+import { CompanyBranch } from "../models/entities/company-branch";
+import { Employee } from "../models/entities/employee";
+import { ItemCategory } from "../models/entities/item-category";
+import { Item } from "../models/entities/item";
+import { SaleOrderItem } from "../models/entities/sale-order-item";
+import { SaleOrder } from "../models/entities/sale-order";
 
 @injectable()
 export class Database {
@@ -26,12 +34,20 @@ export class Database {
 
         this.sequelize.addModels([
             Address,
+            CompanyBranchItemPrice,
+            CompanyBranchItem,
+            CompanyBranch,
             Company,
             Cylinder,
             DeviceGasLevel,
             Device,
+            Employee,
+            ItemCategory,
+            Item,
             PersonPhone,
             Person,
+            SaleOrderItem,
+            SaleOrder,
             NotificationConfiguration,
             User
         ]);

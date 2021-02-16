@@ -52,14 +52,6 @@ export class Person extends Entity<Person> {
     public isCustomer: boolean;
 
     @AllowNull(false)
-    @Column
-    public isManager: boolean;
-
-    @AllowNull(false)
-    @Column
-    public isDriver: boolean;
-
-    @AllowNull(false)
     @CreatedAt
     @Column
     public createdAt: Date;

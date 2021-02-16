@@ -1,40 +1,41 @@
 import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, Table, Unique, UpdatedAt } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
-import { Employee } from "./employee";
-import { Person } from "./person";
+import { Company } from "./company";
 
 @Table({
-    tableName: 'Users',
+    tableName: 'Employees',
     timestamps: true
 })
-export class User extends Entity<User> {
-
-    @ForeignKey(() => Person)
-    @AllowNull(false)
-    @Column
-    public personId: number;
-    @BelongsTo(() => Person, 'personId')
-    public person: Person;
-
-    @ForeignKey(() => Employee)
-    @AllowNull(false)
-    @Column
-    public employeeId: number;
-    @BelongsTo(() => Employee, 'employeeId')
-    public employee: Employee;
-
-    @AllowNull(false)
-    @Unique
-    @Column
-    public username: string;
+export class Employee extends Entity<Employee> {
 
     @AllowNull(false)
     @Column
-    public password: string;
+    public name: string;
+
+    @Column
+    public documentNumber: string;   
+
+    @Column
+    public email: string;   
+
+    @ForeignKey(() => Company)
+    @AllowNull(false)
+    @Column
+    public companyId: number;
+    @BelongsTo(() => Company, 'companyId')
+    public company: Company;
 
     @AllowNull(false)
     @Column
-    public isAdmin: boolean;
+    public isManager: boolean;
+
+    @AllowNull(false)
+    @Column
+    public isAgent: boolean;
+
+    @AllowNull(false)
+    @Column
+    public isDriver: boolean;
 
     @AllowNull(false)
     @Column
