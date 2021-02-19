@@ -24,7 +24,7 @@ AuthController.post('/login', async (req: Request, res: Response, next: NextFunc
     }
 });
 
-AuthController.post('/refresh', checkToken, async (rreq: Request, res: Response, next: NextFunction) => {
+AuthController.post('/refresh', checkToken, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userToken = await authService.refresh(TokenHelper.getPayload(res));
         res.json(userToken);

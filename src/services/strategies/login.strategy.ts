@@ -6,11 +6,12 @@ import { Strategy } from "../abstraction/strategy";
 import * as bcrypt from 'bcryptjs';
 import { AuthException } from "../../common/exceptions/auth.exception";
 import { PersonException } from "../../common/exceptions/person.exception";
+import { Employee } from "../../models/entities/employee";
 
 export class LoginStrategy extends Strategy<LoginInputModel, Promise<User>> {
 
     constructor(type: string) {
-        super(type, ['manager', 'customer', 'driver']);
+        super(type, ['employee', 'customer', 'driver']);
     }
 
     private verifyPassword(inputPassword: string, userPassword: string): void {
@@ -26,6 +27,10 @@ export class LoginStrategy extends Strategy<LoginInputModel, Promise<User>> {
                 {
                     model: Person,
                     as: 'person'
+                },
+                {
+                    model: Employee,
+                    as: 'employee'
                 }
             ]
         });
@@ -36,11 +41,11 @@ export class LoginStrategy extends Strategy<LoginInputModel, Promise<User>> {
         return user;
     }
 
-    public async manager(input: LoginInputModel): Promise<User> {
+    public async employee(input: LoginInputModel): Promise<User> {
 
         const user = await this.getUser(input);
 
-        if (!user.person.isManager)
+        if (!user.employeeId)
             throw new PersonException('Usuário não é um administrador');
 
         this.verifyPassword(input.password, user.password);

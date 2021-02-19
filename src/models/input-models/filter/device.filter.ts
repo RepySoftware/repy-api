@@ -1,4 +1,4 @@
 export interface DeviceFilter {
 
-    supplierId?: number;
+    companyId?: number;
 }

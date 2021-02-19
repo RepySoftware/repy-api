@@ -11,7 +11,6 @@ export interface PersonInputModel {
     email: string;
     address: AddressInputModel;
     isCustomer: boolean;
-    isManager: boolean;
-    isDriver: boolean;
+    isSupplier: boolean;
     personPhones: PersonPhoneInputModel[];
 }

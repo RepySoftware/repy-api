@@ -5,6 +5,7 @@ import { PersonType } from "../../common/enums/person-type";
 import { Person } from "../entities/person";
 import { DeviceViewModel } from "./device.view-model";
 import { PersonPhoneViewModel } from "./person-phone.view-model";
+import { DateHelper } from "../../common/helpers/date.helper";
 
 export class PersonViewModel {
 
@@ -18,8 +19,6 @@ export class PersonViewModel {
     public address: AddressViewModel;
     public isSupplier: boolean;
     public isCustomer: boolean;
-    public isManager: boolean;
-    public isDriver: boolean;
     public devices: DeviceViewModel[];
     public createdAt: string;
     public updatedAt: string;
@@ -38,11 +37,9 @@ export class PersonViewModel {
         person.address = p.address ? AddressViewModel.fromEntity(p.address) : null;
         person.isSupplier = p.isSupplier;
         person.isCustomer = p.isCustomer;
-        person.isManager = p.isManager;
-        person.isDriver = p.isDriver;
         person.devices = p.devices ? p.devices.map(DeviceViewModel.fromEntity) : null;
-        person.createdAt = moment.utc(p.createdAt).local().format(DEFAULT_DATETIME_FORMAT);
-        person.updatedAt = moment.utc(p.updatedAt).local().format(DEFAULT_DATETIME_FORMAT);
+        person.createdAt = DateHelper.toStringViewModel(p.createdAt);
+        person.updatedAt = DateHelper.toStringViewModel(p.updatedAt);
 
         return person;
     }

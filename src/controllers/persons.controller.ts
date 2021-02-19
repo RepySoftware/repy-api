@@ -10,7 +10,7 @@ const PersonsController = Router();
 
 const personService = ServicesCollection.resolve(PersonService);
 
-PersonsController.get('/', [checkToken, checkRole(AccessControlRole.MANAGER)], async (req: Request, res: Response, next: NextFunction) => {
+PersonsController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const persons = await personService.getAll(req.query, TokenHelper.getPayload(res).userId);
         res.json(persons);
@@ -19,7 +19,7 @@ PersonsController.get('/', [checkToken, checkRole(AccessControlRole.MANAGER)], a
     }
 });
 
-PersonsController.get('/:personId', [checkToken, checkRole(AccessControlRole.MANAGER)], async (req: Request, res: Response, next: NextFunction) => {
+PersonsController.get('/:personId', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const person = await personService.getById(Number(req.params.personId), TokenHelper.getPayload(res).userId);
         res.json(person);
@@ -28,7 +28,7 @@ PersonsController.get('/:personId', [checkToken, checkRole(AccessControlRole.MAN
     }
 });
 
-PersonsController.post('/', [checkToken, checkRole(AccessControlRole.MANAGER)], async (req: Request, res: Response, next: NextFunction) => {
+PersonsController.post('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const person = await personService.create(req.body, TokenHelper.getPayload(res).userId);
         res.json(person);
@@ -37,7 +37,7 @@ PersonsController.post('/', [checkToken, checkRole(AccessControlRole.MANAGER)], 
     }
 });
 
-PersonsController.put('/', [checkToken, checkRole(AccessControlRole.MANAGER)], async (req: Request, res: Response, next: NextFunction) => {
+PersonsController.put('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const person = await personService.update(req.body, TokenHelper.getPayload(res).userId);
         res.json(person);

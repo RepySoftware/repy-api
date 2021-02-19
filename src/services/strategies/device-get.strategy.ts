@@ -5,6 +5,7 @@ import { verifyUserRole } from "../../middlewares/check-role";
 import { Address } from "../../models/entities/address";
 import { Device } from "../../models/entities/device";
 import { DeviceGasLevel } from "../../models/entities/device-gas-level";
+import { Employee } from "../../models/entities/employee";
 import { Person } from "../../models/entities/person";
 import { User } from "../../models/entities/user";
 import { DeviceFilter } from "../../models/input-models/filter/device.filter";
@@ -24,7 +25,7 @@ export class DeviceGetStrategy extends Strategy<{ userId: number, filter: Device
     ];
 
     constructor(type: string) {
-        super(type || 'default', ['default', 'all', 'customer', 'manager']);
+        super(type || 'default', ['default', 'all', 'customer', 'managerAgent']);
     }
 
     private async default(params: { userId: number, filter: DeviceFilter }): Promise<Device[]> {
@@ -35,6 +36,10 @@ export class DeviceGetStrategy extends Strategy<{ userId: number, filter: Device
                 {
                     model: Person,
                     as: 'person'
+                },
+                {
+                    model: Employee,
+                    as: 'employee'
                 }
             ]
         });
@@ -44,10 +49,10 @@ export class DeviceGetStrategy extends Strategy<{ userId: number, filter: Device
 
         if (user.isAdmin)
             return this.all(params);
-        else if (user.person.isCustomer)
+        else if (user.person && user.person.isCustomer)
             return this.customer(params);
-        else if (user.person.isManager)
-            return this.manager(params);
+        else if (user.employee && (user.employee.isAgent || user.employee.isManager))
+            return this.managerAgent(params);
         else
             return [];
     }
@@ -88,16 +93,17 @@ export class DeviceGetStrategy extends Strategy<{ userId: number, filter: Device
         return user.person.devices;
     }
 
-    private async manager(params: { userId: number, filter: DeviceFilter }): Promise<Device[]> {
+    private async managerAgent(params: { userId: number, filter: DeviceFilter }): Promise<Device[]> {
 
-        await verifyUserRole(params.userId, AccessControlRole.MANAGER);
+        await verifyUserRole(params.userId, AccessControlRole.EMPLOYEE_MANAGER);
+        await verifyUserRole(params.userId, AccessControlRole.EMPLOYEE_AGENT);
 
         const devices: Device[] = await Device.findAll({
             include: [
                 ...this._defaultDeviceIncludes
             ],
             where: {
-                supplierId: params.filter.supplierId
+                'person.companyId': params.filter.companyId
             }
         });
 

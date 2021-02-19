@@ -4,6 +4,7 @@ import { AuthException } from "../common/exceptions/auth.exception";
 import { User } from "../models/entities/user";
 import { AccessControlRole } from "../common/enums/access-control-role";
 import { Person } from "../models/entities/person";
+import { Employee } from "../models/entities/employee";
 
 export async function verifyUserRole(userId: number, roles: AccessControlRole | AccessControlRole[]): Promise<void> {
 
@@ -13,6 +14,10 @@ export async function verifyUserRole(userId: number, roles: AccessControlRole | 
             {
                 model: Person,
                 as: 'person'
+            },
+            {
+                model: Employee,
+                as: 'employee'
             }
         ]
     });
@@ -28,20 +33,32 @@ export async function verifyUserRole(userId: number, roles: AccessControlRole | 
         }
     }
 
+    if (r.includes(AccessControlRole.EMPLOYEE)) {
+        if (!user.employee) {
+            throw new AuthException('Não autorizado');
+        }
+    }
+
+    if (r.includes(AccessControlRole.EMPLOYEE_MANAGER)) {
+        if (!user.employee || user.employee.isManager) {
+            throw new AuthException('Não autorizado');
+        }
+    }
+
+    if (r.includes(AccessControlRole.EMPLOYEE_AGENT)) {
+        if (!user.employee || user.employee.isAgent) {
+            throw new AuthException('Não autorizado');
+        }
+    }
+
+    if (r.includes(AccessControlRole.EMPLOYEE_DRIVER)) {
+        if (!user.employee || user.employee.isDriver) {
+            throw new AuthException('Não autorizado');
+        }
+    }
+
     if (r.includes(AccessControlRole.CUSTOMER)) {
         if (!user.person.isCustomer) {
-            throw new AuthException('Não autorizado');
-        }
-    }
-
-    if (r.includes(AccessControlRole.MANAGER)) {
-        if (!user.person.isManager) {
-            throw new AuthException('Não autorizado');
-        }
-    }
-
-    if (r.includes(AccessControlRole.DRIVER)) {
-        if (!user.person.isDriver) {
             throw new AuthException('Não autorizado');
         }
     }
