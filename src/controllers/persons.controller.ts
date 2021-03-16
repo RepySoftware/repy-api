@@ -19,6 +19,15 @@ PersonsController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MA
     }
 });
 
+PersonsController.get('/search', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const persons = await personService.search(req.query, TokenHelper.getPayload(res).userId);
+        res.json(persons);
+    } catch (error) {
+        next(error);
+    }
+});
+
 PersonsController.get('/:personId', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const person = await personService.getById(Number(req.params.personId), TokenHelper.getPayload(res).userId);

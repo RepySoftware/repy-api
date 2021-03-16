@@ -21,10 +21,6 @@ export class CompanyBranchItemPrice extends Entity<CompanyBranchItemPrice> {
 
     @AllowNull(false)
     @Column
-    public purchasePrice: number;
-
-    @AllowNull(false)
-    @Column
     public salePrice: number;
 
     @AllowNull(false)

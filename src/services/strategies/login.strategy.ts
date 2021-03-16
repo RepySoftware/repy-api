@@ -46,7 +46,7 @@ export class LoginStrategy extends Strategy<LoginInputModel, Promise<User>> {
         const user = await this.getUser(input);
 
         if (!user.employeeId)
-            throw new PersonException('Usuário não é um administrador');
+            throw new PersonException('Usuário não é um funcionário');
 
         this.verifyPassword(input.password, user.password);
 

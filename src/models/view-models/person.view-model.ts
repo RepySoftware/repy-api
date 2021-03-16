@@ -1,11 +1,11 @@
 import { AddressViewModel } from "./address.view-model";
-import * as moment from 'moment-timezone';
-import { DEFAULT_DATETIME_FORMAT } from "../../config";
 import { PersonType } from "../../common/enums/person-type";
 import { Person } from "../entities/person";
 import { DeviceViewModel } from "./device.view-model";
 import { PersonPhoneViewModel } from "./person-phone.view-model";
 import { DateHelper } from "../../common/helpers/date.helper";
+import { PersonTaxRegime } from "../../common/enums/person-tax-regime";
+import { PersonIcmsContributorType } from "../../common/enums/person-icms-contributor.type";
 
 export class PersonViewModel {
 
@@ -19,6 +19,11 @@ export class PersonViewModel {
     public address: AddressViewModel;
     public isSupplier: boolean;
     public isCustomer: boolean;
+    public taxRegime: PersonTaxRegime;
+    public icmsContributorType: PersonIcmsContributorType;
+    public stateRegistration: string;
+    public municipalRegistration: string;
+    public isActive: boolean;
     public devices: DeviceViewModel[];
     public createdAt: string;
     public updatedAt: string;
@@ -37,6 +42,11 @@ export class PersonViewModel {
         person.address = p.address ? AddressViewModel.fromEntity(p.address) : null;
         person.isSupplier = p.isSupplier;
         person.isCustomer = p.isCustomer;
+        person.taxRegime = p.taxRegime;
+        person.icmsContributorType = p.icmsContributorType;
+        person.stateRegistration = p.stateRegistration;
+        person.municipalRegistration = p.municipalRegistration;
+        person.isActive = p.isActive;
         person.devices = p.devices ? p.devices.map(DeviceViewModel.fromEntity) : null;
         person.createdAt = DateHelper.toStringViewModel(p.createdAt);
         person.updatedAt = DateHelper.toStringViewModel(p.updatedAt);

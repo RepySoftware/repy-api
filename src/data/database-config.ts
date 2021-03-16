@@ -18,6 +18,7 @@ import { ItemCategory } from "../models/entities/item-category";
 import { Item } from "../models/entities/item";
 import { SaleOrderItem } from "../models/entities/sale-order-item";
 import { SaleOrder } from "../models/entities/sale-order";
+import { ViewPersonSearch } from "../models/entities/views/view-person-search";
 
 @injectable()
 export class Database {
@@ -51,5 +52,10 @@ export class Database {
             NotificationConfiguration,
             User
         ]);
+
+        this.sequelize.define(ViewPersonSearch.modelName, ViewPersonSearch.model, {
+            timestamps: false,
+            tableName: ViewPersonSearch.modelName
+        });
     }
 }

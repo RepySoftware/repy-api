@@ -1,4 +1,6 @@
-import { AllowNull, BelongsTo, BelongsToMany, Column, CreatedAt, ForeignKey, HasMany, Table, UpdatedAt } from "sequelize-typescript";
+import { AllowNull, BelongsTo, BelongsToMany, Column, CreatedAt, Default, ForeignKey, HasMany, Table, UpdatedAt } from "sequelize-typescript";
+import { PersonIcmsContributorType } from "../../common/enums/person-icms-contributor.type";
+import { PersonTaxRegime } from "../../common/enums/person-tax-regime";
 import { PersonType } from "../../common/enums/person-type";
 import { Entity } from "../abstraction/entity";
 import { Address } from "./address";
@@ -16,7 +18,6 @@ export class Person extends Entity<Person> {
     @Column
     public type: PersonType;
 
-    @AllowNull(false)
     @Column
     public documentNumber: string;
 
@@ -50,6 +51,24 @@ export class Person extends Entity<Person> {
     @AllowNull(false)
     @Column
     public isCustomer: boolean;
+
+    @AllowNull(false)
+    @Column
+    public taxRegime: PersonTaxRegime;
+
+    @Column
+    public icmsContributorType: PersonIcmsContributorType;
+
+    @Column
+    public stateRegistration: string;
+
+    @Column
+    public municipalRegistration: string;
+
+    @AllowNull(false)
+    @Default(true)
+    @Column
+    public isActive: boolean;
 
     @AllowNull(false)
     @CreatedAt

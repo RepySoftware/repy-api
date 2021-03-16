@@ -40,19 +40,19 @@ export async function verifyUserRole(userId: number, roles: AccessControlRole | 
     }
 
     if (r.includes(AccessControlRole.EMPLOYEE_MANAGER)) {
-        if (!user.employee || user.employee.isManager) {
+        if (!user.employee || !user.employee.isManager) {
             throw new AuthException('Não autorizado');
         }
     }
 
     if (r.includes(AccessControlRole.EMPLOYEE_AGENT)) {
-        if (!user.employee || user.employee.isAgent) {
+        if (!user.employee || !user.employee.isAgent) {
             throw new AuthException('Não autorizado');
         }
     }
 
     if (r.includes(AccessControlRole.EMPLOYEE_DRIVER)) {
-        if (!user.employee || user.employee.isDriver) {
+        if (!user.employee || !user.employee.isDriver) {
             throw new AuthException('Não autorizado');
         }
     }

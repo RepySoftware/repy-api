@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { Op, Transaction, WhereOptions } from "sequelize";
+import { FindOptions, Op, Transaction, WhereOptions } from "sequelize";
 import { NotFoundException } from "../common/exceptions/not-fount.exception";
 import { PersonException } from "../common/exceptions/person.exception";
 import { StringHelper } from "../common/helpers/string.helper";
@@ -8,8 +8,11 @@ import { Address } from "../models/entities/address";
 import { Person } from "../models/entities/person";
 import { PersonPhone } from "../models/entities/person-phone";
 import { User } from "../models/entities/user";
+import { ViewPersonSearch } from "../models/entities/views/view-person-search";
+import { PersonSearchInputModel } from "../models/input-models/filter/person-search-filter.input-model";
 import { PersonFilter } from "../models/input-models/filter/person.filter";
 import { PersonInputModel } from "../models/input-models/person.input-model";
+import { PersonSearchViewModel } from "../models/view-models/person-search.view-model";
 import { PersonViewModel } from "../models/view-models/person.view-model";
 
 @injectable()
@@ -260,6 +263,53 @@ export class PersonService {
             await transaction.rollback();
             throw error;
         }
+    }
+
+    public async search(input: PersonSearchInputModel, userId: number): Promise<PersonSearchViewModel[]> {
+
+        const limit = Number(input.limit || 20);
+        const offset = Number((input.index || 0) * limit);
+
+        const user = await this.getUserPerson(userId);
+
+        const options: FindOptions = {
+            limit,
+            offset,
+            where: {
+                [Op.and]: [
+                    { companyId: user.person.companyId }
+                ]
+            }
+        }
+
+        if (input.q) {
+            options.where[Op.and].push({
+                generalSearch: { [Op.like]: `%${input.q}%` }
+            });
+        }
+
+        if (input.name) {
+            options.where[Op.and].push({
+                nameSearch: { [Op.like]: `%${input.name}%` }
+            });
+        }
+
+        if (input.phone) {
+            options.where[Op.and].push({
+                phonesSearch: { [Op.like]: `%${input.phone}%` }
+            });
+        }
+
+        if (input.address) {
+            options.where[Op.and].push({
+                addressSearch: { [Op.like]: `%${input.address}%` }
+            });
+        }
+
+        const viewPersonSearchModel = ViewPersonSearch.getDefinedModel(this._database.sequelize);
+        const persons: ViewPersonSearch[] = await viewPersonSearchModel.findAll(options);
+
+        return persons.map(PersonSearchViewModel.fromEntity);
     }
 
     private verifyInputPerson(input: PersonInputModel): void {
