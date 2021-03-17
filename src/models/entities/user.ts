@@ -1,5 +1,6 @@
 import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, Table, Unique, UpdatedAt } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
+import { Company } from "./company";
 import { Employee } from "./employee";
 import { Person } from "./person";
 
@@ -8,6 +9,13 @@ import { Person } from "./person";
     timestamps: true
 })
 export class User extends Entity<User> {
+
+    @ForeignKey(() => Company)
+    @AllowNull(false)
+    @Column
+    public companyId: number;
+    @BelongsTo(() => Company, 'companyId')
+    public company: Company;
 
     @ForeignKey(() => Person)
     @AllowNull(false)

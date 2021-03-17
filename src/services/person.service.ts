@@ -22,15 +22,9 @@ export class PersonService {
         @inject(Database) private _database: Database
     ) { }
 
-    private async getUserPerson(userId: number): Promise<User> {
+    private async getUser(userId: number): Promise<User> {
 
         const user: User = await User.findOne({
-            include: [
-                {
-                    model: Person,
-                    as: 'person'
-                }
-            ],
             where: {
                 id: userId
             }
@@ -44,13 +38,13 @@ export class PersonService {
 
     public async getAll(input: PersonFilter, userId: number): Promise<PersonViewModel[]> {
 
-        const user = await this.getUserPerson(userId);
+        const user = await this.getUser(userId);
 
         const limit = Number(input.limit || 20);
         const offset = Number((input.index || 0) * limit);
 
         let where: WhereOptions = {
-            companyId: user.person.companyId
+            companyId: user.companyId
         };
 
         if (input.q) {
@@ -77,11 +71,11 @@ export class PersonService {
 
     public async getById(personId: number, userId: number): Promise<PersonViewModel> {
 
-        const user = await this.getUserPerson(userId);
+        const user = await this.getUser(userId);
 
         const person: Person = await Person.findOne({
             where: {
-                companyId: user.person.companyId,
+                companyId: user.companyId,
                 id: personId
             },
             include: [
@@ -106,7 +100,7 @@ export class PersonService {
 
         this.verifyInputPerson(input);
 
-        const user = await this.getUserPerson(userId);
+        const user = await this.getUser(userId);
 
         const transaction: Transaction = await this._database.sequelize.transaction();
 
@@ -138,7 +132,7 @@ export class PersonService {
                 tradeName: input.tradeName,
                 email: input.email,
                 addressId: address ? address.id : null,
-                companyId: user.person.companyId,
+                companyId: user.companyId,
                 isSupplier: input.isSupplier,
                 isCustomer: input.isCustomer || false
             });
@@ -165,11 +159,11 @@ export class PersonService {
 
         this.verifyInputPerson(input);
 
-        const user = await this.getUserPerson(userId);
+        const user = await this.getUser(userId);
 
         const person: Person = await Person.findOne({
             where: {
-                companyId: user.person.companyId,
+                companyId: user.companyId,
                 id: input.id
             },
             include: [
@@ -232,7 +226,7 @@ export class PersonService {
             person.name = input.name;
             person.tradeName = input.tradeName;
             person.email = input.email;
-            person.companyId = user.person.companyId;
+            person.companyId = user.companyId;
             person.isSupplier = input.isSupplier || false;
             person.isCustomer = input.isCustomer || false;
 
@@ -270,14 +264,14 @@ export class PersonService {
         const limit = Number(input.limit || 20);
         const offset = Number((input.index || 0) * limit);
 
-        const user = await this.getUserPerson(userId);
+        const user = await this.getUser(userId);
 
         const options: FindOptions = {
             limit,
             offset,
             where: {
                 [Op.and]: [
-                    { companyId: user.person.companyId }
+                    { companyId: user.companyId }
                 ]
             }
         }
