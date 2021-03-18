@@ -3,7 +3,8 @@ import { Entity } from "../abstraction/entity";
 import { Company } from "./company";
 
 @Table({
-    tableName: 'ProductCategories'
+    tableName: 'ProductCategories',
+    timestamps: false
 })
 export class ProductCategory extends Entity<ProductCategory> {
 

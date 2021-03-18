@@ -56,11 +56,22 @@ export class ProductService {
             include: [
                 {
                     model: Product,
-                    as: 'product'
+                    as: 'product',
+                    include: [
+                        {
+                            model: ProductCategory,
+                            as: 'category'
+                        }
+                    ]
                 },
                 {
                     model: CompanyBranch,
                     as: 'companyBranch'
+                },
+                {
+                    model: CompanyBranchProductPrice,
+                    as: 'prices',
+                    separate: true
                 }
             ],
             limit,

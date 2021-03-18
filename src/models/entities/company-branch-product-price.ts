@@ -16,7 +16,7 @@ export class CompanyBranchProductPrice extends Entity<CompanyBranchProductPrice>
     @AllowNull(false)
     @Column
     public companyBranchProductId: number;
-    @BelongsTo(() => CompanyBranchProduct, 'companyBranchProductId')
+    @BelongsTo(() => CompanyBranchProduct)
     public companyBranchProduct: CompanyBranchProduct;
 
     @AllowNull(false)

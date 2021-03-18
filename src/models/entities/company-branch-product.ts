@@ -24,6 +24,6 @@ export class CompanyBranchProduct extends Entity<CompanyBranchProduct> {
     @BelongsTo(() => CompanyBranch, 'companyBranchId')
     public companyBranch: CompanyBranch;
 
-    @HasMany(() => CompanyBranchProductPrice)
+    @HasMany(() => CompanyBranchProductPrice, 'companyBranchProductId')
     public prices: CompanyBranchProductPrice[];
 }
