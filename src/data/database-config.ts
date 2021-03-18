@@ -10,13 +10,13 @@ import { NotificationConfiguration } from "../models/entities/notification-confi
 import { Person } from "../models/entities/person";
 import { PersonPhone } from "../models/entities/person-phone";
 import { Company } from "../models/entities/company";
-import { CompanyBranchItemPrice } from "../models/entities/company-branch-item-price";
-import { CompanyBranchItem } from "../models/entities/company-branch-item";
+import { CompanyBranchProductPrice } from "../models/entities/company-branch-product-price";
+import { CompanyBranchProduct } from "../models/entities/company-branch-product";
 import { CompanyBranch } from "../models/entities/company-branch";
 import { Employee } from "../models/entities/employee";
-import { ItemCategory } from "../models/entities/item-category";
-import { Item } from "../models/entities/item";
-import { SaleOrderItem } from "../models/entities/sale-order-item";
+import { ProductCategory } from "../models/entities/product-category";
+import { Product } from "../models/entities/product";
+import { SaleOrderProduct } from "../models/entities/sale-order-product";
 import { SaleOrder } from "../models/entities/sale-order";
 import { ViewPersonSearch } from "../models/entities/views/view-person-search";
 
@@ -35,19 +35,19 @@ export class Database {
 
         this.sequelize.addModels([
             Address,
-            CompanyBranchItemPrice,
-            CompanyBranchItem,
+            CompanyBranchProductPrice,
+            CompanyBranchProduct,
             CompanyBranch,
             Company,
             Cylinder,
             DeviceGasLevel,
             Device,
             Employee,
-            ItemCategory,
-            Item,
+            ProductCategory,
+            Product,
             PersonPhone,
             Person,
-            SaleOrderItem,
+            SaleOrderProduct,
             SaleOrder,
             NotificationConfiguration,
             User

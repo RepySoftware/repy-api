@@ -1,23 +1,23 @@
 import { AllowNull, BelongsTo, Column, CreatedAt, Default, ForeignKey, Table, UpdatedAt } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
-import { CompanyBranchItem } from "./company-branch-item";
+import { CompanyBranchProduct } from "./company-branch-product";
 
 @Table({
-    tableName: 'CompanyBranchesItemsPrices',
+    tableName: 'CompanyBranchesProductsPrices',
     timestamps: true
 })
-export class CompanyBranchItemPrice extends Entity<CompanyBranchItemPrice> {
+export class CompanyBranchProductPrice extends Entity<CompanyBranchProductPrice> {
 
     @AllowNull(false)
     @Column
     public name: string;
 
-    @ForeignKey(() => CompanyBranchItem)
+    @ForeignKey(() => CompanyBranchProduct)
     @AllowNull(false)
     @Column
-    public companyBranchItemId: number;
-    @BelongsTo(() => CompanyBranchItem, 'companyBranchItemId')
-    public companyBranchItem: CompanyBranchItem;
+    public companyBranchProductId: number;
+    @BelongsTo(() => CompanyBranchProduct, 'companyBranchProductId')
+    public companyBranchProduct: CompanyBranchProduct;
 
     @AllowNull(false)
     @Column

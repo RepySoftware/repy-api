@@ -3,15 +3,15 @@ import { PersonType } from "../../common/enums/person-type";
 import { Entity } from "../abstraction/entity";
 import { Address } from "./address";
 import { Company } from "./company";
-import { CompanyBranchItem } from "./company-branch-item";
+import { CompanyBranchProduct } from "./company-branch-product";
 import { Device } from "./device";
 import { PersonPhone } from "./person-phone";
 import { SaleOrder } from "./sale-order";
 
 @Table({
-    tableName: 'SaleOrdersItems'
+    tableName: 'SaleOrdersProducts'
 })
-export class SaleOrderItem extends Entity<SaleOrderItem> {
+export class SaleOrderProduct extends Entity<SaleOrderProduct> {
     
     @ForeignKey(() => SaleOrder)
     @AllowNull(false)
@@ -20,12 +20,12 @@ export class SaleOrderItem extends Entity<SaleOrderItem> {
     @BelongsTo(() => SaleOrder, 'saleOrderId')
     public saleOrder: SaleOrder;
 
-    @ForeignKey(() => CompanyBranchItem)
+    @ForeignKey(() => CompanyBranchProduct)
     @AllowNull(false)
     @Column
-    public companyBranchItemId: number;
-    @BelongsTo(() => CompanyBranchItem, 'companyBranchItemId')
-    public companyBranchItem: CompanyBranchItem;
+    public companyBranchProductId: number;
+    @BelongsTo(() => CompanyBranchProduct, 'companyBranchProductId')
+    public companyBranchProduct: CompanyBranchProduct;
 
     @AllowNull(false)
     @Column

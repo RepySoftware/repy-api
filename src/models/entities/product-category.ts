@@ -3,9 +3,9 @@ import { Entity } from "../abstraction/entity";
 import { Company } from "./company";
 
 @Table({
-    tableName: 'ItemCategories'
+    tableName: 'ProductCategories'
 })
-export class ItemCategory extends Entity<ItemCategory> {
+export class ProductCategory extends Entity<ProductCategory> {
 
     @ForeignKey(() => Company)
     @AllowNull(false)

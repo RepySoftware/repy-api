@@ -2,13 +2,13 @@ import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, Table, UpdatedAt }
 import { MeasurementUnit } from "../../common/enums/measurement-unit";
 import { Entity } from "../abstraction/entity";
 import { Company } from "./company";
-import { ItemCategory } from "./item-category";
+import { ProductCategory } from "./product-category";
 
 @Table({
-    tableName: 'Items',
+    tableName: 'Products',
     timestamps: true
 })
-export class Item extends Entity<Item> {
+export class Product extends Entity<Product> {
 
     @ForeignKey(() => Company)
     @AllowNull(false)
@@ -17,12 +17,12 @@ export class Item extends Entity<Item> {
     @BelongsTo(() => Company, 'companyId')
     public company: Company;
 
-    @ForeignKey(() => ItemCategory)
+    @ForeignKey(() => ProductCategory)
     @AllowNull(false)
     @Column
     public categoryId: number;
-    @BelongsTo(() => ItemCategory, 'categoryId')
-    public category: ItemCategory;
+    @BelongsTo(() => ProductCategory, 'categoryId')
+    public category: ProductCategory;
 
     @AllowNull(false)
     @Column
