@@ -133,8 +133,8 @@ export class PersonService {
                 email: input.email,
                 addressId: address ? address.id : null,
                 companyId: user.companyId,
-                isSupplier: input.isSupplier,
-                isCustomer: input.isCustomer || false
+                isSupplier: !!input.isSupplier,
+                isCustomer: !!input.isCustomer
             });
 
             await person.save({ transaction });
@@ -227,8 +227,8 @@ export class PersonService {
             person.tradeName = input.tradeName;
             person.email = input.email;
             person.companyId = user.companyId;
-            person.isSupplier = input.isSupplier || false;
-            person.isCustomer = input.isCustomer || false;
+            person.isSupplier = !!input.isSupplier;
+            person.isCustomer = !!input.isCustomer;
 
             await person.save({ transaction });
 
