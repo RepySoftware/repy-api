@@ -23,6 +23,7 @@ export class PersonViewModel {
     public icmsContributorType: PersonIcmsContributorType;
     public stateRegistration: string;
     public municipalRegistration: string;
+    public isGasCustomer: boolean;
     public isActive: boolean;
     public devices: DeviceViewModel[];
     public createdAt: string;
@@ -46,6 +47,7 @@ export class PersonViewModel {
         person.icmsContributorType = p.icmsContributorType;
         person.stateRegistration = p.stateRegistration;
         person.municipalRegistration = p.municipalRegistration;
+        person.isGasCustomer = p.isGasCustomer;
         person.isActive = p.isActive;
         person.devices = p.devices ? p.devices.map(DeviceViewModel.fromEntity) : null;
         person.createdAt = DateHelper.toStringViewModel(p.createdAt);

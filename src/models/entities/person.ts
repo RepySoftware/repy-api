@@ -66,6 +66,11 @@ export class Person extends Entity<Person> {
     public municipalRegistration: string;
 
     @AllowNull(false)
+    @Default(false)
+    @Column
+    public isGasCustomer: boolean;
+
+    @AllowNull(false)
     @Default(true)
     @Column
     public isActive: boolean;

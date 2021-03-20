@@ -1,4 +1,4 @@
-import { DataTypes, ModelAttributes, Sequelize } from "sequelize";
+import { ModelAttributes, Sequelize } from "sequelize";
 import { DataType } from "sequelize-typescript";
 
 export class ViewPersonSearch {
@@ -14,6 +14,7 @@ export class ViewPersonSearch {
         companyId: DataType.BIGINT,
         isSupplier: DataType.BOOLEAN,
         isCustomer: DataType.BOOLEAN,
+        isGasCustomer: DataType.BOOLEAN,
         isActive: DataType.BOOLEAN,
         phones: DataType.STRING,
         addressDescription: DataType.STRING,
@@ -37,6 +38,7 @@ export interface ViewPersonSearch {
     documentNumber: string;
     isSupplier: boolean;
     isCustomer: boolean;
+    isGasCustomer: boolean;
     isActive: boolean;
     phones: string;
     addressDescription: string;

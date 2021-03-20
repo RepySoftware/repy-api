@@ -48,8 +48,12 @@ export class PersonService {
         };
 
         if (input.q) {
-            where['name'] = {
-                [Op.like]: `%${input.q}%`
+            if (input.q.startsWith('id:')) {
+                where['id'] = input.q.split(':')[1]
+            } else {
+                where['name'] = {
+                    [Op.like]: `%${input.q}%`
+                }
             }
         }
 
@@ -277,9 +281,16 @@ export class PersonService {
         }
 
         if (input.q) {
-            options.where[Op.and].push({
-                generalSearch: { [Op.like]: `%${input.q}%` }
-            });
+
+            if (input.q.startsWith('id:')) {
+                options.where[Op.and].push({
+                    id: input.q.split(':')[1]
+                });
+            } else {
+                options.where[Op.and].push({
+                    generalSearch: { [Op.like]: `%${input.q}%` }
+                });
+            }
         }
 
         if (input.name) {

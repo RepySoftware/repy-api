@@ -8,6 +8,7 @@ export class PersonSearchViewModel {
     public documentNumber: string;
     public isSupplier: boolean;
     public isCustomer: boolean;
+    public isGasCustomer: boolean;
     public isActive: boolean;
     public phones: string[];
     public addressDescription: string;
@@ -24,6 +25,7 @@ export class PersonSearchViewModel {
         person.documentNumber = p.documentNumber;
         person.isSupplier = p.isSupplier;
         person.isCustomer = p.isCustomer;
+        person.isGasCustomer = p.isGasCustomer;
         person.isActive = p.isActive;
         person.phones = p.phones.split(',').filter(x => !!x);
         person.addressDescription = p.addressDescription;
