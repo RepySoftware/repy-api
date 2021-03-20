@@ -14,31 +14,19 @@ import { PersonFilter } from "../models/input-models/filter/person.filter";
 import { PersonInputModel } from "../models/input-models/person.input-model";
 import { PersonSearchViewModel } from "../models/view-models/person-search.view-model";
 import { PersonViewModel } from "../models/view-models/person.view-model";
+import { UserService } from "./user.service";
 
 @injectable()
 export class PersonService {
 
     constructor(
-        @inject(Database) private _database: Database
+        @inject(Database) private _database: Database,
+        @inject(UserService) private _userService: UserService
     ) { }
-
-    private async getUser(userId: number): Promise<User> {
-
-        const user: User = await User.findOne({
-            where: {
-                id: userId
-            }
-        });
-
-        if (!user)
-            throw new NotFoundException('Usuário não encontrado');
-
-        return user;
-    }
 
     public async getAll(input: PersonFilter, userId: number): Promise<PersonViewModel[]> {
 
-        const user = await this.getUser(userId);
+        const user = await this._userService.getEntityById(userId);
 
         const limit = Number(input.limit || 20);
         const offset = Number((input.index || 0) * limit);
@@ -75,7 +63,7 @@ export class PersonService {
 
     public async getById(personId: number, userId: number): Promise<PersonViewModel> {
 
-        const user = await this.getUser(userId);
+        const user = await this._userService.getEntityById(userId);
 
         const person: Person = await Person.findOne({
             where: {
@@ -104,7 +92,7 @@ export class PersonService {
 
         this.verifyInputPerson(input);
 
-        const user = await this.getUser(userId);
+        const user = await this._userService.getEntityById(userId);
 
         const transaction: Transaction = await this._database.sequelize.transaction();
 
@@ -163,7 +151,7 @@ export class PersonService {
 
         this.verifyInputPerson(input);
 
-        const user = await this.getUser(userId);
+        const user = await this._userService.getEntityById(userId);
 
         const person: Person = await Person.findOne({
             where: {
@@ -268,7 +256,7 @@ export class PersonService {
         const limit = Number(input.limit || 20);
         const offset = Number((input.index || 0) * limit);
 
-        const user = await this.getUser(userId);
+        const user = await this._userService.getEntityById(userId);
 
         const options: FindOptions = {
             limit,

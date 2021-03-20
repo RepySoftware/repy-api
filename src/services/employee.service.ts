@@ -7,31 +7,18 @@ import { User } from "../models/entities/user";
 import { EmployeeFilter } from "../models/input-models/filter/employee.filter";
 import { CompanyBranchProductViewModel } from "../models/view-models/company-branch-product.view-model";
 import { EmployeeViewModel } from "../models/view-models/employee.view-model";
+import { UserService } from "./user.service";
 
 @injectable()
 export class EmployeeService {
 
     constructor(
-        @inject(Database) private _database: Database
+        @inject(UserService) private _userService: UserService
     ) { }
-
-    private async getUser(userId: number): Promise<User> {
-
-        const user: User = await User.findOne({
-            where: {
-                id: userId
-            }
-        });
-
-        if (!user)
-            throw new NotFoundException('Usuário não encontrado');
-
-        return user;
-    }
 
     public async getAll(input: EmployeeFilter, userId: number): Promise<EmployeeViewModel[]> {
 
-        const user = await this.getUser(userId);
+        const user = await this._userService.getEntityById(userId);
 
         const limit = Number(input.limit || 20);
         const offset = Number((input.index || 0) * limit);
@@ -47,7 +34,7 @@ export class EmployeeService {
         }
 
         if (input.isDriver !== undefined && input.isDriver !== null) {
-            where['isDriver'] = typeof (input.isDriver) == 'string' ? JSON.parse(input.isDriver) : input.isDriver;
+            where['isDriver'] = typeof(input.isDriver) == 'string' ? JSON.parse(input.isDriver) : input.isDriver;
         }
 
         const employees: Employee[] = await Employee.findAll({

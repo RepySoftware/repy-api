@@ -19,6 +19,7 @@ import { Product } from "../models/entities/product";
 import { SaleOrderProduct } from "../models/entities/sale-order-product";
 import { SaleOrder } from "../models/entities/sale-order";
 import { ViewPersonSearch } from "../models/entities/views/view-person-search";
+import { PaymentMethod } from "../models/entities/payment-method";
 
 @injectable()
 export class Database {
@@ -43,6 +44,7 @@ export class Database {
             DeviceGasLevel,
             Device,
             Employee,
+            PaymentMethod,
             ProductCategory,
             Product,
             PersonPhone,

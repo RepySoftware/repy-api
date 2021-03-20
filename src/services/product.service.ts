@@ -11,31 +11,18 @@ import { ProductCategory } from "../models/entities/product-category";
 import { User } from "../models/entities/user";
 import { ProductFilter } from "../models/input-models/filter/product.filter";
 import { CompanyBranchProductViewModel } from "../models/view-models/company-branch-product.view-model";
+import { UserService } from "./user.service";
 
 @injectable()
 export class ProductService {
 
     constructor(
-        @inject(Database) private _database: Database
+        @inject(UserService) private _userService: UserService
     ) { }
-
-    private async getUser(userId: number): Promise<User> {
-
-        const user: User = await User.findOne({
-            where: {
-                id: userId
-            }
-        });
-
-        if (!user)
-            throw new NotFoundException('Usuário não encontrado');
-
-        return user;
-    }
 
     public async getAllForSales(input: ProductFilter, companyBranchId: number, userId: number): Promise<CompanyBranchProductViewModel[]> {
 
-        const user = await this.getUser(userId);
+        const user = await this._userService.getEntityById(userId);
 
         const limit = Number(input.limit || 20);
         const offset = Number((input.index || 0) * limit);

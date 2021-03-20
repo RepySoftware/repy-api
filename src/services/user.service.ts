@@ -1,5 +1,6 @@
 import { inject, injectable } from "inversify";
 import { Op, WhereOptions } from "sequelize";
+import { CompanyBranchException } from "../common/exceptions/company-branch.exception";
 import { NotFoundException } from "../common/exceptions/not-fount.exception";
 import { Database } from "../data/database-config";
 import { CompanyBranch } from "../models/entities/company-branch";
@@ -10,27 +11,23 @@ import { ProductCategory } from "../models/entities/product-category";
 import { User } from "../models/entities/user";
 import { ProductFilter } from "../models/input-models/filter/product.filter";
 import { CompanyBranchProductViewModel } from "../models/view-models/company-branch-product.view-model";
-import { CompanyBranchViewModel } from "../models/view-models/company-branch.view-model";
-import { UserService } from "./user.service";
 
 @injectable()
-export class CompanyBranchService {
+export class UserService {
 
-    constructor(
-        @inject(UserService) private _userService: UserService
-    ) { }
+    constructor() { }
 
-    public async getAll(userId: number): Promise<CompanyBranchViewModel[]> {
+    public async getEntityById(userId: number): Promise<User> {
 
-        const user = await this._userService.getEntityById(userId);
-
-        const branches: CompanyBranch[] = await CompanyBranch.findAll({
+        const user: User = await User.findOne({
             where: {
-                companyId: user.companyId
-            },
-            order: [['name', 'ASC']]
+                id: userId
+            }
         });
 
-        return branches.map(CompanyBranchViewModel.fromEntity);
+        if (!user)
+            throw new NotFoundException('Usuário não encontrado');
+
+        return user;
     }
 }

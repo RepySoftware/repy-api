@@ -3,6 +3,7 @@ import { AuthController } from "./controllers/auth.controller";
 import { CompanyBranchesController } from "./controllers/company-branches.controller";
 import { DevicesController } from "./controllers/devices.controller";
 import { EmployeesController } from "./controllers/employees.controller";
+import { PaymentMethodsController } from "./controllers/payment-methods.controller";
 import { PersonsController } from "./controllers/persons.controller";
 import { ProductsController } from "./controllers/product.controller";
 import { VERSION } from "./version";
@@ -20,5 +21,6 @@ routes.use('/devices', DevicesController);
 routes.use('/products', ProductsController);
 routes.use('/companyBranches', CompanyBranchesController);
 routes.use('/employees', EmployeesController);
+routes.use('/paymentMethods', PaymentMethodsController);
 
 export { routes };
