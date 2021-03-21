@@ -4,6 +4,7 @@ import { Entity } from "../abstraction/entity";
 import { Address } from "./address";
 import { CompanyBranch } from "./company-branch";
 import { Employee } from "./employee";
+import { PaymentMethod } from "./payment-method";
 import { Person } from "./person";
 
 @Table({
@@ -46,9 +47,12 @@ export class SaleOrder extends Entity<SaleOrder> {
     @BelongsTo(() => Address, 'deliveryAddressId')
     public deliveryAddress: Address;
 
+    @ForeignKey(() => PaymentMethod)
     @AllowNull(false)
     @Column
-    public totalPurchasePrice: number;
+    public paymentMethodId: number;
+    @BelongsTo(() => PaymentMethod, 'paymentMethodId')
+    public paymentMethod: PaymentMethod;
 
     @AllowNull(false)
     @Column
@@ -56,7 +60,7 @@ export class SaleOrder extends Entity<SaleOrder> {
 
     @AllowNull(false)
     @Column
-    public totalFinalPrice: number;
+    public paymentInstallments: number;
 
     @AllowNull(false)
     @Column

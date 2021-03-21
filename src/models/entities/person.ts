@@ -53,6 +53,7 @@ export class Person extends Entity<Person> {
     public isCustomer: boolean;
 
     @AllowNull(false)
+    @Default(PersonTaxRegime.UNDEFINED)
     @Column
     public taxRegime: PersonTaxRegime;
 
