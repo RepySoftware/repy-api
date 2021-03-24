@@ -6,6 +6,7 @@ import { EmployeesController } from "./controllers/employees.controller";
 import { PaymentMethodsController } from "./controllers/payment-methods.controller";
 import { PersonsController } from "./controllers/persons.controller";
 import { ProductsController } from "./controllers/product.controller";
+import { SaleOrdersController } from "./controllers/sale-orders.controller";
 import { VERSION } from "./version";
 
 const routes = Router();
@@ -22,5 +23,6 @@ routes.use('/products', ProductsController);
 routes.use('/companyBranches', CompanyBranchesController);
 routes.use('/employees', EmployeesController);
 routes.use('/paymentMethods', PaymentMethodsController);
+routes.use('/saleOrders', SaleOrdersController);
 
 export { routes };

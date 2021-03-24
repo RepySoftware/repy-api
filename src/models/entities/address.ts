@@ -32,11 +32,9 @@ export class Address extends Entity<Address> {
     @Column
     public referencePoint: string;
 
-    @AllowNull(false)
     @Column
-    public latitude: number;
+    public latitude?: number;
 
-    @AllowNull(false)
     @Column
-    public longitude: number;
+    public longitude?: number;
 }

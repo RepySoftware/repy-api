@@ -1,18 +1,15 @@
-import { AllowNull, BelongsTo, BelongsToMany, Column, CreatedAt, ForeignKey, HasMany, Table, UpdatedAt } from "sequelize-typescript";
-import { PersonType } from "../../common/enums/person-type";
+import { AllowNull, BelongsTo, Column, ForeignKey, Table } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
-import { Address } from "./address";
-import { Company } from "./company";
 import { CompanyBranchProduct } from "./company-branch-product";
-import { Device } from "./device";
-import { PersonPhone } from "./person-phone";
+import { CompanyBranchProductPrice } from "./company-branch-product-price";
 import { SaleOrder } from "./sale-order";
 
 @Table({
-    tableName: 'SaleOrdersProducts'
+    tableName: 'SaleOrderProducts',
+    timestamps: false
 })
 export class SaleOrderProduct extends Entity<SaleOrderProduct> {
-    
+
     @ForeignKey(() => SaleOrder)
     @AllowNull(false)
     @Column
@@ -27,19 +24,18 @@ export class SaleOrderProduct extends Entity<SaleOrderProduct> {
     @BelongsTo(() => CompanyBranchProduct, 'companyBranchProductId')
     public companyBranchProduct: CompanyBranchProduct;
 
+    @ForeignKey(() => CompanyBranchProductPrice)
+    @AllowNull(false)
+    @Column
+    public companyBranchProductPriceId: number;
+    @BelongsTo(() => CompanyBranchProductPrice, 'companyBranchProductPriceId')
+    public companyBranchProductPrice: CompanyBranchProductPrice;
+
     @AllowNull(false)
     @Column
     public quantity: number;
 
     @AllowNull(false)
     @Column
-    public purchasePrice: number;
-
-    @AllowNull(false)
-    @Column
     public salePrice: number;
-
-    @AllowNull(false)
-    @Column
-    public finalPrice: number;
 }

@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { Op, WhereOptions } from "sequelize";
+import { Includeable, Op, WhereOptions } from "sequelize";
 import { CompanyBranchException } from "../common/exceptions/company-branch.exception";
 import { NotFoundException } from "../common/exceptions/not-fount.exception";
 import { Database } from "../data/database-config";
@@ -17,12 +17,13 @@ export class UserService {
 
     constructor() { }
 
-    public async getEntityById(userId: number): Promise<User> {
+    public async getEntityById(userId: number, include: Includeable[] = []): Promise<User> {
 
         const user: User = await User.findOne({
             where: {
                 id: userId
-            }
+            },
+            include
         });
 
         if (!user)

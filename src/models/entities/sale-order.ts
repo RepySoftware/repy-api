@@ -1,4 +1,4 @@
-import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, Table, UpdatedAt } from "sequelize-typescript";
+import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, HasMany, Table, UpdatedAt } from "sequelize-typescript";
 import { SaleOrderStatus } from "../../common/enums/sale-order-status";
 import { Entity } from "../abstraction/entity";
 import { Address } from "./address";
@@ -6,6 +6,7 @@ import { CompanyBranch } from "./company-branch";
 import { Employee } from "./employee";
 import { PaymentMethod } from "./payment-method";
 import { Person } from "./person";
+import { SaleOrderProduct } from "./sale-order-product";
 
 @Table({
     tableName: 'SaleOrders',
@@ -58,19 +59,18 @@ export class SaleOrder extends Entity<SaleOrder> {
     @Column
     public totalSalePrice: number;
 
-    @AllowNull(false)
     @Column
-    public paymentInstallments: number;
+    public paymentInstallments?: number;
 
     @AllowNull(false)
     @Column
     public status: SaleOrderStatus;
 
     @Column
-    public scheduledAt: Date;
+    public scheduledAt?: Date;
 
     @Column
-    public deliveredAt: Date;
+    public deliveredAt?: Date;
 
     @AllowNull(false)
     @CreatedAt
@@ -81,4 +81,13 @@ export class SaleOrder extends Entity<SaleOrder> {
     @UpdatedAt
     @Column
     public updatedAt: Date;
+
+    @HasMany(() => SaleOrderProduct)
+    public products: SaleOrderProduct[];
+
+    public calculeTotalSalePrice(products: SaleOrderProduct[] = this.products): void {
+        this.totalSalePrice = products
+            .map(p => p.quantity * p.salePrice)
+            .reduce((a, b) => a + b, 0);
+    }
 }
