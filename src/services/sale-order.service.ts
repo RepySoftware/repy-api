@@ -1,12 +1,14 @@
 import { inject, injectable } from "inversify";
-import { Transaction, WhereOptions } from "sequelize";
+import { Op, Transaction, WhereOptions } from "sequelize";
 import { SaleOrderStatus } from "../common/enums/sale-order-status";
 import { NotFoundException } from "../common/exceptions/not-fount.exception";
 import { Database } from "../data/database-config";
 import { Address } from "../models/entities/address";
 import { CompanyBranch } from "../models/entities/company-branch";
+import { CompanyBranchProduct } from "../models/entities/company-branch-product";
 import { Employee } from "../models/entities/employee";
 import { Person } from "../models/entities/person";
+import { Product } from "../models/entities/product";
 import { SaleOrder } from "../models/entities/sale-order";
 import { SaleOrderProduct } from "../models/entities/sale-order-product";
 import { SaleOrderFilter } from "../models/input-models/filter/sale-order.filter";
@@ -29,9 +31,13 @@ export class SaleOrderService {
         const limit = Number(input.limit || 20);
         const offset = Number((input.index || 0) * limit);
 
-        let where: WhereOptions = {
+        const where: WhereOptions = {
             '$companyBranch.companyId$': user.companyId
         };
+
+        if (input.status) {
+            where['status'] = input.status;
+        }
 
         const saleOrders: SaleOrder[] = await SaleOrder.findAll({
             where,
@@ -55,6 +61,23 @@ export class SaleOrderService {
                 {
                     model: Address,
                     as: 'deliveryAddress'
+                },
+                {
+                    model: SaleOrderProduct,
+                    as: 'products',
+                    separate: true,
+                    include: [
+                        {
+                            model: CompanyBranchProduct,
+                            as: 'companyBranchProduct',
+                            include: [
+                                {
+                                    model: Product,
+                                    as: 'product'
+                                }
+                            ]
+                        }
+                    ]
                 }
             ],
             limit,
@@ -84,6 +107,13 @@ export class SaleOrderService {
         if (!personCustomer)
             throw new NotFoundException('Cliente não encontrado');
 
+        const pendingSaleOrders: SaleOrder[] = await SaleOrder.findAll({
+            where: {
+                '$companyBranch.companyId$': user.companyId,
+                status: SaleOrderStatus.PENDING
+            }
+        });
+
         const transaction: Transaction = await this._database.sequelize.transaction();
 
         try {
@@ -112,6 +142,7 @@ export class SaleOrderService {
                 totalSalePrice: 0,
                 paymentInstallments: input.paymentInstallments,
                 status: SaleOrderStatus.PENDING,
+                index: pendingSaleOrders.length,
                 scheduledAt: input.scheduledAt
             });
 
@@ -140,5 +171,63 @@ export class SaleOrderService {
             await transaction.rollback();
             throw error;
         }
+    }
+
+    public async updateIndex(items: { saleOrderId: number, index: number }[], userId: number): Promise<void> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const saleOrders: SaleOrder[] = await SaleOrder.findAll({
+            where: {
+                '$companyBranch.companyId$': user.companyId,
+                id: { [Op.in]: items.map(x => x.saleOrderId) }
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                }
+            ]
+        });
+
+        const transaction: Transaction = await this._database.sequelize.transaction();
+
+        try {
+            for (const so of saleOrders) {
+                const item = items.find(x => x.saleOrderId == so.id);
+
+                if (item) {
+                    so.index = item.index;
+                    await so.save({ transaction });
+                }
+            }
+
+            await transaction.commit();
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
+    public async updateEmployeeDriver(input: { saleOrderId: number, employeeDriverId: number }, userId: number): Promise<void> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const saleOrder: SaleOrder = await SaleOrder.findOne({
+            where: {
+                '$companyBranch.companyId$': user.companyId,
+                id: input.saleOrderId
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                }
+            ]
+        });
+
+        saleOrder.employeeDriverId = input.employeeDriverId;
+
+        await saleOrder.save();
     }
 }

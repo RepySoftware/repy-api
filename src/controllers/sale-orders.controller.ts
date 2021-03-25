@@ -28,4 +28,23 @@ SaleOrdersController.post('/', [checkToken, checkRole([AccessControlRole.EMPLOYE
     }
 });
 
+SaleOrdersController.patch('/updateIndex', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await saleOrderService.updateIndex(req.body, TokenHelper.getPayload(res).userId);
+        res.json({ ok: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
+
+SaleOrdersController.patch('/updateEmployeeDriver', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await saleOrderService.updateEmployeeDriver(req.body, TokenHelper.getPayload(res).userId);
+        res.json({ ok: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
 export { SaleOrdersController };

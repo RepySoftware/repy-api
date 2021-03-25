@@ -20,6 +20,7 @@ export class SaleOrderViewModel {
     public totalSalePrice: number;
     public paymentInstallments: number;
     public status: SaleOrderStatus;
+    public index: number;
     public scheduledAt?: string;
     public deliveredAt?: string;
     public createdAt: string;
@@ -40,6 +41,7 @@ export class SaleOrderViewModel {
         saleOrder.totalSalePrice = so.totalSalePrice;
         saleOrder.paymentInstallments = so.paymentInstallments;
         saleOrder.status = so.status;
+        saleOrder.index = so.index;
         saleOrder.scheduledAt = DateHelper.toStringViewModel(so.scheduledAt);
         saleOrder.deliveredAt = DateHelper.toStringViewModel(so.deliveredAt);
         saleOrder.createdAt = DateHelper.toStringViewModel(so.createdAt);
