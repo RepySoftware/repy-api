@@ -21,7 +21,6 @@ export class Person extends Entity<Person> {
     @Column
     public documentNumber: string;
 
-    @AllowNull(false)
     @Column
     public name: string;
 

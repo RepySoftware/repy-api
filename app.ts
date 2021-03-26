@@ -20,7 +20,7 @@ app.options("*", cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-moment.tz.setDefault('UTC');
+moment.tz.setDefault('America/Sao_Paulo');
 
 app.use(routes);
 
