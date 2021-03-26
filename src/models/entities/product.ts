@@ -40,6 +40,10 @@ export class Product extends Entity<Product> {
     public measurementUnit: MeasurementUnit;
 
     @AllowNull(false)
+    @Column
+    public isGas: boolean;
+
+    @AllowNull(false)
     @CreatedAt
     @Column
     public createdAt: Date;

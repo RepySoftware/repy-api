@@ -15,6 +15,10 @@ import { SaleOrderFilter } from "../models/input-models/filter/sale-order.filter
 import { SaleOrderCreateInputModel } from "../models/input-models/sale-order-create.input-model";
 import { SaleOrderViewModel } from "../models/view-models/sale-order.view-model";
 import { UserService } from "./user.service";
+import * as moment from 'moment-timezone';
+import { PaymentMethod } from "../models/entities/payment-method";
+import { SaleOrderConfirmDeliveryInputModel } from "../models/input-models/sale-order-confirm-delivery.input-model";
+import { SaleOrderException } from "../common/exceptions/sale-order.exception";
 
 @injectable()
 export class SaleOrderService {
@@ -61,6 +65,10 @@ export class SaleOrderService {
                 {
                     model: Address,
                     as: 'deliveryAddress'
+                },
+                {
+                    model: PaymentMethod,
+                    as: 'paymentMethod'
                 },
                 {
                     model: SaleOrderProduct,
@@ -111,7 +119,13 @@ export class SaleOrderService {
             where: {
                 '$companyBranch.companyId$': user.companyId,
                 status: SaleOrderStatus.PENDING
-            }
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                }
+            ]
         });
 
         const transaction: Transaction = await this._database.sequelize.transaction();
@@ -226,8 +240,84 @@ export class SaleOrderService {
             ]
         });
 
-        saleOrder.employeeDriverId = input.employeeDriverId;
+        saleOrder.employeeDriverId = input.employeeDriverId || null;
 
         await saleOrder.save();
+    }
+
+    public async confirmDelivery(input: SaleOrderConfirmDeliveryInputModel, userId: number): Promise<void> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const saleOrder: SaleOrder = await SaleOrder.findOne({
+            where: {
+                '$companyBranch.companyId$': user.companyId,
+                id: input.saleOrderId
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                },
+                {
+                    model: Person,
+                    as: 'personCustomer'
+                },
+                {
+                    model: SaleOrderProduct,
+                    as: 'products',
+                    separate: true,
+                    include: [
+                        {
+                            model: CompanyBranchProduct,
+                            as: 'companyBranchProduct',
+                            include: [
+                                {
+                                    model: Product,
+                                    as: 'product'
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        });
+
+        const paymentMethod: PaymentMethod = PaymentMethod.findOne({
+            where: {
+                id: input.paymentMethodId
+            }
+        });
+
+        if (!paymentMethod)
+            throw new NotFoundException('Método de pagamento não encontrado');
+
+        if (
+            paymentMethod.hasInstallments
+            && (!input.installments || input.installments <= 0)
+        ) {
+            throw new SaleOrderException('Número de parcelas inválido');
+        }
+
+        saleOrder.status = SaleOrderStatus.FINISHED;
+        saleOrder.deliveredAt = moment(input.deliveredAt).toDate();
+        saleOrder.paymentMethodId = input.paymentMethodId;
+        saleOrder.paymentInstallments = input.installments || null;
+
+        const transaction: Transaction = await this._database.sequelize.transaction();
+
+        try {
+            await saleOrder.save({ transaction });
+
+            if (saleOrder.products.find(p => p.companyBranchProduct.product.isGas)) {
+                saleOrder.personCustomer.isGasCustomer = true;
+                await saleOrder.personCustomer.save({ transaction });
+            }
+
+            await transaction.commit();
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
     }
 }

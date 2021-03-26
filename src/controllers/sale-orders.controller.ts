@@ -47,4 +47,13 @@ SaleOrdersController.patch('/updateEmployeeDriver', [checkToken, checkRole([Acce
     }
 });
 
+SaleOrdersController.post('/confirmDelivery', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await saleOrderService.confirmDelivery(req.body, TokenHelper.getPayload(res).userId);
+        res.json({ ok: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
 export { SaleOrdersController };
