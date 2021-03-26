@@ -104,7 +104,10 @@ export class PersonService {
 
                 address = new Address({
                     description: input.address.description,
+                    street: input.address.street,
+                    number: input.address.number,
                     zipCode: input.address.zipCode,
+                    neighborhood: input.address.neighborhood,
                     city: input.address.city,
                     region: input.address.region,
                     country: input.address.country,
@@ -185,7 +188,10 @@ export class PersonService {
                 if (!person.addressId) {
                     const address = new Address({
                         description: input.address.description,
+                        street: input.address.street,
+                        number: input.address.number,
                         zipCode: input.address.zipCode,
+                        neighborhood: input.address.neighborhood,
                         city: input.address.city,
                         region: input.address.region,
                         country: input.address.country,
@@ -200,7 +206,10 @@ export class PersonService {
                     person.addressId = address.id;
                 } else {
                     person.address.description = input.address.description;
+                    person.address.street = input.address.street;
+                    person.address.number = input.address.number;
                     person.address.zipCode = input.address.zipCode;
+                    person.address.neighborhood = input.address.neighborhood;
                     person.address.city = input.address.city;
                     person.address.region = input.address.region;
                     person.address.country = input.address.country;
@@ -295,7 +304,11 @@ export class PersonService {
 
         if (input.address) {
             options.where[Op.and].push({
-                addressSearch: { [Op.like]: `%${input.address}%` }
+                addressSearch: {
+                    [Op.and]: input.address.split(',').map(x => {
+                        return { [Op.like]: `%${x}%` }
+                    })
+                }
             });
         }
 

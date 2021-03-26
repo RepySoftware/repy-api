@@ -11,8 +11,18 @@ export class Address extends Entity<Address> {
     @Column
     public description: string;
 
+    @AllowNull(false)
+    @Column
+    public street: string;
+
+    @Column
+    public number?: string;
+
     @Column
     public zipCode?: string;
+
+    @Column
+    public neighborhood?: string;
 
     @AllowNull(false)
     @Column

@@ -11,6 +11,12 @@ export class PersonSearchViewModel {
     public isGasCustomer: boolean;
     public isActive: boolean;
     public phones: string[];
+    public addressStreet: string;
+    public addressNumber: string;
+    public addressNeighborhood: string;
+    public addressCity: string;
+    public addressRegion: string;
+    public addressCountry: string;
     public addressDescription: string;
     public addressComplement: string;
     public addressReferencePoint: string;
@@ -28,6 +34,12 @@ export class PersonSearchViewModel {
         person.isGasCustomer = p.isGasCustomer;
         person.isActive = p.isActive;
         person.phones = p.phones ? p.phones.split(',').filter(x => !!x) : null;
+        person.addressStreet = p.addressStreet;
+        person.addressNumber = p.addressNumber;
+        person.addressNeighborhood = p.addressNeighborhood;
+        person.addressCity = p.addressCity;
+        person.addressRegion = p.addressRegion;
+        person.addressCountry = p.addressCountry;
         person.addressDescription = p.addressDescription;
         person.addressComplement = p.addressComplement;
         person.addressReferencePoint = p.addressReferencePoint;

@@ -18,6 +18,12 @@ export class ViewPersonSearch {
         isActive: DataType.BOOLEAN,
         phones: DataType.STRING,
         addressDescription: DataType.STRING,
+        addressStreet: DataType.STRING,
+        addressNumber: DataType.STRING,
+        addressNeighborhood: DataType.STRING,
+        addressCity: DataType.STRING,
+        addressRegion: DataType.STRING,
+        addressCountry: DataType.STRING,
         addressComplement: DataType.STRING,
         addressReferencePoint: DataType.STRING,
         addressSearch: DataType.STRING,
@@ -41,6 +47,12 @@ export interface ViewPersonSearch {
     isGasCustomer: boolean;
     isActive: boolean;
     phones: string;
+    addressStreet: string;
+    addressNumber: string;
+    addressNeighborhood: string;
+    addressCity: string;
+    addressRegion: string;
+    addressCountry: string;
     addressDescription: string;
     addressComplement: string;
     addressReferencePoint: string;

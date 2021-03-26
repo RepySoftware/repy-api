@@ -134,7 +134,10 @@ export class SaleOrderService {
 
             const deliveryAddress = new Address({
                 description: personCustomer.address.description,
+                street: personCustomer.address.street,
+                number: personCustomer.address.number,
                 zipCode: personCustomer.address.zipCode,
+                neighborhood: personCustomer.address.neighborhood,
                 city: personCustomer.address.city,
                 region: personCustomer.address.region,
                 country: personCustomer.address.country,
