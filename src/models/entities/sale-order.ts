@@ -49,7 +49,6 @@ export class SaleOrder extends Entity<SaleOrder> {
     public deliveryAddress: Address;
 
     @ForeignKey(() => PaymentMethod)
-    @AllowNull(false)
     @Column
     public paymentMethodId: number;
     @BelongsTo(() => PaymentMethod, 'paymentMethodId')
