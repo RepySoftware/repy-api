@@ -1,4 +1,4 @@
-import { AllowNull, BelongsTo, Column, ForeignKey, Table } from "sequelize-typescript";
+import { AllowNull, BelongsTo, Column, Default, ForeignKey, Table } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
 import { Company } from "./company";
 
@@ -25,4 +25,9 @@ export class PaymentMethod extends Entity<PaymentMethod> {
 
     @Column
     public erpPaymentMethodId: string;
+
+    @AllowNull(false)
+    @Default(0)
+    @Column
+    public isDefault: boolean;
 }

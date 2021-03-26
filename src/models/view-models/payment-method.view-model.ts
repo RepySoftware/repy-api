@@ -5,6 +5,7 @@ export class PaymentMethodViewModel {
     public id: number;
     public name: string;
     public hasInstallments: boolean;
+    public isDefault: boolean;
 
     public static fromEntity(pm: PaymentMethod): PaymentMethodViewModel {
 
@@ -13,6 +14,7 @@ export class PaymentMethodViewModel {
         paymentMethod.id = pm.id;
         paymentMethod.name = pm.name;
         paymentMethod.hasInstallments = pm.hasInstallments;
+        paymentMethod.isDefault = pm.isDefault;
 
         return paymentMethod;
     }

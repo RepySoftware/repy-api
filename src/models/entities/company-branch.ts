@@ -1,4 +1,4 @@
-import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, Table, Unique, UpdatedAt } from "sequelize-typescript";
+import { AllowNull, BelongsTo, Column, CreatedAt, Default, ForeignKey, Table, Unique, UpdatedAt } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
 import { Address } from "./address";
 import { Company } from "./company";
@@ -32,6 +32,11 @@ export class CompanyBranch extends Entity<CompanyBranch> {
     public addressId: number;
     @BelongsTo(() => Address, 'addressId')
     public address: Address;
+
+    @AllowNull(false)
+    @Default(0)
+    @Column
+    public isDefault: boolean;
 
     @AllowNull(false)
     @CreatedAt

@@ -1,4 +1,4 @@
-import { AllowNull, BelongsTo, Column, ForeignKey, HasMany, Table } from "sequelize-typescript";
+import { AllowNull, BelongsTo, Column, Default, ForeignKey, HasMany, Table } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
 import { CompanyBranch } from "./company-branch";
 import { CompanyBranchProductPrice } from "./company-branch-product-price";
@@ -23,6 +23,11 @@ export class CompanyBranchProduct extends Entity<CompanyBranchProduct> {
     public companyBranchId: number;
     @BelongsTo(() => CompanyBranch, 'companyBranchId')
     public companyBranch: CompanyBranch;
+
+    @AllowNull(false)
+    @Default(0)
+    @Column
+    public isDefault: boolean;
 
     @HasMany(() => CompanyBranchProductPrice, 'companyBranchProductId')
     public prices: CompanyBranchProductPrice[];

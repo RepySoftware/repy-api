@@ -9,6 +9,7 @@ export class CompanyBranchViewModel {
     public tradeName: string;
     public documentNumber: string;
     public address: AddressViewModel;
+    public isDefault: boolean;
     public createdAt: string;
     public updatedAt: string;
 
@@ -21,6 +22,7 @@ export class CompanyBranchViewModel {
         branch.tradeName = cb.tradeName;
         branch.documentNumber = cb.documentNumber;
         branch.address = cb.address ? AddressViewModel.fromEntity(cb.address) : null;
+        branch.isDefault = cb.isDefault;
         branch.createdAt = DateHelper.toStringViewModel(cb.createdAt);
         branch.updatedAt = DateHelper.toStringViewModel(cb.updatedAt);
 
