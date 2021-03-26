@@ -27,7 +27,7 @@ export class PersonSearchViewModel {
         person.isCustomer = p.isCustomer;
         person.isGasCustomer = p.isGasCustomer;
         person.isActive = p.isActive;
-        person.phones = p.phones.split(',').filter(x => !!x);
+        person.phones = p.phones ? p.phones.split(',').filter(x => !!x) : null;
         person.addressDescription = p.addressDescription;
         person.addressComplement = p.addressComplement;
         person.addressReferencePoint = p.addressReferencePoint;
