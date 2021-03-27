@@ -6,6 +6,7 @@ export interface SaleOrderCreateInputModel {
     personCustomerId: number;
     paymentMethodId: number;
     paymentInstallments: number;
+    observation?: string;
     scheduledAt?: string;
     products: SaleOrderProductCreateInputModel[];
 }

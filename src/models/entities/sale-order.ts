@@ -70,6 +70,9 @@ export class SaleOrder extends Entity<SaleOrder> {
     public index: number;
 
     @Column
+    public observation: string;
+
+    @Column
     public scheduledAt?: Date;
 
     @Column

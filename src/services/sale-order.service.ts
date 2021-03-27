@@ -171,8 +171,9 @@ export class SaleOrderService {
                 totalSalePrice: 0,
                 paymentInstallments: input.paymentInstallments,
                 status: SaleOrderStatus.PENDING,
+                observation: input.observation,
                 index: pendingSaleOrders.length,
-                scheduledAt: input.scheduledAt
+                scheduledAt: input.scheduledAt ? moment.utc(input.scheduledAt).toDate() : null
             });
 
             await saleOrder.save({ transaction });
