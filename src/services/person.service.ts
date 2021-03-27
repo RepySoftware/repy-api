@@ -306,7 +306,7 @@ export class PersonService {
             options.where[Op.and].push({
                 addressSearch: {
                     [Op.and]: input.address.split(',').map(x => {
-                        return { [Op.like]: `%${x}%` }
+                        return { [Op.like]: `%${x.trim()}%` }
                     })
                 }
             });

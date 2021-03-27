@@ -66,10 +66,13 @@ update Addresses set Street = trim(split_str(Description, ',', 1));
 update Addresses set Number = trim(split_str(trim(split_str(Description, ',', 2)), ' ', 1));
 update Addresses set Neighborhood = trim(split_str(Description, '-', 2));
 
-select ID from Persons p 
-where AddressID in (
-	select ID from Addresses a where Neighborhood = 'Curitiba'
-);
+delete from PersonsPhones
+where ID in (
+	select ID from Persons p 
+	where AddressID in (
+		select ID from Addresses a where Neighborhood = 'Curitiba'
+	)
+)
 
 delete from Persons
 where AddressID in (

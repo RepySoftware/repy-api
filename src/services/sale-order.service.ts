@@ -43,6 +43,18 @@ export class SaleOrderService {
             where['status'] = input.status;
         }
 
+        if(input.employeeDriverId) {
+            where['employeeDriverId'] = input.employeeDriverId;
+        }
+
+        if(input.startCreatedAt) {
+            where['createdAt'] = { [Op.gte]: moment(input.startCreatedAt).toDate() }
+        }
+
+        if(input.startCreatedAt) {
+            where['createdAt'] = { [Op.lte]: moment(input.endCreatedAt).toDate() }
+        }
+
         const saleOrders: SaleOrder[] = await SaleOrder.findAll({
             where,
             include: [
