@@ -43,15 +43,15 @@ export class SaleOrderService {
             where['status'] = input.status;
         }
 
-        if(input.employeeDriverId) {
+        if (input.employeeDriverId) {
             where['employeeDriverId'] = input.employeeDriverId;
         }
 
-        if(input.startCreatedAt) {
+        if (input.startCreatedAt) {
             where['createdAt'] = { [Op.gte]: moment(input.startCreatedAt).toDate() }
         }
 
-        if(input.startCreatedAt) {
+        if (input.startCreatedAt) {
             where['createdAt'] = { [Op.lte]: moment(input.endCreatedAt).toDate() }
         }
 
@@ -315,7 +315,7 @@ export class SaleOrderService {
         }
 
         saleOrder.status = SaleOrderStatus.FINISHED;
-        saleOrder.deliveredAt = moment(input.deliveredAt).toDate();
+        saleOrder.deliveredAt = moment.utc(input.deliveredAt).toDate();
         saleOrder.paymentMethodId = input.paymentMethodId;
         saleOrder.paymentInstallments = input.installments || null;
 

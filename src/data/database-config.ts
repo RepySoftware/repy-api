@@ -30,8 +30,10 @@ export class Database {
             host: CONFIG.DB_HOST,
             dialect: 'mysql',
             dialectOptions: {
-                decimalNumbers: true
-            }
+                decimalNumbers: true,
+                useUTC: true, // for reading from database
+            },
+            timezone: '+00:00', // for writing to database
         });
 
         this.sequelize.addModels([
