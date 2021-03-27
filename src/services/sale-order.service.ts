@@ -48,11 +48,11 @@ export class SaleOrderService {
         }
 
         if (input.startCreatedAt) {
-            where['createdAt'] = { [Op.gte]: moment(input.startCreatedAt).toDate() }
+            where['createdAt'] = { [Op.gte]: moment.utc(input.startCreatedAt).toDate() }
         }
 
         if (input.startCreatedAt) {
-            where['createdAt'] = { [Op.lte]: moment(input.endCreatedAt).toDate() }
+            where['createdAt'] = { [Op.lte]: moment.utc(input.endCreatedAt).toDate() }
         }
 
         const saleOrders: SaleOrder[] = await SaleOrder.findAll({
