@@ -31,7 +31,7 @@ export class Database {
             dialect: 'mysql',
             dialectOptions: {
                 decimalNumbers: true,
-                useUTC: true, // for reading from database
+                useUTC: true, // for reading from database,
             },
             timezone: '+00:00', // for writing to database
         });

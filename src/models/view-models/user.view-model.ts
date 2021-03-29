@@ -1,7 +1,6 @@
 import { User } from "../entities/user";
-import * as moment from 'moment-timezone';
 import { PersonViewModel } from "./person.view-model";
-import { DEFAULT_DATETIME_FORMAT } from "../../config";
+import { DateHelper } from "../../common/helpers/date.helper";
 
 export class UserViewModel {
 
@@ -23,8 +22,8 @@ export class UserViewModel {
         user.username = u.username;
         user.isAdmin = u.isAdmin;
         user.isActive = u.isActive;
-        user.createdAt = moment.utc(u.createdAt).local().format(DEFAULT_DATETIME_FORMAT);
-        user.updatedAt = moment.utc(u.updatedAt).local().format(DEFAULT_DATETIME_FORMAT);
+        user.createdAt = DateHelper.toStringViewModel(u.createdAt);
+        user.updatedAt = DateHelper.toStringViewModel(u.updatedAt);
 
         return user;
     }

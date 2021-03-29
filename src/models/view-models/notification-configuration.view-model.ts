@@ -1,6 +1,5 @@
 import { NotificationConfiguration } from "../entities/notification-configuration";
-import * as moment from 'moment-timezone';
-import { DEFAULT_DATETIME_FORMAT } from "../../config";
+import { DateHelper } from "../../common/helpers/date.helper";
 
 export class NotificationConfigurationViewModel {
 
@@ -17,7 +16,7 @@ export class NotificationConfigurationViewModel {
         const config = new NotificationConfigurationViewModel();
 
         config.id = nc.id;
-        config.lastNotification = moment(nc.lastNotification).format(DEFAULT_DATETIME_FORMAT);
+        config.lastNotification = DateHelper.toStringViewModel(nc.lastNotification);
         config.minNotificationIntervalMinutes = nc.minNotificationIntervalMinutes;
         config.phonesToNotify = nc.phonesToNotify;
         config.emailsToNotify = nc.emailsToNotify;

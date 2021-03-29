@@ -13,9 +13,14 @@ import { DeviceSyncDataInputModel } from "../models/input-models/abstraction/dev
 import { DeviceSyncDataViewModel } from "../models/view-models/abstraction/device-sync-data.view-model";
 import { DeviceSyncDataStrategy } from "./strategies/device-sync-data.strategy";
 import { Person } from "../models/entities/person";
+import { Database } from "../data/database-config";
 
 @injectable()
 export class DeviceService {
+
+    constructor(
+        private _database: Database
+    ) { }
 
     public async get(strategy: string, userId: number, filter: DeviceFilter): Promise<DeviceViewModel[]> {
 
@@ -23,10 +28,10 @@ export class DeviceService {
         return devices.map(DeviceViewModel.fromEntity);
     }
 
-    public async getByKey(key: string, userId: number): Promise<DeviceViewModel> {
+    public async getById(id: number, userId: number): Promise<DeviceViewModel> {
 
         const device: Device = await Device.findOne({
-            where: { deviceKey: key },
+            where: { id },
             include: [
                 {
                     model: Address,
@@ -55,17 +60,17 @@ export class DeviceService {
 
     public async syncData(input: DeviceSyncDataInputModel): Promise<DeviceSyncDataViewModel> {
 
-        const device: Device = Device.findOne({
+        const device: Device = await Device.findOne({
             where: {
-                deviceKey: input.deviceKey,
-                token: input.deviceToken
+                id: input.deviceId,
+                token: input.token
             }
         });
 
         if (!device)
             throw new NotFoundException('Dispositivo não encontrado');
 
-        const result = await (new DeviceSyncDataStrategy(device.type).call(input));
+        const result = await (new DeviceSyncDataStrategy(device.type, this._database.sequelize).call(input));
 
         return result;
     }

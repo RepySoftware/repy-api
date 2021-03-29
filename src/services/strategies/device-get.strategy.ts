@@ -25,7 +25,7 @@ export class DeviceGetStrategy extends Strategy<{ userId: number, filter: Device
     ];
 
     constructor(type: string) {
-        super(type || 'default', ['default', 'all', 'customer', 'managerAgent']);
+        super(type || 'default', ['default', 'employee', 'customer']);
     }
 
     private async default(params: { userId: number, filter: DeviceFilter }): Promise<Device[]> {
@@ -52,7 +52,7 @@ export class DeviceGetStrategy extends Strategy<{ userId: number, filter: Device
         else if (user.person && user.person.isCustomer)
             return this.customer(params);
         else if (user.employee && (user.employee.isAgent || user.employee.isManager))
-            return this.managerAgent(params);
+            return this.employee(params);
         else
             return [];
     }
@@ -93,7 +93,7 @@ export class DeviceGetStrategy extends Strategy<{ userId: number, filter: Device
         return user.person.devices;
     }
 
-    private async managerAgent(params: { userId: number, filter: DeviceFilter }): Promise<Device[]> {
+    private async employee(params: { userId: number, filter: DeviceFilter }): Promise<Device[]> {
 
         await verifyUserRole(params.userId, AccessControlRole.EMPLOYEE_MANAGER);
         await verifyUserRole(params.userId, AccessControlRole.EMPLOYEE_AGENT);

@@ -1,7 +1,6 @@
 import { DeviceGasLevel } from "../entities/device-gas-level";
 import { CylinderViewModel } from "./cylinder.view-model";
-import * as moment from 'moment-timezone';
-import { DEFAULT_DATETIME_FORMAT } from "../../config";
+import { DateHelper } from "../../common/helpers/date.helper";
 
 export class DeviceGasLevelViewModel {
 
@@ -27,7 +26,7 @@ export class DeviceGasLevelViewModel {
         device.contentWeight = dgl.getContentWeight();
         device.percentageToNotify = dgl.percentageToNotify;
         device.setTare = dgl.setTare;
-        device.lastWeightUpdate = moment.utc(dgl.lastWeightUpdate).local().format(DEFAULT_DATETIME_FORMAT);
+        device.lastWeightUpdate = DateHelper.toStringViewModel(dgl.lastWeightUpdate);
         device.percentage = dgl.calculePercentage();
 
         return device;

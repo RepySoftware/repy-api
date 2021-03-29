@@ -2,15 +2,13 @@ import { DeviceType } from "../../common/enums/device-type";
 import { Device } from "../entities/device";
 import { AddressViewModel } from "./address.view-model";
 import { DeviceGasLevelViewModel } from "./device-gas-level.view-mode";
-import * as moment from 'moment-timezone';
-import { DEFAULT_DATETIME_FORMAT } from "../../config";
 import { NotificationConfigurationViewModel } from "./notification-configuration.view-model";
 import { PersonViewModel } from "./person.view-model";
+import { DateHelper } from "../../common/helpers/date.helper";
 
 export class DeviceViewModel {
 
     public id: number;
-    public deviceKey: string;
     public token: string;
     public name: string;
     public address: AddressViewModel;
@@ -27,7 +25,6 @@ export class DeviceViewModel {
         const device = new DeviceViewModel();
 
         device.id = d.id;
-        device.deviceKey = d.deviceKey;
         device.token = d.token;
         device.name = d.name;
         device.address = d.address ? AddressViewModel.fromEntity(d.address) : null;
@@ -35,8 +32,8 @@ export class DeviceViewModel {
         device.type = d.type;
         device.notificationConfiguration = d.notificationConfiguration ? NotificationConfigurationViewModel.fromEntity(d.notificationConfiguration) : null;
         device.isOnline = d.isOnline();
-        device.createdAt = moment.utc(d.createdAt).local().format(DEFAULT_DATETIME_FORMAT);
-        device.updatedAt = moment.utc(d.updatedAt).local().format(DEFAULT_DATETIME_FORMAT);
+        device.createdAt = DateHelper.toStringViewModel(d.createdAt);
+        device.updatedAt = DateHelper.toStringViewModel(d.updatedAt);
 
         device.deviceGasLevel = d.deviceGasLevel ? DeviceGasLevelViewModel.fromEntity(d.deviceGasLevel) : null;
 

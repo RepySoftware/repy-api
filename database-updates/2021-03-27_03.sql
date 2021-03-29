@@ -1,0 +1,1 @@
+ALTER TABLE Devices DROP COLUMN DeviceKey;

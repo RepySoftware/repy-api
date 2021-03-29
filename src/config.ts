@@ -11,4 +11,4 @@ export const CONFIG: {
 
 } = process.env as any;
 
-export const DEFAULT_DATETIME_FORMAT: string = 'YYYY-MM-DD HH:mm:ss';
+// export const DEFAULT_DATETIME_FORMAT: string = 'YYYY-MM-DD HH:mm:ss';

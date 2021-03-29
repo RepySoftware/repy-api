@@ -17,11 +17,6 @@ export class Device extends Entity<Device> {
     @AllowNull(false)
     @Unique
     @Column
-    public deviceKey: string;
-
-    @AllowNull(false)
-    @Unique
-    @Column
     public token: string;
 
     @AllowNull(false)
@@ -77,6 +72,6 @@ export class Device extends Entity<Device> {
 
     public isOnline(): boolean {
         const device: DeviceIsOnline = this.deviceByType();
-        return device ? device.isOnline(this) : moment().diff(moment.utc(this.updatedAt).local()) < 30000;;
+        return device ? device.isOnline(this) : moment().diff(moment.utc(this.updatedAt)) < 30000;
     }
 }

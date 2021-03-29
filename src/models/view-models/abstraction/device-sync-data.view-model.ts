@@ -1,3 +1,3 @@
 export interface DeviceSyncDataViewModel {
-    deviceKey: number;
+    deviceId: number;
 }

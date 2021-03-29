@@ -3,6 +3,8 @@ import { ServicesCollection } from "../providers";
 import { TokenHelper } from "../common/helpers/token.helper";
 import { checkToken } from "../middlewares/check-token";
 import { DeviceService } from "../services/device.service";
+import { HttpHelper } from "../common/helpers/http.helper";
+import { HttpResponseFormat } from "../common/enums/http-response-format";
 
 const DevicesController = Router();
 
@@ -17,9 +19,9 @@ DevicesController.get('/', [checkToken], async (req: Request, res: Response, nex
     }
 });
 
-DevicesController.get('/getByKey/:deviceKey', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
+DevicesController.get('/:id', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const device = await deviceService.getByKey(req.params.deviceKey, TokenHelper.getPayload(res).userId);
+        const device = await deviceService.getById(Number(req.params.id), TokenHelper.getPayload(res).userId);
         res.json(device);
     } catch (error) {
         next(error);
@@ -29,8 +31,20 @@ DevicesController.get('/getByKey/:deviceKey', [checkToken], async (req: Request,
 
 DevicesController.post('/syncData', async (req: Request, res: Response, next: NextFunction) => {
     try {
+
+        const {
+            responseFormat,
+            rawDelimiter,
+            rawSubDelimiter
+        } = req.query;
+
         const result = await deviceService.syncData(req.body);
-        res.json(result);
+        HttpHelper.formatResponse(result, {
+            format: (responseFormat as HttpResponseFormat) || HttpResponseFormat.JSON,
+            res,
+            rawDelimiter: rawDelimiter as string,
+            rawSubDelimiter: rawSubDelimiter as string
+        });
     } catch (error) {
         next(error);
     }
