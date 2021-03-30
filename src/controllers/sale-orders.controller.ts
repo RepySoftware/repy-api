@@ -19,6 +19,15 @@ SaleOrdersController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE
     }
 });
 
+SaleOrdersController.get('/:id', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const saleOrder = await saleOrderService.getById(Number(req.params.id), TokenHelper.getPayload(res).userId);
+        res.json(saleOrder);
+    } catch (error) {
+        next(error);
+    }
+});
+
 SaleOrdersController.post('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const saleOrder = await saleOrderService.create(req.body, TokenHelper.getPayload(res).userId);

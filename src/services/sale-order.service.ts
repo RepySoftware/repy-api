@@ -28,6 +28,66 @@ export class SaleOrderService {
         @inject(Database) private _database: Database,
     ) { }
 
+    public async getById(id: number, userId: number): Promise<SaleOrderViewModel> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const saleOrder: SaleOrder = await SaleOrder.findOne({
+            where: {
+                id,
+                '$companyBranch.companyId$': user.companyId
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                },
+                {
+                    model: Employee,
+                    as: 'employeeAgent'
+                },
+                {
+                    model: Employee,
+                    as: 'employeeDriver'
+                },
+                {
+                    model: Person,
+                    as: 'personCustomer'
+                },
+                {
+                    model: Address,
+                    as: 'deliveryAddress'
+                },
+                {
+                    model: PaymentMethod,
+                    as: 'paymentMethod'
+                },
+                {
+                    model: SaleOrderProduct,
+                    as: 'products',
+                    separate: true,
+                    include: [
+                        {
+                            model: CompanyBranchProduct,
+                            as: 'companyBranchProduct',
+                            include: [
+                                {
+                                    model: Product,
+                                    as: 'product'
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!saleOrder)
+            throw new NotFoundException('Pedido não encontrado');
+
+        return SaleOrderViewModel.fromEntity(saleOrder);
+    }
+
     public async getAll(input: SaleOrderFilter, userId: number): Promise<SaleOrderViewModel[]> {
 
         const user = await this._userService.getEntityById(userId);
