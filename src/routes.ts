@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { AuthController } from "./controllers/auth.controller";
 import { CompanyBranchesController } from "./controllers/company-branches.controller";
+import { DashboardController } from "./controllers/dashboard.controller";
 import { DevicesController } from "./controllers/devices.controller";
 import { EmployeesController } from "./controllers/employees.controller";
 import { PaymentMethodsController } from "./controllers/payment-methods.controller";
@@ -24,5 +25,6 @@ routes.use('/companyBranches', CompanyBranchesController);
 routes.use('/employees', EmployeesController);
 routes.use('/paymentMethods', PaymentMethodsController);
 routes.use('/saleOrders', SaleOrdersController);
+routes.use('/dashboard', DashboardController);
 
 export { routes };
