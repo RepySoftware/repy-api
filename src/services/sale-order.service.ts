@@ -107,12 +107,12 @@ export class SaleOrderService {
             where['employeeDriverId'] = input.employeeDriverId;
         }
 
-        if (input.startCreatedAt) {
-            where['createdAt'] = { [Op.gte]: moment.utc(input.startCreatedAt).toDate() }
+        if (input.startDateOfIssue) {
+            where['dateOfIssue'] = { [Op.gte]: moment.utc(input.startDateOfIssue).toDate() }
         }
 
-        if (input.startCreatedAt) {
-            where['createdAt'] = { [Op.lte]: moment.utc(input.endCreatedAt).toDate() }
+        if (input.endDateOfIssue) {
+            where['dateOfIssue'] = { [Op.lte]: moment.utc(input.endDateOfIssue).toDate() }
         }
 
         const saleOrders: SaleOrder[] = await SaleOrder.findAll({
@@ -232,6 +232,7 @@ export class SaleOrderService {
                 paymentInstallments: input.paymentInstallments,
                 status: SaleOrderStatus.PENDING,
                 observation: input.observation,
+                dateOfIssue: moment.utc().toDate(),
                 index: pendingSaleOrders.length,
                 scheduledAt: input.scheduledAt ? moment.utc(input.scheduledAt).toDate() : null
             });

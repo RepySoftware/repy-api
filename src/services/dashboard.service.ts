@@ -11,6 +11,7 @@ import { CompanyBranchProduct } from "../models/entities/company-branch-product"
 import { Product } from "../models/entities/product";
 import { SalesByDayViewModel } from "../models/view-models/sales-by-day.view-model";
 import { SalesByDayItemViewModel } from "../models/view-models/sales-by-day-item.view-model";
+import { SaleOrderStatus } from "../common/enums/sale-order-status";
 
 @injectable()
 export class DashboardService {
@@ -34,8 +35,9 @@ export class DashboardService {
                 [Op.and]: [
                     { '$saleOrder.companyBranch.companyId$': user.companyId },
                     { '$saleOrder.companyBranchId$': input.companyBranchId },
+                    { '$saleOrder.status': { [Op.not]: SaleOrderStatus.CANCELED } },
                     where(
-                        cast(col('saleOrder.deliveredAt'), 'date'),
+                        cast(col('saleOrder.dateOfIssue'), 'date'),
                         input.date
                     )
                 ]
@@ -73,19 +75,26 @@ export class DashboardService {
             if (!resultProduct) {
                 items.push({
                     product: ProductViewModel.fromEntity(sop.companyBranchProduct.product),
-                    quantity: sop.quantity,
-                    totalSalePrice: sop.quantity * sop.salePrice
+                    quantityIssued: sop.quantity,
+                    quantityDelivered: sop.saleOrder.deliveredAt ? sop.quantity : 0,
+                    totalIssuedSalePrice: sop.quantity * sop.salePrice,
+                    totalDeliveredSalePrice: sop.saleOrder.deliveredAt ? sop.quantity * sop.salePrice : 0
                 });
             } else {
-                resultProduct.quantity += sop.quantity;
-                resultProduct.totalSalePrice += sop.quantity * sop.salePrice;
+                resultProduct.quantityIssued += sop.quantity;
+                resultProduct.quantityDelivered += sop.saleOrder.deliveredAt ? sop.quantity : 0;
+                resultProduct.totalIssuedSalePrice += sop.quantity * sop.salePrice;
+                resultProduct.totalDeliveredSalePrice += sop.saleOrder.deliveredAt ? sop.quantity * sop.salePrice : 0;
             }
         });
 
+        // TODO: verificar UTC
         return {
             items,
-            totalItems: items.map(x => x.quantity).reduce((a, b) => a + b, 0),
-            totalSalePrice: items.map(x => x.totalSalePrice).reduce((a, b) => a + b, 0)
+            totalIssuedItems: items.map(x => x.quantityIssued).reduce((a, b) => a + b, 0),
+            totalDeliveredItems: items.map(x => x.quantityDelivered).reduce((a, b) => a + b, 0),
+            totalIssuedSalePrice: items.map(x => x.totalIssuedSalePrice).reduce((a, b) => a + b, 0),
+            totalDeliveredSalePrice: items.map(x => x.totalDeliveredSalePrice).reduce((a, b) => a + b, 0)
         };
     }
 }

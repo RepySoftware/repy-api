@@ -2,6 +2,8 @@ import { ProductViewModel } from "./product.view-model";
 
 export class SalesByDayItemViewModel {
     public product: ProductViewModel;
-    public quantity: number;
-    public totalSalePrice: number;
+    public quantityIssued: number;
+    public quantityDelivered: number;
+    public totalIssuedSalePrice: number;
+    public totalDeliveredSalePrice: number;
 }

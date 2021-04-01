@@ -72,6 +72,10 @@ export class SaleOrder extends Entity<SaleOrder> {
     @Column
     public observation: string;
 
+    @AllowNull(false)
+    @Column
+    public dateOfIssue: Date;
+
     @Column
     public scheduledAt?: Date;
 
