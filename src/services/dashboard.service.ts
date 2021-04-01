@@ -35,7 +35,7 @@ export class DashboardService {
                 [Op.and]: [
                     { '$saleOrder.companyBranch.companyId$': user.companyId },
                     { '$saleOrder.companyBranchId$': input.companyBranchId },
-                    { '$saleOrder.status': { [Op.not]: SaleOrderStatus.CANCELED } },
+                    { '$saleOrder.status$': { [Op.not]: SaleOrderStatus.CANCELED } },
                     where(
                         cast(col('saleOrder.dateOfIssue'), 'date'),
                         input.date
