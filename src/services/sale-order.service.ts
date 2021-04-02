@@ -424,6 +424,9 @@ export class SaleOrderService {
         if (!saleOrder)
             throw new NotFoundException('Pedido não encontrado');
 
+        if (saleOrder.status != SaleOrderStatus.PENDING)
+            throw new SaleOrderException('Só é possível excluir pedidos pendentes');
+
         const transaction: Transaction = await this._database.sequelize.transaction();
 
         try {
