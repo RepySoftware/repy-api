@@ -25,41 +25,43 @@ export async function verifyUserRole(userId: number, roles: AccessControlRole | 
     if (!user)
         throw new NotFoundException('Usuário não encontrado');
 
+    const defaultMessage = 'Usuário não tem permissão para executar esta ação';
+
     const r = Array.isArray(roles) ? roles : [roles];
 
     if (r.includes(AccessControlRole.ADMIN)) {
         if (!user.isAdmin) {
-            throw new AuthException('Não autorizado');
+            throw new AuthException(defaultMessage);
         }
     }
 
     if (r.includes(AccessControlRole.EMPLOYEE)) {
         if (!user.employee) {
-            throw new AuthException('Não autorizado');
+            throw new AuthException(defaultMessage);
         }
     }
 
     if (r.includes(AccessControlRole.EMPLOYEE_MANAGER)) {
         if (!user.employee || !user.employee.isManager) {
-            throw new AuthException('Não autorizado');
+            throw new AuthException(defaultMessage);
         }
     }
 
     if (r.includes(AccessControlRole.EMPLOYEE_AGENT)) {
         if (!user.employee || !user.employee.isAgent) {
-            throw new AuthException('Não autorizado');
+            throw new AuthException(defaultMessage);
         }
     }
 
     if (r.includes(AccessControlRole.EMPLOYEE_DRIVER)) {
         if (!user.employee || !user.employee.isDriver) {
-            throw new AuthException('Não autorizado');
+            throw new AuthException(defaultMessage);
         }
     }
 
     if (r.includes(AccessControlRole.CUSTOMER)) {
         if (!user.person.isCustomer) {
-            throw new AuthException('Não autorizado');
+            throw new AuthException(defaultMessage);
         }
     }
 }

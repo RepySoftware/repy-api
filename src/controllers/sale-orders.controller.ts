@@ -65,4 +65,13 @@ SaleOrdersController.post('/confirmDelivery', [checkToken, checkRole([AccessCont
     }
 });
 
+SaleOrdersController.delete('/:id', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await saleOrderService.delete(Number(req.params.id), TokenHelper.getPayload(res).userId);
+        res.json({ ok: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
 export { SaleOrdersController };

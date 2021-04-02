@@ -95,28 +95,34 @@ export class SaleOrderService {
         const limit = Number(input.limit || 20);
         const offset = Number((input.index || 0) * limit);
 
-        const where: WhereOptions = {
-            '$companyBranch.companyId$': user.companyId
-        };
+        const whereAnd: any[] = [
+            { '$companyBranch.companyId$': user.companyId }
+        ];
 
         if (input.status) {
-            where['status'] = input.status;
+            whereAnd.push({ status: input.status });
         }
 
         if (input.employeeDriverId) {
-            where['employeeDriverId'] = input.employeeDriverId;
+            whereAnd.push({ employeeDriverId: input.employeeDriverId });
         }
 
         if (input.startDateOfIssue) {
-            where['dateOfIssue'] = { [Op.gte]: moment.utc(input.startDateOfIssue).toDate() }
+            whereAnd.push({ dateOfIssue: { [Op.gte]: moment.utc(input.startDateOfIssue).toDate() } });
         }
 
         if (input.endDateOfIssue) {
-            where['dateOfIssue'] = { [Op.lte]: moment.utc(input.endDateOfIssue).toDate() }
+            whereAnd.push({ dateOfIssue: { [Op.lte]: moment.utc(input.endDateOfIssue).toDate() } });
+        }
+
+        if (input.personCustomerId) {
+            whereAnd.push({ personCustomerId: input.personCustomerId });
         }
 
         const saleOrders: SaleOrder[] = await SaleOrder.findAll({
-            where,
+            where: {
+                [Op.and]: whereAnd
+            },
             include: [
                 {
                     model: CompanyBranch,
@@ -390,6 +396,51 @@ export class SaleOrderService {
                 saleOrder.personCustomer.isGasCustomer = true;
                 await saleOrder.personCustomer.save({ transaction });
             }
+
+            await transaction.commit();
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
+    public async delete(id: number, userId: number): Promise<void> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const saleOrder: SaleOrder = await SaleOrder.findOne({
+            where: {
+                id,
+                '$companyBranch.companyId$': user.companyId
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                }
+            ]
+        });
+
+        if (!saleOrder)
+            throw new NotFoundException('Pedido não encontrado');
+
+        const transaction: Transaction = await this._database.sequelize.transaction();
+
+        try {
+
+            await SaleOrderProduct.destroy({
+                where: {
+                    saleOrderId: saleOrder.id
+                },
+                transaction
+            });
+
+            await SaleOrder.destroy({
+                where: {
+                    id: saleOrder.id
+                },
+                transaction
+            });
 
             await transaction.commit();
         } catch (error) {
