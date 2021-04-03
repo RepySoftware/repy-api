@@ -9,8 +9,8 @@ import { UserService } from "./user.service";
 import * as moment from 'moment-timezone';
 import { CompanyBranchProduct } from "../models/entities/company-branch-product";
 import { Product } from "../models/entities/product";
-import { SalesByDayViewModel } from "../models/view-models/sales-by-day.view-model";
-import { SalesByDayItemViewModel } from "../models/view-models/sales-by-day-item.view-model";
+import { SalesByDateViewModel } from "../models/view-models/sales-by-date.view-model";
+import { SalesByDateItemViewModel } from "../models/view-models/sales-by-date-item.view-model";
 import { SaleOrderStatus } from "../common/enums/sale-order-status";
 
 @injectable()
@@ -22,11 +22,12 @@ export class DashboardService {
 
     public async getSalesByDay(
         input: {
-            date: string,
+            startDate: string,
+            endDate: string,
             companyBranchId: number
         },
         userId: number
-    ): Promise<SalesByDayViewModel> {
+    ): Promise<SalesByDateViewModel> {
 
         const user: User = await this._userService.getEntityById(userId);
 
@@ -36,10 +37,8 @@ export class DashboardService {
                     { '$saleOrder.companyBranch.companyId$': user.companyId },
                     { '$saleOrder.companyBranchId$': input.companyBranchId },
                     { '$saleOrder.status$': { [Op.not]: SaleOrderStatus.CANCELED } },
-                    where(
-                        cast(col('saleOrder.dateOfIssue'), 'date'),
-                        input.date
-                    )
+                    { '$saleOrder.dateOfIssue$': { [Op.gte]: moment.utc(input.startDate).toDate() } },
+                    { '$saleOrder.dateOfIssue$': { [Op.lte]: moment.utc(input.endDate).toDate() } }
                 ]
             },
             include: [
@@ -66,7 +65,7 @@ export class DashboardService {
             ]
         });
 
-        const items: SalesByDayItemViewModel[] = [];
+        const items: SalesByDateItemViewModel[] = [];
 
         salesOrderProducts.forEach(sop => {
 

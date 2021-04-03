@@ -10,7 +10,7 @@ const DashboardController = Router();
 
 const dashboardService = ServicesCollection.resolve(DashboardService);
 
-DashboardController.get('/salesByDay', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+DashboardController.get('/salesByDate', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const result = await dashboardService.getSalesByDay(req.query as any, TokenHelper.getPayload(res).userId);
         res.json(result);

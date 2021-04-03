@@ -1,6 +1,6 @@
 import { ProductViewModel } from "./product.view-model";
 
-export class SalesByDayItemViewModel {
+export class SalesByDateItemViewModel {
     public product: ProductViewModel;
     public quantityIssued: number;
     public quantityDelivered: number;

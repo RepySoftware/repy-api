@@ -1,8 +1,8 @@
-import { SalesByDayItemViewModel } from "./sales-by-day-item.view-model";
+import { SalesByDateItemViewModel } from "./sales-by-date-item.view-model";
 
-export class SalesByDayViewModel {
+export class SalesByDateViewModel {
 
-    public items: SalesByDayItemViewModel[];
+    public items: SalesByDateItemViewModel[];
     public totalIssuedItems: number;
     public totalDeliveredItems: number;
     public totalIssuedSalePrice: number;
