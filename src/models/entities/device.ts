@@ -7,6 +7,7 @@ import { NotificationConfiguration } from "./notification-configuration";
 import * as moment from 'moment-timezone';
 import { DeviceIsOnline } from "../abstraction/device-is-online";
 import { Person } from "./person";
+import { DeviceVerifyNotification, DeviceVerifyNotificationResult } from "../abstraction/device-verify-notification";
 
 @Table({
     tableName: 'Devices',
@@ -73,5 +74,10 @@ export class Device extends Entity<Device> {
     public isOnline(): boolean {
         const device: DeviceIsOnline = this.deviceByType();
         return device ? device.isOnline(this) : moment().diff(moment.utc(this.updatedAt)) < 30000;
+    }
+
+    public async verifyNotification(): Promise<DeviceVerifyNotificationResult> {
+        const device: DeviceVerifyNotification = this.deviceByType();
+        return device.verifyNotification(this);
     }
 }

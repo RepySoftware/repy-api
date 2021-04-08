@@ -42,6 +42,19 @@ export class NotificationConfiguration extends Entity<NotificationConfiguration>
     }
 
     @AllowNull(false)
+    @Default('[]')
+    @Column({
+        field: 'whatsAppsToNotify'
+    })
+    private _whatsAppsToNotify: string;
+    public get whatsAppsToNotify(): string[] {
+        return JSON.parse(this._whatsAppsToNotify);
+    }
+    public set whatsAppsToNotify(value: string[]) {
+        this._whatsAppsToNotify = JSON.stringify(value);
+    }
+
+    @AllowNull(false)
     @Column
     public alreadyNotified: boolean;
 

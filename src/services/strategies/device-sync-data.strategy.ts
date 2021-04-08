@@ -3,17 +3,20 @@ import { DeviceType } from "../../common/enums/device-type";
 import { NotFoundException } from "../../common/exceptions/not-fount.exception";
 import { Device } from "../../models/entities/device";
 import { DeviceGasLevel } from "../../models/entities/device-gas-level";
+import { NotificationConfiguration } from "../../models/entities/notification-configuration";
 import { DeviceSyncDataInputModel } from "../../models/input-models/abstraction/device-sync-data.input-model";
 import { DeviceGasLevelSyncDataInputModel } from "../../models/input-models/device-gas-level-sync-data.input-model";
 import { DeviceSyncDataViewModel } from "../../models/view-models/abstraction/device-sync-data.view-model";
 import { DeviceGasLevelSyncDataViewModel } from "../../models/view-models/device-gas-level-sync-data.view-mode";
 import { Strategy } from "../abstraction/strategy";
+import { MessagingService } from "../messaging.service";
 
 export class DeviceSyncDataStrategy extends Strategy<DeviceSyncDataInputModel, Promise<DeviceSyncDataViewModel>> {
 
     constructor(
         type: string,
-        private _sequelize: Sequelize
+        private _sequelize: Sequelize,
+        private _messagingService: MessagingService
     ) {
         super(type, [DeviceType.GAS_LEVEL]);
     }
@@ -29,6 +32,10 @@ export class DeviceSyncDataStrategy extends Strategy<DeviceSyncDataInputModel, P
                 {
                     model: DeviceGasLevel,
                     as: 'deviceGasLevel'
+                },
+                {
+                    model: NotificationConfiguration,
+                    as: 'notificationConfiguration'
                 }
             ]
         });
@@ -52,6 +59,32 @@ export class DeviceSyncDataStrategy extends Strategy<DeviceSyncDataInputModel, P
         } catch (error) {
             await transaction.rollback();
             throw error;
+        }
+
+        const notificationResult = await device.verifyNotification();
+
+        if (notificationResult) {
+
+            if (notificationResult.config.emailsToNotify.length) {
+                this._messagingService.sendEmail({
+                    emails: notificationResult.config.emailsToNotify,
+                    subject: notificationResult.email.subject,
+                    message: notificationResult.email.message
+                });
+            }
+
+            if (notificationResult.config.phonesToNotify) {
+                // TODO: implement voice call
+                console.log('TODO: implement voice call');
+            }
+
+            if (notificationResult.config.whatsAppsToNotify.length) {
+                this._messagingService.sendWhatsApp({
+                    whatsAppPhones: notificationResult.config.whatsAppsToNotify,
+                    message: notificationResult.whatsApp.message
+                });
+            }
+
         }
 
         return {

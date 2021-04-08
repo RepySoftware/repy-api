@@ -7,7 +7,15 @@ export const CONFIG: {
     DB_USER: string,
     DB_PASSWORD: string,
 
-    JWT_SECRET: string
+    JWT_SECRET: string,
+
+    EMAIL_SERVICE: string,
+    EMAIL_USER: string,
+    EMAIL_PASSWORD: string,
+
+    TWILIO_ACCOUNT_SID: string,
+    TWILIO_AUTH_TOKEN: string,
+    TWILIO_WHATS_APP_FROM: string
 
 } = process.env as any;
 

@@ -10,6 +10,7 @@ import { UserService } from './services/user.service';
 import { PaymentMethodService } from './services/payment-method.service';
 import { SaleOrderService } from './services/sale-order.service';
 import { DashboardService } from './services/dashboard.service';
+import { MessagingService } from './services/messaging.service';
 
 const ServicesCollection = new Container();
 
@@ -25,5 +26,6 @@ ServicesCollection.bind(UserService).toSelf();
 ServicesCollection.bind(PaymentMethodService).toSelf();
 ServicesCollection.bind(SaleOrderService).toSelf();
 ServicesCollection.bind(DashboardService).toSelf();
+ServicesCollection.bind(MessagingService).toSelf();
 
 export { ServicesCollection };
