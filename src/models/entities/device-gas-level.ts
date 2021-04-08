@@ -5,7 +5,6 @@ import * as moment from 'moment-timezone';
 import { DeviceIsOnline } from "../abstraction/device-is-online";
 import { Device } from "./device";
 import { DeviceVerifyNotification, DeviceVerifyNotificationResult } from "../abstraction/device-verify-notification";
-import { NotificationConfiguration } from "./notification-configuration";
 
 @Table({
     tableName: 'DevicesGasLevels',
