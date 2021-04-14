@@ -37,6 +37,15 @@ SaleOrdersController.post('/', [checkToken, checkRole([AccessControlRole.EMPLOYE
     }
 });
 
+SaleOrdersController.put('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const saleOrder = await saleOrderService.update(req.body, TokenHelper.getPayload(res).userId);
+        res.json(saleOrder);
+    } catch (error) {
+        next(error);
+    }
+});
+
 SaleOrdersController.patch('/updateIndex', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         await saleOrderService.updateIndex(req.body, TokenHelper.getPayload(res).userId);

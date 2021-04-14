@@ -14,6 +14,26 @@ import { PersonPhone } from "./person-phone";
 })
 export class Person extends Entity<Person> {
 
+    public static create(input: {
+        type: PersonType;
+        documentNumber: string;
+        name: string;
+        tradeName: string;
+        email: string;
+        addressId?: number;
+        companyId: number;
+        isSupplier: boolean;
+        isCustomer: boolean;
+        taxRegime: PersonTaxRegime;
+        icmsContributorType: PersonIcmsContributorType;
+        stateRegistration: string;
+        municipalRegistration: string;
+        isGasCustomer: boolean;
+        isActive: boolean;
+    }): Person {
+        return new Person(input);
+    }
+
     @AllowNull(false)
     @Column
     public type: PersonType;

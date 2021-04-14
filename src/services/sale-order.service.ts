@@ -19,6 +19,8 @@ import * as moment from 'moment-timezone';
 import { PaymentMethod } from "../models/entities/payment-method";
 import { SaleOrderConfirmDeliveryInputModel } from "../models/input-models/sale-order-confirm-delivery.input-model";
 import { SaleOrderException } from "../common/exceptions/sale-order.exception";
+import { SaleOrderUpdateInputModel } from "../models/input-models/sale-order-update.input-model";
+import { CompanyBranchProductPrice } from "../models/entities/company-branch-product-price";
 
 @injectable()
 export class SaleOrderService {
@@ -76,6 +78,10 @@ export class SaleOrderService {
                                     as: 'product'
                                 }
                             ]
+                        },
+                        {
+                            model: CompanyBranchProductPrice,
+                            as: 'companyBranchProductPrice'
                         }
                     ]
                 }
@@ -180,7 +186,8 @@ export class SaleOrderService {
 
         const personCustomer: Person = await Person.findOne({
             where: {
-                id: input.personCustomerId
+                id: input.personCustomerId,
+                companyId: user.companyId
             },
             include: [
                 {
@@ -210,7 +217,7 @@ export class SaleOrderService {
 
         try {
 
-            const deliveryAddress = new Address({
+            const deliveryAddress = Address.create({
                 description: personCustomer.address.description,
                 street: personCustomer.address.street,
                 number: personCustomer.address.number,
@@ -227,7 +234,7 @@ export class SaleOrderService {
 
             await deliveryAddress.save({ transaction });
 
-            const saleOrder = new SaleOrder({
+            const saleOrder = SaleOrder.create({
                 companyBranchId: input.companyBranchId,
                 employeeAgentId: user.employeeId,
                 employeeDriverId: input.employeeDriverId,
@@ -240,12 +247,13 @@ export class SaleOrderService {
                 observation: input.observation,
                 dateOfIssue: moment.utc().toDate(),
                 index: pendingSaleOrders.length,
-                scheduledAt: input.scheduledAt ? moment.utc(input.scheduledAt).toDate() : null
+                scheduledAt: input.scheduledAt ? moment.utc(input.scheduledAt).toDate() : null,
+                deliveredAt: null
             });
 
             await saleOrder.save({ transaction });
 
-            const saleOrderProducts = input.products.map(inputProduct => new SaleOrderProduct({
+            const saleOrderProducts = input.products.map(inputProduct => SaleOrderProduct.create({
                 saleOrderId: saleOrder.id,
                 companyBranchProductId: inputProduct.companyBranchProductId,
                 companyBranchProductPriceId: inputProduct.companyBranchProductPriceId,
@@ -259,6 +267,134 @@ export class SaleOrderService {
 
             saleOrder.calculeTotalSalePrice(saleOrderProducts);
             await saleOrder.save({ transaction });
+
+            await transaction.commit();
+
+            return SaleOrderViewModel.fromEntity(saleOrder);
+
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
+    public async update(input: SaleOrderUpdateInputModel, userId: number): Promise<SaleOrderViewModel> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const personCustomer: Person = await Person.findOne({
+            where: {
+                id: input.personCustomerId,
+                companyId: user.companyId
+            },
+            include: [
+                {
+                    model: Address,
+                    as: 'address'
+                }
+            ]
+        });
+
+        if (!personCustomer)
+            throw new NotFoundException('Cliente não encontrado');
+
+        const saleOrder: SaleOrder = await SaleOrder.findOne({
+            where: {
+                '$companyBranch.companyId$': user.companyId,
+                id: input.id
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                },
+                {
+                    model: Address,
+                    as: 'deliveryAddress'
+                },
+                {
+                    model: SaleOrderProduct,
+                    as: 'products'
+                }
+            ]
+        });
+
+        if (!saleOrder)
+            throw new NotFoundException('Pedido não encontrado');
+
+        const transaction: Transaction = await this._database.sequelize.transaction();
+
+        try {
+
+            saleOrder.deliveryAddress.description = input.deliveryAddress.description;
+            saleOrder.deliveryAddress.street = input.deliveryAddress.street;
+            saleOrder.deliveryAddress.number = input.deliveryAddress.number;
+            saleOrder.deliveryAddress.zipCode = input.deliveryAddress.zipCode;
+            saleOrder.deliveryAddress.neighborhood = input.deliveryAddress.neighborhood;
+            saleOrder.deliveryAddress.city = input.deliveryAddress.city;
+            saleOrder.deliveryAddress.region = input.deliveryAddress.region;
+            saleOrder.deliveryAddress.country = input.deliveryAddress.country;
+            saleOrder.deliveryAddress.complement = input.deliveryAddress.complement;
+            saleOrder.deliveryAddress.referencePoint = input.deliveryAddress.referencePoint;
+            saleOrder.deliveryAddress.latitude = input.deliveryAddress.latitude;
+            saleOrder.deliveryAddress.longitude = input.deliveryAddress.longitude;
+
+            await saleOrder.deliveryAddress.save({ transaction });
+
+            saleOrder.status = input.status;
+            saleOrder.companyBranchId = input.companyBranchId;
+            saleOrder.employeeDriverId = input.employeeDriverId;
+            saleOrder.personCustomerId = input.personCustomerId;
+            saleOrder.paymentMethodId = input.paymentMethodId;
+            saleOrder.paymentInstallments = input.paymentInstallments;
+            saleOrder.observation = input.observation;
+            saleOrder.dateOfIssue = moment.utc(input.dateOfIssue).toDate();
+            saleOrder.scheduledAt = moment.utc(input.scheduledAt).toDate();
+            saleOrder.deliveredAt = moment.utc(input.deliveredAt).toDate();
+
+            await saleOrder.save({ transaction });
+
+            // update products
+            for (const sopInput of input.products) {
+                const saleOrderProduct = saleOrder.products.find(x => x.id == sopInput.id);
+
+                if (saleOrderProduct) {
+                    saleOrderProduct.companyBranchProductId = sopInput.companyBranchProductId;
+                    saleOrderProduct.companyBranchProductPriceId = sopInput.companyBranchProductPriceId;
+                    saleOrderProduct.quantity = sopInput.quantity;
+                    saleOrderProduct.salePrice = sopInput.salePrice;
+                }
+
+                await saleOrderProduct.save({ transaction });
+            }
+
+            // delete products
+            for (const sop of saleOrder.products) {
+                if (!input.products.find(x => x.id == sop.id)) {
+                    await SaleOrderProduct.destroy({
+                        where: { id: sop.id },
+                        transaction
+                    });
+                }
+            }
+
+            // add products
+            for (const sopInput of input.products) {
+                if (!sopInput.id) {
+                    await SaleOrderProduct.create({
+                        companyBranchProductId: sopInput.companyBranchProductId,
+                        companyBranchProductPriceId: sopInput.companyBranchProductPriceId,
+                        quantity: sopInput.quantity,
+                        salePrice: sopInput.salePrice,
+                        saleOrderId: saleOrder.id
+                    }).save({ transaction });
+                }
+            }
+
+            const newSaleOrder: SaleOrder = await saleOrder.reload();
+
+            newSaleOrder.calculeTotalSalePrice();
+            await newSaleOrder.save({ transaction });
 
             await transaction.commit();
 

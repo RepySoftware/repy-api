@@ -7,6 +7,23 @@ import { Entity } from "../abstraction/entity";
 })
 export class Address extends Entity<Address> {
 
+    public static create(input: {
+        description: string;
+        street: string;
+        number: string;
+        zipCode: string;
+        neighborhood: string;
+        city: string;
+        region: string;
+        country: string;
+        complement: string;
+        referencePoint: string;
+        latitude: number;
+        longitude: number;
+    }): Address {
+        return new Address(input);
+    }
+
     @AllowNull(false)
     @Column
     public description: string;

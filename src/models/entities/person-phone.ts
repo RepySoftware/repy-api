@@ -8,6 +8,13 @@ import { Person } from "./person";
 })
 export class PersonPhone extends Entity<PersonPhone> {
 
+    public static create(input: {
+        personId: number,
+        phone: string
+    }): PersonPhone {
+        return new PersonPhone(input);
+    }
+
     @ForeignKey(() => Person)
     @AllowNull(false)
     @Column

@@ -1,4 +1,4 @@
-import { SaleOrderProductCreateInputModel } from "./sale-order-product-create.input-model copy";
+import { SaleOrderProductCreateInputModel } from "./sale-order-product-create.input-model";
 
 export interface SaleOrderCreateInputModel {
     companyBranchId: number;

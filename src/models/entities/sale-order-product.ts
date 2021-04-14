@@ -10,6 +10,16 @@ import { SaleOrder } from "./sale-order";
 })
 export class SaleOrderProduct extends Entity<SaleOrderProduct> {
 
+    public static create(input: {
+        saleOrderId: number;
+        companyBranchProductId: number;
+        companyBranchProductPriceId: number;
+        quantity: number;
+        salePrice: number;
+    }): SaleOrderProduct {
+        return new SaleOrderProduct(input);
+    }
+
     @ForeignKey(() => SaleOrder)
     @AllowNull(false)
     @Column

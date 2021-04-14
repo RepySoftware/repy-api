@@ -102,7 +102,7 @@ export class PersonService {
 
             if (input.address) {
 
-                address = new Address({
+                address = Address.create({
                     description: input.address.description,
                     street: input.address.street,
                     number: input.address.number,
@@ -135,7 +135,7 @@ export class PersonService {
             await person.save({ transaction });
 
             for (let p of input.personPhones) {
-                await new PersonPhone({
+                await PersonPhone.create({
                     personId: person.id,
                     phone: StringHelper.getOnlyNumbers(p.phone)
                 }).save({ transaction });

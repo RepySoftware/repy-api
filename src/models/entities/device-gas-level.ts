@@ -108,7 +108,10 @@ export class DeviceGasLevel extends Entity<DeviceGasLevel> implements DeviceIsOn
                 }
             }
         }
-        else if (percentage >= device.deviceGasLevel.percentageToNotify && device.notificationConfiguration.alreadyNotified) {
+        else if (
+            percentage >= device.deviceGasLevel.percentageToNotify
+            && device.notificationConfiguration.alreadyNotified
+        ) {
             device.notificationConfiguration.alreadyNotified = true;
             await device.notificationConfiguration.save();
         }
