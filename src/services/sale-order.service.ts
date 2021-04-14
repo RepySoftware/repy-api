@@ -21,6 +21,7 @@ import { SaleOrderConfirmDeliveryInputModel } from "../models/input-models/sale-
 import { SaleOrderException } from "../common/exceptions/sale-order.exception";
 import { SaleOrderUpdateInputModel } from "../models/input-models/sale-order-update.input-model";
 import { CompanyBranchProductPrice } from "../models/entities/company-branch-product-price";
+import { ProductCategory } from "../models/entities/product-category";
 
 @injectable()
 export class SaleOrderService {
@@ -30,7 +31,7 @@ export class SaleOrderService {
         @inject(Database) private _database: Database,
     ) { }
 
-    public async getById(id: number, userId: number): Promise<SaleOrderViewModel> {
+    public async getById(id: number, userId: number): Promise<SaleOrder | SaleOrderViewModel> {
 
         const user = await this._userService.getEntityById(userId);
 
@@ -75,7 +76,17 @@ export class SaleOrderService {
                             include: [
                                 {
                                     model: Product,
-                                    as: 'product'
+                                    as: 'product',
+                                    include: [
+                                        {
+                                            model: ProductCategory,
+                                            as: 'category'
+                                        }
+                                    ]
+                                },
+                                {
+                                    model: CompanyBranchProductPrice,
+                                    as: 'prices'
                                 }
                             ]
                         },
@@ -326,31 +337,31 @@ export class SaleOrderService {
 
         try {
 
-            saleOrder.deliveryAddress.description = input.deliveryAddress.description;
-            saleOrder.deliveryAddress.street = input.deliveryAddress.street;
-            saleOrder.deliveryAddress.number = input.deliveryAddress.number;
-            saleOrder.deliveryAddress.zipCode = input.deliveryAddress.zipCode;
-            saleOrder.deliveryAddress.neighborhood = input.deliveryAddress.neighborhood;
-            saleOrder.deliveryAddress.city = input.deliveryAddress.city;
-            saleOrder.deliveryAddress.region = input.deliveryAddress.region;
-            saleOrder.deliveryAddress.country = input.deliveryAddress.country;
-            saleOrder.deliveryAddress.complement = input.deliveryAddress.complement;
-            saleOrder.deliveryAddress.referencePoint = input.deliveryAddress.referencePoint;
-            saleOrder.deliveryAddress.latitude = input.deliveryAddress.latitude;
-            saleOrder.deliveryAddress.longitude = input.deliveryAddress.longitude;
+            // saleOrder.deliveryAddress.description = input.deliveryAddress.description;
+            // saleOrder.deliveryAddress.street = input.deliveryAddress.street;
+            // saleOrder.deliveryAddress.number = input.deliveryAddress.number;
+            // saleOrder.deliveryAddress.zipCode = input.deliveryAddress.zipCode;
+            // saleOrder.deliveryAddress.neighborhood = input.deliveryAddress.neighborhood;
+            // saleOrder.deliveryAddress.city = input.deliveryAddress.city;
+            // saleOrder.deliveryAddress.region = input.deliveryAddress.region;
+            // saleOrder.deliveryAddress.country = input.deliveryAddress.country;
+            // saleOrder.deliveryAddress.complement = input.deliveryAddress.complement;
+            // saleOrder.deliveryAddress.referencePoint = input.deliveryAddress.referencePoint;
+            // saleOrder.deliveryAddress.latitude = input.deliveryAddress.latitude;
+            // saleOrder.deliveryAddress.longitude = input.deliveryAddress.longitude;
 
-            await saleOrder.deliveryAddress.save({ transaction });
+            // await saleOrder.deliveryAddress.save({ transaction });
 
             saleOrder.status = input.status;
             saleOrder.companyBranchId = input.companyBranchId;
-            saleOrder.employeeDriverId = input.employeeDriverId;
+            saleOrder.employeeDriverId = input.employeeDriverId || null;
             saleOrder.personCustomerId = input.personCustomerId;
-            saleOrder.paymentMethodId = input.paymentMethodId;
-            saleOrder.paymentInstallments = input.paymentInstallments;
-            saleOrder.observation = input.observation;
+            saleOrder.paymentMethodId = input.paymentMethodId || null;
+            saleOrder.paymentInstallments = input.paymentInstallments || null;
+            saleOrder.observation = input.observation || null;
             saleOrder.dateOfIssue = moment.utc(input.dateOfIssue).toDate();
-            saleOrder.scheduledAt = moment.utc(input.scheduledAt).toDate();
-            saleOrder.deliveredAt = moment.utc(input.deliveredAt).toDate();
+            saleOrder.scheduledAt = input.scheduledAt ? moment.utc(input.scheduledAt).toDate() : null;
+            saleOrder.deliveredAt = input.deliveredAt ? moment.utc(input.deliveredAt).toDate() : null;
 
             await saleOrder.save({ transaction });
 
@@ -363,9 +374,9 @@ export class SaleOrderService {
                     saleOrderProduct.companyBranchProductPriceId = sopInput.companyBranchProductPriceId;
                     saleOrderProduct.quantity = sopInput.quantity;
                     saleOrderProduct.salePrice = sopInput.salePrice;
-                }
 
-                await saleOrderProduct.save({ transaction });
+                    await saleOrderProduct.save({ transaction });
+                }
             }
 
             // delete products
@@ -375,26 +386,33 @@ export class SaleOrderService {
                         where: { id: sop.id },
                         transaction
                     });
+
+                    saleOrder.products.splice(
+                        saleOrder.products.findIndex(x => x.id == sop.id),
+                        1
+                    );
                 }
             }
 
             // add products
             for (const sopInput of input.products) {
                 if (!sopInput.id) {
-                    await SaleOrderProduct.create({
+                    const newSaleOrderProduct = SaleOrderProduct.create({
                         companyBranchProductId: sopInput.companyBranchProductId,
                         companyBranchProductPriceId: sopInput.companyBranchProductPriceId,
                         quantity: sopInput.quantity,
                         salePrice: sopInput.salePrice,
                         saleOrderId: saleOrder.id
-                    }).save({ transaction });
+                    });
+
+                    await newSaleOrderProduct.save({ transaction });
+
+                    saleOrder.products.push(newSaleOrderProduct);
                 }
             }
 
-            const newSaleOrder: SaleOrder = await saleOrder.reload();
-
-            newSaleOrder.calculeTotalSalePrice();
-            await newSaleOrder.save({ transaction });
+            saleOrder.calculeTotalSalePrice();
+            await saleOrder.save({ transaction });
 
             await transaction.commit();
 

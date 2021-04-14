@@ -10,7 +10,7 @@ export interface SaleOrderUpdateInputModel {
     personCustomerId: number;
     paymentMethodId: number;
     paymentInstallments: number;
-    deliveryAddress: AddressInputModel;
+    // deliveryAddress: AddressInputModel;
     observation?: string;
     scheduledAt?: string;
     dateOfIssue: string;
