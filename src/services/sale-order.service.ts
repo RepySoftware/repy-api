@@ -22,6 +22,10 @@ import { SaleOrderException } from "../common/exceptions/sale-order.exception";
 import { SaleOrderUpdateInputModel } from "../models/input-models/sale-order-update.input-model";
 import { CompanyBranchProductPrice } from "../models/entities/company-branch-product-price";
 import { ProductCategory } from "../models/entities/product-category";
+import { DriverSaleOrderViewModel } from "../models/view-models/driver-sale-order.view-model";
+import { AddressHelper } from "../common/helpers/address.helper";
+import { DateHelper } from "../common/helpers/date.helper";
+import { DriverSaleOrderProductViewModel } from "../models/view-models/driver-sale-order-product.view-model";
 
 @injectable()
 export class SaleOrderService {
@@ -604,5 +608,78 @@ export class SaleOrderService {
             await transaction.rollback();
             throw error;
         }
+    }
+
+    public async getForDriver(userId: number): Promise<DriverSaleOrderViewModel[]> {
+
+        const user = await this._userService.getEntityById(userId, [
+            {
+                model: Employee,
+                as: 'employee'
+            }
+        ]);
+
+        const saleOrders: SaleOrder[] = await SaleOrder.findAll({
+            where: {
+                '$companyBranch.companyId$': user.companyId,
+                employeeDriverId: user.employee.id
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                },
+                {
+                    model: Person,
+                    as: 'personCustomer'
+                },
+                {
+                    model: Address,
+                    as: 'deliveryAddress'
+                },
+                {
+                    model: PaymentMethod,
+                    as: 'paymentMethod'
+                },
+                {
+                    model: SaleOrderProduct,
+                    as: 'products',
+                    separate: true,
+                    include: [
+                        {
+                            model: CompanyBranchProduct,
+                            as: 'companyBranchProduct',
+                            include: [
+                                {
+                                    model: Product,
+                                    as: 'product'
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            limit: 2,
+            order: [['index', 'ASC']]
+        });
+
+        return saleOrders.map(so => {
+            return {
+                id: so.id,
+                personCustomerName: so.personCustomer.name,
+                addressFormatted: AddressHelper.format(so.deliveryAddress),
+                paymentMethod: so.paymentMethod?.name,
+                scheduledAt: so.scheduledAt ? DateHelper.toStringViewModel(so.scheduledAt) : null,
+                totalSalePrice: so.totalSalePrice,
+                observation: so.observation,
+                products: so.products.map(sop => {
+                    return {
+                        productName: sop.companyBranchProduct.product.name,
+                        quantity: sop.quantity,
+                        salePrice: sop.salePrice
+                    } as DriverSaleOrderProductViewModel
+                })
+            } as DriverSaleOrderViewModel;
+        });
     }
 }

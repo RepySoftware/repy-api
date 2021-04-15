@@ -13,10 +13,7 @@ AuthController.post('/login', async (req: Request, res: Response, next: NextFunc
 
         const { strategy } = req.query;
 
-        const userToken = await authService.login({
-            ...req.body,
-            strategy
-        });
+        const userToken = await authService.login(req.body, String(strategy));
 
         res.json(userToken);
     } catch (error) {

@@ -8,13 +8,15 @@ import { User } from "../models/entities/user";
 import { UserViewModel } from "../models/view-models/user.view-model";
 import { UserTokenViewModel } from "../models/view-models/user-token.view-model";
 import { LoginStrategy } from "./strategies/login.strategy";
+import { Person } from "../models/entities/person";
+import { Employee } from "../models/entities/employee";
 
 @injectable()
 export class AuthService {
 
-    public async login(input: LoginInputModel): Promise<UserTokenViewModel> {
+    public async login(input: LoginInputModel, strategy: string): Promise<UserTokenViewModel> {
 
-        const user = await (new LoginStrategy(input.strategy).call(input));
+        const user = await (new LoginStrategy(strategy).call(input));
 
         return {
             user: UserViewModel.fromEntity(user),
@@ -25,7 +27,17 @@ export class AuthService {
     public async refresh(tokenPayload: TokenPayload) {
 
         const user: User = await User.findOne({
-            where: { id: tokenPayload.userId }
+            where: { id: tokenPayload.userId },
+            include: [
+                {
+                    model: Person,
+                    as: 'person'
+                },
+                {
+                    model: Employee,
+                    as: 'employee'
+                }
+            ]
         });
 
         if (!user)

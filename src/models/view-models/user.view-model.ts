@@ -1,11 +1,13 @@
 import { User } from "../entities/user";
 import { PersonViewModel } from "./person.view-model";
 import { DateHelper } from "../../common/helpers/date.helper";
+import { EmployeeViewModel } from "./employee.view-model";
 
 export class UserViewModel {
 
     public id: number;
-    public person: PersonViewModel;
+    public person?: PersonViewModel;
+    public employee?: EmployeeViewModel;
     public username: string;
     public password: string;
     public isAdmin: boolean;
@@ -19,6 +21,7 @@ export class UserViewModel {
 
         user.id = u.id;
         user.person = u.person ? PersonViewModel.fromEntity(u.person) : null;
+        user.employee = u.employee ? EmployeeViewModel.fromEntity(u.employee) : null;
         user.username = u.username;
         user.isAdmin = u.isAdmin;
         user.isActive = u.isActive;
