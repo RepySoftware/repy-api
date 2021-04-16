@@ -524,6 +524,9 @@ export class SaleOrderService {
             ]
         });
 
+        if (saleOrder.status != SaleOrderStatus.PENDING)
+            throw new SaleOrderException('Este pedido não pode ser finalizado pois não está pendente');
+
         const paymentMethod: PaymentMethod = PaymentMethod.findOne({
             where: {
                 id: input.paymentMethodId
@@ -541,9 +544,9 @@ export class SaleOrderService {
         }
 
         saleOrder.status = SaleOrderStatus.FINISHED;
-        saleOrder.deliveredAt = moment.utc(input.deliveredAt).toDate();
+        saleOrder.deliveredAt = input.deliveredAt ? moment.utc(input.deliveredAt).toDate() : moment.utc().toDate();
         saleOrder.paymentMethodId = input.paymentMethodId;
-        saleOrder.paymentInstallments = input.installments || null;
+        saleOrder.paymentInstallments = input.installments || (paymentMethod.hasInstallments ? 1 : null);
 
         const transaction: Transaction = await this._database.sequelize.transaction();
 
