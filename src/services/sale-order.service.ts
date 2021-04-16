@@ -622,7 +622,8 @@ export class SaleOrderService {
         const saleOrders: SaleOrder[] = await SaleOrder.findAll({
             where: {
                 '$companyBranch.companyId$': user.companyId,
-                employeeDriverId: user.employee.id
+                employeeDriverId: user.employee.id,
+                status: SaleOrderStatus.PENDING
             },
             include: [
                 {
