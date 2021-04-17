@@ -547,7 +547,7 @@ export class SaleOrderService {
 
         saleOrder.status = SaleOrderStatus.FINISHED;
         saleOrder.deliveredAt = input.deliveredAt ? moment.utc(input.deliveredAt).toDate() : moment.utc().toDate();
-        saleOrder.paymentMethodId = input.paymentMethodId;
+        saleOrder.paymentMethodId = input.paymentMethodId || null;
         saleOrder.paymentInstallments = input.installments || (paymentMethod.hasInstallments ? 1 : null);
 
         const transaction: Transaction = await this._database.sequelize.transaction();
@@ -611,9 +611,6 @@ export class SaleOrderService {
 
         if (!saleOrder)
             throw new NotFoundException('Pedido não encontrado');
-
-        if (saleOrder.status != SaleOrderStatus.PENDING)
-            throw new SaleOrderException('Só é possível excluir pedidos pendentes');
 
         const transaction: Transaction = await this._database.sequelize.transaction();
 
