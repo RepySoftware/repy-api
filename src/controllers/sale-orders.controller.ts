@@ -74,7 +74,16 @@ SaleOrdersController.patch('/updateEmployeeDriver', [checkToken, checkRole([Acce
     }
 });
 
-SaleOrdersController.post('/confirmDelivery', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+SaleOrdersController.patch('/startDelivery', [checkToken, checkRole(AccessControlRole.EMPLOYEE_DRIVER)], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await saleOrderService.startDelivery(req.body.saleOrderId, TokenHelper.getPayload(res).userId);
+        res.json({ ok: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
+SaleOrdersController.patch('/confirmDelivery', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         await saleOrderService.confirmDelivery(req.body, TokenHelper.getPayload(res).userId);
         res.json({ ok: true });

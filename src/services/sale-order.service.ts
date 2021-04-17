@@ -26,6 +26,7 @@ import { DriverSaleOrderViewModel } from "../models/view-models/driver-sale-orde
 import { AddressHelper } from "../common/helpers/address.helper";
 import { DateHelper } from "../common/helpers/date.helper";
 import { DriverSaleOrderProductViewModel } from "../models/view-models/driver-sale-order-product.view-model";
+import { PaymentMethodViewModel } from "../models/view-models/payment-method.view-model";
 
 @injectable()
 export class SaleOrderService {
@@ -121,7 +122,8 @@ export class SaleOrderService {
         ];
 
         if (input.status) {
-            whereAnd.push({ status: input.status });
+            const statusList: SaleOrderStatus[] = input.status.split(',').map(s => SaleOrderStatus[s]);
+            whereAnd.push({ status: { [Op.in]: statusList } });
         }
 
         if (input.employeeDriverId) {
@@ -524,8 +526,8 @@ export class SaleOrderService {
             ]
         });
 
-        if (saleOrder.status != SaleOrderStatus.PENDING)
-            throw new SaleOrderException('Este pedido não pode ser finalizado pois não está pendente');
+        if (saleOrder.status == SaleOrderStatus.CANCELED || saleOrder.status == SaleOrderStatus.FINISHED)
+            throw new SaleOrderException('Este pedido não pode ser finalizado');
 
         const paymentMethod: PaymentMethod = PaymentMethod.findOne({
             where: {
@@ -563,6 +565,31 @@ export class SaleOrderService {
             await transaction.rollback();
             throw error;
         }
+    }
+
+    public async startDelivery(saleOrderId: number, userId: number): Promise<void> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const saleOrder: SaleOrder = await SaleOrder.findOne({
+            where: {
+                '$companyBranch.companyId$': user.companyId,
+                id: saleOrderId
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                }
+            ]
+        });
+
+        if (saleOrder.status == SaleOrderStatus.CANCELED || saleOrder.status == SaleOrderStatus.FINISHED)
+            throw new SaleOrderException('Não é possível iniciar a entrega deste pedido pois não está pendente');
+
+        saleOrder.status = SaleOrderStatus.ON_DELIVERY;
+
+        await saleOrder.save();
     }
 
     public async delete(id: number, userId: number): Promise<void> {
@@ -626,7 +653,7 @@ export class SaleOrderService {
             where: {
                 '$companyBranch.companyId$': user.companyId,
                 employeeDriverId: user.employee.id,
-                status: SaleOrderStatus.PENDING
+                status: { [Op.in]: [SaleOrderStatus.PENDING, SaleOrderStatus.ON_DELIVERY] }
             },
             include: [
                 {
@@ -670,9 +697,10 @@ export class SaleOrderService {
         return saleOrders.map(so => {
             return {
                 id: so.id,
+                status: so.status,
                 personCustomerName: so.personCustomer.name,
                 addressFormatted: AddressHelper.format(so.deliveryAddress),
-                paymentMethod: so.paymentMethod?.name,
+                paymentMethod: so.paymentMethod ? PaymentMethodViewModel.fromEntity(so.paymentMethod) : null,
                 scheduledAt: so.scheduledAt ? DateHelper.toStringViewModel(so.scheduledAt) : null,
                 totalSalePrice: so.totalSalePrice,
                 observation: so.observation,
