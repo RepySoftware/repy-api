@@ -3,7 +3,10 @@ import { ViewPersonSearch } from "../../models/entities/views/view-person-search
 
 export abstract class AddressHelper {
 
-    public static format(address: Address | ViewPersonSearch): string {
+    public static format(
+        address: Address | ViewPersonSearch,
+        options: { includeComplement?: boolean } = { includeComplement: true }
+    ): string {
 
         let addressStr = '';
 
@@ -13,7 +16,10 @@ export abstract class AddressHelper {
 
             addressStr += a.street;
             addressStr += a.number ? `, ${a.number}` : '';
-            addressStr += a.complement ? ` (${a.complement}${a.referencePoint ? ' - ' + a.referencePoint : ''})` : '';
+
+            if (options.includeComplement)
+                addressStr += a.complement ? ` (${a.complement}${a.referencePoint ? ' - ' + a.referencePoint : ''})` : '';
+
             addressStr += a.neighborhood ? ` - ${a.neighborhood}` : '';
             addressStr += ` - ${a.city}`;
             addressStr += ` - ${a.region}`;
@@ -22,7 +28,10 @@ export abstract class AddressHelper {
 
             addressStr += a.addressStreet;
             addressStr += a.addressNumber ? `, ${a.addressNumber}` : '';
-            addressStr += a.addressComplement ? ` (${a.addressComplement}${a.addressReferencePoint ? ' - ' + a.addressReferencePoint : ''})` : '';
+
+            if (options.includeComplement)
+                addressStr += a.addressComplement ? ` (${a.addressComplement}${a.addressReferencePoint ? ' - ' + a.addressReferencePoint : ''})` : '';
+
             addressStr += a.addressNeighborhood ? ` - ${a.addressNeighborhood}` : '';
             addressStr += ` - ${a.addressCity}`;
             addressStr += ` - ${a.addressRegion}`;

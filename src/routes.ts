@@ -2,6 +2,8 @@ import { Router } from "express";
 import { AuthController } from "./controllers/auth.controller";
 import { CompanyBranchesController } from "./controllers/company-branches.controller";
 import { DashboardController } from "./controllers/dashboard.controller";
+import { DeliveryInstructionsController } from "./controllers/delivery-instructions.controller";
+import { DeliveriesController } from "./controllers/delivery.controller";
 import { DevicesController } from "./controllers/devices.controller";
 import { EmployeesController } from "./controllers/employees.controller";
 import { PaymentMethodsController } from "./controllers/payment-methods.controller";
@@ -26,5 +28,7 @@ routes.use('/employees', EmployeesController);
 routes.use('/paymentMethods', PaymentMethodsController);
 routes.use('/saleOrders', SaleOrdersController);
 routes.use('/dashboard', DashboardController);
+routes.use('/deliveries', DeliveriesController);
+routes.use('/deliveryInstructions', DeliveryInstructionsController);
 
 export { routes };

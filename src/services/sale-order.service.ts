@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { Op, Transaction, WhereOptions } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import { SaleOrderStatus } from "../common/enums/sale-order-status";
 import { NotFoundException } from "../common/exceptions/not-fount.exception";
 import { Database } from "../data/database-config";
@@ -17,16 +17,9 @@ import { SaleOrderViewModel } from "../models/view-models/sale-order.view-model"
 import { UserService } from "./user.service";
 import * as moment from 'moment-timezone';
 import { PaymentMethod } from "../models/entities/payment-method";
-import { SaleOrderConfirmDeliveryInputModel } from "../models/input-models/sale-order-confirm-delivery.input-model";
-import { SaleOrderException } from "../common/exceptions/sale-order.exception";
 import { SaleOrderUpdateInputModel } from "../models/input-models/sale-order-update.input-model";
 import { CompanyBranchProductPrice } from "../models/entities/company-branch-product-price";
 import { ProductCategory } from "../models/entities/product-category";
-import { DriverSaleOrderViewModel } from "../models/view-models/driver-sale-order.view-model";
-import { AddressHelper } from "../common/helpers/address.helper";
-import { DateHelper } from "../common/helpers/date.helper";
-import { DriverSaleOrderProductViewModel } from "../models/view-models/driver-sale-order-product.view-model";
-import { PaymentMethodViewModel } from "../models/view-models/payment-method.view-model";
 
 @injectable()
 export class SaleOrderService {
@@ -430,168 +423,6 @@ export class SaleOrderService {
         }
     }
 
-    public async updateIndex(items: { saleOrderId: number, index: number }[], userId: number): Promise<void> {
-
-        const user = await this._userService.getEntityById(userId);
-
-        const saleOrders: SaleOrder[] = await SaleOrder.findAll({
-            where: {
-                '$companyBranch.companyId$': user.companyId,
-                id: { [Op.in]: items.map(x => x.saleOrderId) }
-            },
-            include: [
-                {
-                    model: CompanyBranch,
-                    as: 'companyBranch'
-                }
-            ]
-        });
-
-        const transaction: Transaction = await this._database.sequelize.transaction();
-
-        try {
-            for (const so of saleOrders) {
-                const item = items.find(x => x.saleOrderId == so.id);
-
-                if (item) {
-                    so.index = item.index;
-                    await so.save({ transaction });
-                }
-            }
-
-            await transaction.commit();
-        } catch (error) {
-            await transaction.rollback();
-            throw error;
-        }
-    }
-
-    public async updateEmployeeDriver(input: { saleOrderId: number, employeeDriverId: number }, userId: number): Promise<void> {
-
-        const user = await this._userService.getEntityById(userId);
-
-        const saleOrder: SaleOrder = await SaleOrder.findOne({
-            where: {
-                '$companyBranch.companyId$': user.companyId,
-                id: input.saleOrderId
-            },
-            include: [
-                {
-                    model: CompanyBranch,
-                    as: 'companyBranch'
-                }
-            ]
-        });
-
-        saleOrder.employeeDriverId = input.employeeDriverId || null;
-
-        await saleOrder.save();
-    }
-
-    public async confirmDelivery(input: SaleOrderConfirmDeliveryInputModel, userId: number): Promise<void> {
-
-        const user = await this._userService.getEntityById(userId);
-
-        const saleOrder: SaleOrder = await SaleOrder.findOne({
-            where: {
-                '$companyBranch.companyId$': user.companyId,
-                id: input.saleOrderId
-            },
-            include: [
-                {
-                    model: CompanyBranch,
-                    as: 'companyBranch'
-                },
-                {
-                    model: Person,
-                    as: 'personCustomer'
-                },
-                {
-                    model: SaleOrderProduct,
-                    as: 'products',
-                    separate: true,
-                    include: [
-                        {
-                            model: CompanyBranchProduct,
-                            as: 'companyBranchProduct',
-                            include: [
-                                {
-                                    model: Product,
-                                    as: 'product'
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        });
-
-        if (saleOrder.status == SaleOrderStatus.CANCELED || saleOrder.status == SaleOrderStatus.FINISHED)
-            throw new SaleOrderException('Este pedido não pode ser finalizado');
-
-        const paymentMethod: PaymentMethod = PaymentMethod.findOne({
-            where: {
-                id: input.paymentMethodId
-            }
-        });
-
-        if (!paymentMethod)
-            throw new NotFoundException('Método de pagamento não encontrado');
-
-        if (
-            paymentMethod.hasInstallments
-            && (!input.installments || input.installments <= 0)
-        ) {
-            throw new SaleOrderException('Número de parcelas inválido');
-        }
-
-        saleOrder.status = SaleOrderStatus.FINISHED;
-        saleOrder.deliveredAt = input.deliveredAt ? moment.utc(input.deliveredAt).toDate() : moment.utc().toDate();
-        saleOrder.paymentMethodId = input.paymentMethodId || null;
-        saleOrder.paymentInstallments = input.installments || (paymentMethod.hasInstallments ? 1 : null);
-
-        const transaction: Transaction = await this._database.sequelize.transaction();
-
-        try {
-            await saleOrder.save({ transaction });
-
-            if (saleOrder.products.find(p => p.companyBranchProduct.product.isGas)) {
-                saleOrder.personCustomer.isGasCustomer = true;
-                await saleOrder.personCustomer.save({ transaction });
-            }
-
-            await transaction.commit();
-        } catch (error) {
-            await transaction.rollback();
-            throw error;
-        }
-    }
-
-    public async startDelivery(saleOrderId: number, userId: number): Promise<void> {
-
-        const user = await this._userService.getEntityById(userId);
-
-        const saleOrder: SaleOrder = await SaleOrder.findOne({
-            where: {
-                '$companyBranch.companyId$': user.companyId,
-                id: saleOrderId
-            },
-            include: [
-                {
-                    model: CompanyBranch,
-                    as: 'companyBranch'
-                }
-            ]
-        });
-
-        if (saleOrder.status == SaleOrderStatus.CANCELED || saleOrder.status == SaleOrderStatus.FINISHED)
-            throw new SaleOrderException('Não é possível iniciar a entrega deste pedido pois não está pendente');
-
-        saleOrder.status = SaleOrderStatus.ON_DELIVERY;
-
-        await saleOrder.save();
-    }
-
     public async delete(id: number, userId: number): Promise<void> {
 
         const user = await this._userService.getEntityById(userId);
@@ -635,80 +466,5 @@ export class SaleOrderService {
             await transaction.rollback();
             throw error;
         }
-    }
-
-    public async getForDriver(userId: number): Promise<DriverSaleOrderViewModel[]> {
-
-        const user = await this._userService.getEntityById(userId, [
-            {
-                model: Employee,
-                as: 'employee'
-            }
-        ]);
-
-        const saleOrders: SaleOrder[] = await SaleOrder.findAll({
-            where: {
-                '$companyBranch.companyId$': user.companyId,
-                employeeDriverId: user.employee.id,
-                status: { [Op.in]: [SaleOrderStatus.PENDING, SaleOrderStatus.ON_DELIVERY] }
-            },
-            include: [
-                {
-                    model: CompanyBranch,
-                    as: 'companyBranch'
-                },
-                {
-                    model: Person,
-                    as: 'personCustomer'
-                },
-                {
-                    model: Address,
-                    as: 'deliveryAddress'
-                },
-                {
-                    model: PaymentMethod,
-                    as: 'paymentMethod'
-                },
-                {
-                    model: SaleOrderProduct,
-                    as: 'products',
-                    separate: true,
-                    include: [
-                        {
-                            model: CompanyBranchProduct,
-                            as: 'companyBranchProduct',
-                            include: [
-                                {
-                                    model: Product,
-                                    as: 'product'
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ],
-            limit: 2,
-            order: [['index', 'ASC']]
-        });
-
-        return saleOrders.map(so => {
-            return {
-                id: so.id,
-                status: so.status,
-                personCustomerName: so.personCustomer.name,
-                addressFormatted: AddressHelper.format(so.deliveryAddress),
-                paymentMethod: so.paymentMethod ? PaymentMethodViewModel.fromEntity(so.paymentMethod) : null,
-                scheduledAt: so.scheduledAt ? DateHelper.toStringViewModel(so.scheduledAt) : null,
-                totalSalePrice: so.totalSalePrice,
-                observation: so.observation,
-                products: so.products.map(sop => {
-                    return {
-                        productName: sop.companyBranchProduct.product.name,
-                        quantity: sop.quantity,
-                        salePrice: sop.salePrice
-                    } as DriverSaleOrderProductViewModel
-                })
-            } as DriverSaleOrderViewModel;
-        });
     }
 }

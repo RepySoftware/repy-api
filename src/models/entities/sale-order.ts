@@ -7,6 +7,7 @@ import { Employee } from "./employee";
 import { PaymentMethod } from "./payment-method";
 import { Person } from "./person";
 import { SaleOrderProduct } from "./sale-order-product";
+import * as moment from 'moment-timezone';
 
 @Table({
     tableName: 'SaleOrders',
@@ -91,12 +92,18 @@ export class SaleOrder extends Entity<SaleOrder> {
     @Column
     public observation: string;
 
+    @Column
+    public showObservationToDriver: boolean;
+
     @AllowNull(false)
     @Column
     public dateOfIssue: Date;
 
     @Column
     public scheduledAt?: Date;
+
+    @Column
+    public deliveryStartedAt?: Date;
 
     @Column
     public deliveredAt?: Date;
@@ -118,5 +125,30 @@ export class SaleOrder extends Entity<SaleOrder> {
         this.totalSalePrice = products
             .map(p => p.quantity * p.salePrice)
             .reduce((a, b) => a + b, 0);
+    }
+
+    public setStatus(value: SaleOrderStatus): void {
+
+        switch (value) {
+
+            case SaleOrderStatus.PENDING:
+                this.deliveredAt = null;
+                this.deliveryStartedAt = null;
+                break;
+
+            case SaleOrderStatus.ON_DELIVERY:
+                this.deliveryStartedAt = moment.utc().toDate();
+                this.deliveredAt = null;
+                break;
+
+            case SaleOrderStatus.FINISHED:
+                this.deliveredAt = moment.utc().toDate();
+                break;
+
+            case SaleOrderStatus.CANCELED:
+                break;
+        }
+
+        this.status = value;
     }
 }

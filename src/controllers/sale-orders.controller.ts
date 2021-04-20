@@ -19,15 +19,6 @@ SaleOrdersController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE
     }
 });
 
-SaleOrdersController.get('/driver', [checkToken, checkRole([AccessControlRole.EMPLOYEE_DRIVER])], async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const saleOrders = await saleOrderService.getForDriver(TokenHelper.getPayload(res).userId);
-        res.json(saleOrders);
-    } catch (error) {
-        next(error);
-    }
-});
-
 SaleOrdersController.get('/:id', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const saleOrder = await saleOrderService.getById(Number(req.params.id), TokenHelper.getPayload(res).userId);
@@ -50,43 +41,6 @@ SaleOrdersController.put('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE
     try {
         const saleOrder = await saleOrderService.update(req.body, TokenHelper.getPayload(res).userId);
         res.json(saleOrder);
-    } catch (error) {
-        next(error);
-    }
-});
-
-SaleOrdersController.patch('/updateIndex', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        await saleOrderService.updateIndex(req.body, TokenHelper.getPayload(res).userId);
-        res.json({ ok: true });
-    } catch (error) {
-        next(error);
-    }
-});
-
-
-SaleOrdersController.patch('/updateEmployeeDriver', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        await saleOrderService.updateEmployeeDriver(req.body, TokenHelper.getPayload(res).userId);
-        res.json({ ok: true });
-    } catch (error) {
-        next(error);
-    }
-});
-
-SaleOrdersController.patch('/startDelivery', [checkToken, checkRole(AccessControlRole.EMPLOYEE_DRIVER)], async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        await saleOrderService.startDelivery(req.body.saleOrderId, TokenHelper.getPayload(res).userId);
-        res.json({ ok: true });
-    } catch (error) {
-        next(error);
-    }
-});
-
-SaleOrdersController.patch('/confirmDelivery', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        await saleOrderService.confirmDelivery(req.body, TokenHelper.getPayload(res).userId);
-        res.json({ ok: true });
     } catch (error) {
         next(error);
     }
