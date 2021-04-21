@@ -34,3 +34,13 @@ ALTER TABLE SaleOrders ADD ShowObservationToDriver bit DEFAULT b'1' NOT NULL;
 ALTER TABLE SaleOrders CHANGE ShowObservationToDriver ShowObservationToDriver bit DEFAULT b'1' NOT NULL AFTER Observation;
 ALTER TABLE SaleOrders MODIFY COLUMN ShowObservationToDriver bit(1) NOT NULL;
 
+RENAME TABLE DeliveryInstructions TO DefaultDeliveryInstructions;
+RENAME TABLE EmployeeDeliveryInstructions TO DeliveryInstructions;
+
+ALTER TABLE DeliveryInstructions DROP FOREIGN KEY FK_EmployeeDeliveryInstructions_DeliveryInstructions;
+ALTER TABLE DeliveryInstructions DROP COLUMN DeliveryInstructionID;
+ALTER TABLE DeliveryInstructions ADD Description varchar(150) NOT NULL;
+ALTER TABLE DeliveryInstructions CHANGE Description Description varchar(150) NOT NULL AFTER EmployeeDriverID;
+
+ALTER TABLE DeliveryInstructions ADD CompanyID bigint NOT NULL;
+ALTER TABLE DeliveryInstructions CHANGE CompanyID CompanyID bigint NOT NULL AFTER `Index`;

@@ -4,9 +4,8 @@ import { CompanyBranch } from "../../models/entities/company-branch";
 import { SaleOrder } from "../../models/entities/sale-order";
 import { Strategy } from "../abstraction/strategy";
 import { UserService } from "../user.service";
-import { EmployeeDeliveryInstruction } from "../../models/entities/employee-delivery-instruction";
 import { Employee } from "../../models/entities/employee";
-import { EmployeeDeliveryInstructionStatus } from "../../common/enums/delivery-instruction-status";
+import { DeliveryInstructionStatus } from "../../common/enums/delivery-instruction-status";
 import { DeliveryFinalizeInputModel } from "../../models/input-models/delivery-finalize.input-model";
 import { Person } from "../../models/entities/person";
 import { SaleOrderProduct } from "../../models/entities/sale-order-product";
@@ -17,6 +16,7 @@ import { NotFoundException } from "../../common/exceptions/not-fount.exception";
 import { Transaction } from "sequelize";
 import { Database } from "../../data/database-config";
 import * as moment from 'moment-timezone';
+import { DeliveryInstruction } from "../../models/entities/delivery-instruction";
 
 export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalizeInputModel, userId: number }, Promise<void>> {
 
@@ -111,7 +111,7 @@ export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalize
 
         const user = await this._userService.getEntityById(params.userId);
 
-        const employeeDeliveryInstruction: EmployeeDeliveryInstruction = await EmployeeDeliveryInstruction.findOne({
+        const deliveryInstruction: DeliveryInstruction = await DeliveryInstruction.findOne({
             where: {
                 '$employeeDriver.companyId$': user.companyId,
                 id: params.input.id
@@ -124,11 +124,11 @@ export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalize
             ]
         });
 
-        if (employeeDeliveryInstruction.status == EmployeeDeliveryInstructionStatus.FINISHED)
+        if (deliveryInstruction.status == DeliveryInstructionStatus.FINISHED)
             throw new DeliveryException('Instrução já está finalizada');
 
-        employeeDeliveryInstruction.setStatus(EmployeeDeliveryInstructionStatus.FINISHED);
+        deliveryInstruction.setStatus(DeliveryInstructionStatus.FINISHED);
 
-        await employeeDeliveryInstruction.save();
+        await deliveryInstruction.save();
     }
 }

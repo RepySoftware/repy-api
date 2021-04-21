@@ -10,13 +10,37 @@ const DeliveryInstructionsController = Router();
 
 const deliveryInstructionService = ServicesCollection.resolve(DeliveryInstructionService);
 
-DeliveryInstructionsController.get('/', [checkToken, checkRole([
+DeliveryInstructionsController.get('/default', [checkToken, checkRole([
     AccessControlRole.EMPLOYEE_MANAGER,
     AccessControlRole.EMPLOYEE_AGENT
 ])], async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const deliveryInstructions = await deliveryInstructionService.getAll(TokenHelper.getPayload(res).userId);
-        res.json(deliveryInstructions);
+        const defaultDeliveryInstructions = await deliveryInstructionService.getDefault(TokenHelper.getPayload(res).userId);
+        res.json(defaultDeliveryInstructions);
+    } catch (error) {
+        next(error);
+    }
+});
+
+DeliveryInstructionsController.get('/:id', [checkToken, checkRole([
+    AccessControlRole.EMPLOYEE_MANAGER,
+    AccessControlRole.EMPLOYEE_AGENT
+])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const defaultDeliveryInstruction = await deliveryInstructionService.getById(Number(req.params.id), TokenHelper.getPayload(res).userId);
+        res.json(defaultDeliveryInstruction);
+    } catch (error) {
+        next(error);
+    }
+});
+
+DeliveryInstructionsController.post('/', [checkToken, checkRole([
+    AccessControlRole.EMPLOYEE_MANAGER,
+    AccessControlRole.EMPLOYEE_AGENT
+])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const defaultDeliveryInstruction = await deliveryInstructionService.create(req.body, TokenHelper.getPayload(res).userId);
+        res.json(defaultDeliveryInstruction);
     } catch (error) {
         next(error);
     }

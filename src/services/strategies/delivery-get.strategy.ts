@@ -1,13 +1,13 @@
 import { Includeable, Op } from "sequelize";
 import { AccessControlRole } from "../../common/enums/access-control-role";
-import { EmployeeDeliveryInstructionStatus } from "../../common/enums/delivery-instruction-status";
+import { DeliveryInstructionStatus } from "../../common/enums/delivery-instruction-status";
 import { SaleOrderStatus } from "../../common/enums/sale-order-status";
 import { verifyUserRole } from "../../middlewares/check-role";
 import { Address } from "../../models/entities/address";
 import { CompanyBranch } from "../../models/entities/company-branch";
 import { CompanyBranchProduct } from "../../models/entities/company-branch-product";
+import { DeliveryInstruction } from "../../models/entities/delivery-instruction";
 import { Employee } from "../../models/entities/employee";
-import { EmployeeDeliveryInstruction } from "../../models/entities/employee-delivery-instruction";
 import { PaymentMethod } from "../../models/entities/payment-method";
 import { Person } from "../../models/entities/person";
 import { Product } from "../../models/entities/product";
@@ -86,10 +86,10 @@ export class DeliveryGetStrategy extends Strategy<{ userId: number }, Promise<De
             order: [['createdAt', 'DESC']]
         });
 
-        const employeeDeliveryInstructions: EmployeeDeliveryInstruction[] = await EmployeeDeliveryInstruction.findAll({
+        const deliveryInstructions: DeliveryInstruction[] = await DeliveryInstruction.findAll({
             where: {
                 '$employeeDriver.companyId$': user.companyId,
-                status: { [Op.in]: [EmployeeDeliveryInstructionStatus.PENDING, EmployeeDeliveryInstructionStatus.IN_PROGRESS] }
+                status: { [Op.in]: [DeliveryInstructionStatus.PENDING, DeliveryInstructionStatus.IN_PROGRESS] }
             },
             include: [
                 {
@@ -101,7 +101,7 @@ export class DeliveryGetStrategy extends Strategy<{ userId: number }, Promise<De
 
         const deliveries: DeliveryViewModel[] = [
             ...saleOrders.map(DeliveryViewModel.fromSaleOrder),
-            ...employeeDeliveryInstructions.map(DeliveryViewModel.fromDeliveryInstruction)
+            ...deliveryInstructions.map(DeliveryViewModel.fromDeliveryInstruction)
         ];
 
         return deliveries;
@@ -129,10 +129,10 @@ export class DeliveryGetStrategy extends Strategy<{ userId: number }, Promise<De
             limit: 2
         });
 
-        const employeeDeliveryInstructions: EmployeeDeliveryInstruction[] = await EmployeeDeliveryInstruction.findAll({
+        const deliveryInstructions: DeliveryInstruction[] = await DeliveryInstruction.findAll({
             where: {
                 '$employeeDriver.companyId$': user.companyId,
-                status: { [Op.in]: [EmployeeDeliveryInstructionStatus.PENDING, EmployeeDeliveryInstructionStatus.IN_PROGRESS] }
+                status: { [Op.in]: [DeliveryInstructionStatus.PENDING, DeliveryInstructionStatus.IN_PROGRESS] }
             },
             include: [
                 {
@@ -146,7 +146,7 @@ export class DeliveryGetStrategy extends Strategy<{ userId: number }, Promise<De
 
         const deliveries: DriverDeliveryViewModel[] = [
             ...saleOrders.map(DriverDeliveryViewModel.fromSaleOrder),
-            ...employeeDeliveryInstructions.map(DriverDeliveryViewModel.fromDeliveryInstruction)
+            ...deliveryInstructions.map(DriverDeliveryViewModel.fromDeliveryInstruction)
         ].sort((a, b) => a.index - b.index).splice(0, 2);
 
         return deliveries;

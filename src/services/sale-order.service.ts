@@ -20,6 +20,7 @@ import { PaymentMethod } from "../models/entities/payment-method";
 import { SaleOrderUpdateInputModel } from "../models/input-models/sale-order-update.input-model";
 import { CompanyBranchProductPrice } from "../models/entities/company-branch-product-price";
 import { ProductCategory } from "../models/entities/product-category";
+import { DeliveryService } from "./delivery.service";
 
 @injectable()
 export class SaleOrderService {
@@ -27,6 +28,7 @@ export class SaleOrderService {
     constructor(
         @inject(UserService) private _userService: UserService,
         @inject(Database) private _database: Database,
+        @inject(DeliveryService) private _deliveryService: DeliveryService
     ) { }
 
     public async getById(id: number, userId: number): Promise<SaleOrder | SaleOrderViewModel> {
@@ -210,18 +212,7 @@ export class SaleOrderService {
         if (!personCustomer)
             throw new NotFoundException('Cliente não encontrado');
 
-        const pendingSaleOrders: SaleOrder[] = await SaleOrder.findAll({
-            where: {
-                '$companyBranch.companyId$': user.companyId,
-                status: SaleOrderStatus.PENDING
-            },
-            include: [
-                {
-                    model: CompanyBranch,
-                    as: 'companyBranch'
-                }
-            ]
-        });
+        const index = await this._deliveryService.getNextIndex(userId);
 
         const transaction: Transaction = await this._database.sequelize.transaction();
 
@@ -256,7 +247,7 @@ export class SaleOrderService {
                 status: SaleOrderStatus.PENDING,
                 observation: input.observation,
                 dateOfIssue: moment.utc().toDate(),
-                index: pendingSaleOrders.length,
+                index,
                 scheduledAt: input.scheduledAt ? moment.utc(input.scheduledAt).toDate() : null,
                 deliveredAt: null
             });

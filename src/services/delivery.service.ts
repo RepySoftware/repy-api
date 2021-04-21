@@ -11,16 +11,16 @@ import { DeliveryType } from "../common/enums/delivery-type";
 import { SaleOrder } from "../models/entities/sale-order";
 import { Op, Transaction } from "sequelize";
 import { CompanyBranch } from "../models/entities/company-branch";
-import { EmployeeDeliveryInstruction } from "../models/entities/employee-delivery-instruction";
-import { Employee } from "../models/entities/employee";
 import { SaleOrderStatus } from "../common/enums/sale-order-status";
+import { DeliveryInstruction } from "../models/entities/delivery-instruction";
+import { DeliveryInstructionStatus } from "../common/enums/delivery-instruction-status";
 
 @injectable()
 export class DeliveryService {
 
     constructor(
         @inject(UserService) private _userService: UserService,
-        @inject(Database) private _database: Database,
+        @inject(Database) private _database: Database
     ) { }
 
     public async get(userId: number, strategy: string): Promise<DeliveryViewModel[] | DriverDeliveryViewModel[]> {
@@ -70,17 +70,11 @@ export class DeliveryService {
             ]
         });
 
-        const employeeDeliveryInstructions: EmployeeDeliveryInstruction[] = EmployeeDeliveryInstruction.findAll({
+        const deliveryInstructions: DeliveryInstruction[] = await DeliveryInstruction.findAll({
             where: {
-                '$employee.companyId$': user.companyId,
+                companyId: user.companyId,
                 id: { [Op.in]: deliveryInstructionIds.map(x => x.id) }
-            },
-            include: [
-                {
-                    model: Employee,
-                    as: 'employeeDriver'
-                }
-            ]
+            }
         });
 
         const transaction: Transaction = await this._database.sequelize.transaction();
@@ -96,7 +90,7 @@ export class DeliveryService {
                 }
             }
 
-            for (const edi of employeeDeliveryInstructions) {
+            for (const edi of deliveryInstructions) {
                 const item = deliveryInstructionIds.find(x => x.id == edi.id);
 
                 if (item) {
@@ -137,5 +131,32 @@ export class DeliveryService {
         }
 
         await saleOrder.save();
+    }
+
+    public async getNextIndex(userId: number): Promise<number> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const saleOrders: SaleOrder[] = await SaleOrder.findAll({
+            where: {
+                '$companyBranch.companyId$': user.companyId,
+                status: { [Op.in]: [SaleOrderStatus.PENDING, SaleOrderStatus.ON_DELIVERY] }
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                }
+            ]
+        });
+
+        const deliveryInstructions: DeliveryInstruction[] = DeliveryInstruction.findAll({
+            where: {
+                companyId: user.companyId,
+                status: { [Op.in]: [DeliveryInstructionStatus.PENDING, DeliveryInstructionStatus.IN_PROGRESS] }
+            }
+        });
+
+        return saleOrders.length + deliveryInstructions.length;
     }
 }

@@ -1,4 +1,4 @@
-export enum EmployeeDeliveryInstructionStatus {
+export enum DeliveryInstructionStatus {
 
     PENDING = 'PENDING',
     IN_PROGRESS = 'IN_PROGRESS',

@@ -1,5 +1,5 @@
 import { DeliveryType } from "../../common/enums/delivery-type";
-import { EmployeeDeliveryInstruction } from "../entities/employee-delivery-instruction";
+import { DeliveryInstruction } from "../entities/delivery-instruction";
 import { SaleOrder } from "../entities/sale-order";
 import { DriverEmployeeDeliveryInstructionViewModel } from "./driver-employee-delivery-instruction.view-model";
 import { DriverSaleOrderViewModel } from "./driver-sale-order.view-model";
@@ -22,7 +22,7 @@ export class DriverDeliveryViewModel {
         return delivery;
     }
 
-    public static fromDeliveryInstruction(edi: EmployeeDeliveryInstruction): DriverDeliveryViewModel {
+    public static fromDeliveryInstruction(edi: DeliveryInstruction): DriverDeliveryViewModel {
 
         const delivery = new DriverDeliveryViewModel();
 

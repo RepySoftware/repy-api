@@ -1,39 +1,75 @@
 import { inject, injectable } from "inversify";
-import { Database } from "../data/database-config";
-import { DeliveryFinalizeInputModel } from "../models/input-models/delivery-finalize.input-model";
 import { UserService } from "./user.service";
-import { DriverDeliveryViewModel } from "../models/view-models/driver-delivery.view-model";
-import { DeliveryViewModel } from "../models/view-models/delivery.view-model";
-import { DeliveryStartStrategy } from "./strategies/delivery-start.strategy";
-import { DeliveryFinalizeStrategy } from "./strategies/delivery-finalize.strategy";
-import { DeliveryGetStrategy } from "./strategies/delivery-get.strategy";
-import { DeliveryType } from "../common/enums/delivery-type";
-import { SaleOrder } from "../models/entities/sale-order";
-import { Op, Transaction } from "sequelize";
-import { CompanyBranch } from "../models/entities/company-branch";
-import { EmployeeDeliveryInstruction } from "../models/entities/employee-delivery-instruction";
-import { Employee } from "../models/entities/employee";
-import { SaleOrderStatus } from "../common/enums/sale-order-status";
 import { DeliveryInstruction } from "../models/entities/delivery-instruction";
+import { DefaultDeliveryInstructionViewModel } from "../models/view-models/default-delivery-instruction.view-model";
 import { DeliveryInstructionViewModel } from "../models/view-models/delivery-instruction.view-model";
+import { DeliveryInstructionInputModel } from "../models/input-models/delivery-instruction.input-model";
+import { DeliveryInstructionStatus } from "../common/enums/delivery-instruction-status";
+import { Op } from "sequelize";
+import { Employee } from "../models/entities/employee";
+import { DefaultDeliveryInstruction } from "../models/entities/default-delivery-instruction";
+import { DeliveryService } from "./delivery.service";
 
 @injectable()
 export class DeliveryInstructionService {
 
     constructor(
-        @inject(UserService) private _userService: UserService
+        @inject(UserService) private _userService: UserService,
+        @inject(DeliveryService) private _deliveryService: DeliveryService
     ) { }
 
-    public async getAll(userId: number): Promise<DeliveryInstructionViewModel[]> {
+    public async getDefault(userId: number): Promise<DefaultDeliveryInstructionViewModel[]> {
 
         const user = await this._userService.getEntityById(userId);
 
-        const deliveryInstructions: DeliveryInstruction[] = await DeliveryInstruction.findAll({
+        const deliveryInstructions: DefaultDeliveryInstruction[] = await DefaultDeliveryInstruction.findAll({
             where: {
                 companyId: user.companyId
             }
         });
 
-        return deliveryInstructions.map(DeliveryInstructionViewModel.fromEntity);
+        return deliveryInstructions.map(DefaultDeliveryInstructionViewModel.fromEntity);
     }
+
+    public async create(input: DeliveryInstructionInputModel, userId: number): Promise<DeliveryInstructionViewModel> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const index = input.index !== undefined && input.index !== null
+            ? input.index
+            : await this._deliveryService.getNextIndex(userId);
+
+        const deliveryInstruction = DeliveryInstruction.create({
+            employeeDriverId: input.employeeDriverId,
+            description: input.description,
+            status: DeliveryInstructionStatus.PENDING,
+            index,
+            companyId: user.companyId
+        });
+
+        await deliveryInstruction.save();
+
+        return await this.getById(deliveryInstruction.id, userId);
+    }
+
+    public async getById(id: number, userId: number): Promise<DeliveryInstructionViewModel> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const deliveryInstruction: DeliveryInstruction = await DeliveryInstruction.findOne({
+            where: {
+                companyId: user.companyId,
+                id
+            },
+            include: [
+                {
+                    model: Employee,
+                    as: 'employeeDriver'
+                }
+            ]
+        });
+
+        return DeliveryInstructionViewModel.fromEntity(deliveryInstruction);
+    }
+
 }

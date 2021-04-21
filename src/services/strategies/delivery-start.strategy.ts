@@ -5,10 +5,10 @@ import { SaleOrder } from "../../models/entities/sale-order";
 import { Strategy } from "../abstraction/strategy";
 import { UserService } from "../user.service";
 import * as moment from 'moment-timezone';
-import { EmployeeDeliveryInstruction } from "../../models/entities/employee-delivery-instruction";
 import { Employee } from "../../models/entities/employee";
-import { EmployeeDeliveryInstructionStatus } from "../../common/enums/delivery-instruction-status";
+import { DeliveryInstructionStatus } from "../../common/enums/delivery-instruction-status";
 import { DeliveryException } from "../../common/exceptions/delivery.exception";
+import { DeliveryInstruction } from "../../models/entities/delivery-instruction";
 
 export class DeliveryStartStrategy extends Strategy<{ id: number, userId: number }, Promise<void>> {
 
@@ -48,7 +48,7 @@ export class DeliveryStartStrategy extends Strategy<{ id: number, userId: number
 
         const user = await this._userService.getEntityById(params.userId);
 
-        const employeeDeliveryInstruction: EmployeeDeliveryInstruction = await EmployeeDeliveryInstruction.findOne({
+        const employeeDeliveryInstruction: DeliveryInstruction = await DeliveryInstruction.findOne({
             where: {
                 '$employeeDriver.companyId$': user.companyId,
                 id: params.id
@@ -61,10 +61,10 @@ export class DeliveryStartStrategy extends Strategy<{ id: number, userId: number
             ]
         });
 
-        if (employeeDeliveryInstruction.status == EmployeeDeliveryInstructionStatus.IN_PROGRESS)
+        if (employeeDeliveryInstruction.status == DeliveryInstructionStatus.IN_PROGRESS)
             throw new DeliveryException('Instrução já está em progresso');
 
-        employeeDeliveryInstruction.setStatus(EmployeeDeliveryInstructionStatus.IN_PROGRESS);
+        employeeDeliveryInstruction.setStatus(DeliveryInstructionStatus.IN_PROGRESS);
 
         await employeeDeliveryInstruction.save();
     }
