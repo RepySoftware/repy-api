@@ -64,7 +64,7 @@ DeliveriesController.patch('/finalize', [checkToken, checkRole([
     AccessControlRole.EMPLOYEE_DRIVER
 ])], async (req: Request, res: Response, next: NextFunction) => {
     try {
-        await deliveryService.finalize(req.body.id, (req.query.strategy as string), TokenHelper.getPayload(res).userId)
+        await deliveryService.finalize(req.body, (req.query.strategy as string), TokenHelper.getPayload(res).userId)
         res.json({ ok: true });
     } catch (error) {
         next(error);

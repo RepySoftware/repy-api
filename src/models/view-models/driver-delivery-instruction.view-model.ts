@@ -1,13 +1,10 @@
 import { DeliveryInstructionStatus } from "../../common/enums/delivery-instruction-status";
 import { DateHelper } from "../../common/helpers/date.helper";
 import { DeliveryInstruction } from "../entities/delivery-instruction";
-import { DefaultDeliveryInstructionViewModel } from "./default-delivery-instruction.view-model";
-import { EmployeeViewModel } from "./employee.view-model";
 
-export class DeliveryInstructionViewModel {
+export class DriverDeliveryInstructionViewModel {
 
     public id: number;
-    public employee: EmployeeViewModel;
     public description: string;
     public status: DeliveryInstructionStatus;
     public index: number;
@@ -16,14 +13,13 @@ export class DeliveryInstructionViewModel {
     public createdAt: string;
     public updatedAt: string;
 
-    public static fromEntity(edi: DeliveryInstruction): DeliveryInstructionViewModel {
+    public static fromEntity(edi: DeliveryInstruction): DriverDeliveryInstructionViewModel {
 
-        const deliveryInstruction = new DeliveryInstructionViewModel();
+        const deliveryInstruction = new DriverDeliveryInstructionViewModel();
 
         deliveryInstruction.id = edi.id;
-        deliveryInstruction.employee = edi.employeeDriver ? EmployeeViewModel.fromEntity(edi.employeeDriver) : null;
-        deliveryInstruction.status = edi.status;
         deliveryInstruction.description = edi.description;
+        deliveryInstruction.status = edi.status;
         deliveryInstruction.index = edi.index;
         deliveryInstruction.startedAt = DateHelper.toStringViewModel(edi.startedAt);
         deliveryInstruction.finishedAt = DateHelper.toStringViewModel(edi.finishedAt);

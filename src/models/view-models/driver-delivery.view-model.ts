@@ -1,7 +1,7 @@
 import { DeliveryType } from "../../common/enums/delivery-type";
 import { DeliveryInstruction } from "../entities/delivery-instruction";
 import { SaleOrder } from "../entities/sale-order";
-import { DriverEmployeeDeliveryInstructionViewModel } from "./driver-employee-delivery-instruction.view-model";
+import { DriverDeliveryInstructionViewModel } from "./driver-delivery-instruction.view-model";
 import { DriverSaleOrderViewModel } from "./driver-sale-order.view-model";
 
 export class DriverDeliveryViewModel {
@@ -9,7 +9,7 @@ export class DriverDeliveryViewModel {
     public type: DeliveryType;
     public index: number;
     public saleOrder?: DriverSaleOrderViewModel;
-    public deliveryInstruction?: DriverEmployeeDeliveryInstructionViewModel;
+    public deliveryInstruction?: DriverDeliveryInstructionViewModel;
 
     public static fromSaleOrder(so: SaleOrder): DriverDeliveryViewModel {
 
@@ -28,7 +28,7 @@ export class DriverDeliveryViewModel {
 
         delivery.type = DeliveryType.deliveryInstruction;
         delivery.index = edi.index;
-        delivery.deliveryInstruction = DriverEmployeeDeliveryInstructionViewModel.fromEntity(edi);
+        delivery.deliveryInstruction = DriverDeliveryInstructionViewModel.fromEntity(edi);
 
         return delivery;
     }

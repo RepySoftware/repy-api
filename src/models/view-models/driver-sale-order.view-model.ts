@@ -29,7 +29,7 @@ export class DriverSaleOrderViewModel {
         saleOrder.totalSalePrice = so.totalSalePrice;
         saleOrder.addressFormatted = AddressHelper.format(so.deliveryAddress);
         saleOrder.addressToMap = AddressHelper.format(so.deliveryAddress, { includeComplement: false });
-        saleOrder.paymentMethod = PaymentMethodViewModel.fromEntity(so.paymentMethod);
+        saleOrder.paymentMethod = so.paymentMethod ? PaymentMethodViewModel.fromEntity(so.paymentMethod) : null;
         saleOrder.observation = so.showObservationToDriver ? so.observation : null;
         saleOrder.products = so.products.map(DriverSaleOrderProductViewModel.fromEntity);
 
