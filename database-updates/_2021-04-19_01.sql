@@ -32,7 +32,6 @@ ALTER TABLE EmployeeDeliveryInstructions CHANGE EmployeeID EmployeeDriverID bigi
 
 ALTER TABLE SaleOrders ADD ShowObservationToDriver bit DEFAULT b'1' NOT NULL;
 ALTER TABLE SaleOrders CHANGE ShowObservationToDriver ShowObservationToDriver bit DEFAULT b'1' NOT NULL AFTER Observation;
-ALTER TABLE SaleOrders MODIFY COLUMN ShowObservationToDriver bit(1) NOT NULL;
 
 RENAME TABLE DeliveryInstructions TO DefaultDeliveryInstructions;
 RENAME TABLE EmployeeDeliveryInstructions TO DeliveryInstructions;

@@ -133,6 +133,28 @@ export class DeliveryService {
         await saleOrder.save();
     }
 
+    public async updateShowObservationToDriver(input: { saleOrderId: number, value: boolean }, userId: number): Promise<void> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const saleOrder: SaleOrder = await SaleOrder.findOne({
+            where: {
+                '$companyBranch.companyId$': user.companyId,
+                id: input.saleOrderId
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                }
+            ]
+        });
+
+        saleOrder.showObservationToDriver = input.value;
+
+        await saleOrder.save();
+    }
+
     public async getNextIndex(userId: number): Promise<number> {
 
         const user = await this._userService.getEntityById(userId);

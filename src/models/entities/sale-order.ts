@@ -92,6 +92,7 @@ export class SaleOrder extends Entity<SaleOrder> {
     @Column
     public observation: string;
 
+    @AllowNull(true)
     @Column
     public showObservationToDriver: boolean;
 

@@ -22,6 +22,7 @@ export class SaleOrderViewModel {
     public status: SaleOrderStatus;
     public index: number;
     public observation: string;
+    public showObservationToDriver: boolean;
     public scheduledAt?: string;
     public dateOfIssue: string;
     public deliveredAt?: string;
@@ -45,6 +46,7 @@ export class SaleOrderViewModel {
         saleOrder.status = so.status;
         saleOrder.index = so.index;
         saleOrder.observation = so.observation;
+        saleOrder.showObservationToDriver = so.showObservationToDriver;
         saleOrder.dateOfIssue = DateHelper.toStringViewModel(so.dateOfIssue);
         saleOrder.scheduledAt = DateHelper.toStringViewModel(so.scheduledAt);
         saleOrder.deliveredAt = DateHelper.toStringViewModel(so.deliveredAt);

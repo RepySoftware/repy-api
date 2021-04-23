@@ -47,6 +47,18 @@ DeliveriesController.patch('/updateEmployeeDriver', [checkToken, checkRole([
     }
 });
 
+DeliveriesController.patch('/updateShowObservationToDriver', [checkToken, checkRole([
+    AccessControlRole.EMPLOYEE_MANAGER,
+    AccessControlRole.EMPLOYEE_AGENT
+])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await deliveryService.updateShowObservationToDriver(req.body, TokenHelper.getPayload(res).userId);
+        res.json({ ok: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
 DeliveriesController.patch('/start', [checkToken, checkRole(
     AccessControlRole.EMPLOYEE_DRIVER
 )], async (req: Request, res: Response, next: NextFunction) => {
