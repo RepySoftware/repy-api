@@ -132,7 +132,8 @@ export class DeliveryGetStrategy extends Strategy<{ userId: number }, Promise<De
         const deliveryInstructions: DeliveryInstruction[] = await DeliveryInstruction.findAll({
             where: {
                 '$employeeDriver.companyId$': user.companyId,
-                status: { [Op.in]: [DeliveryInstructionStatus.PENDING, DeliveryInstructionStatus.IN_PROGRESS] }
+                status: { [Op.in]: [DeliveryInstructionStatus.PENDING, DeliveryInstructionStatus.IN_PROGRESS] },
+                employeeDriverId: user.employeeId
             },
             include: [
                 {
