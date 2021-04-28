@@ -63,7 +63,7 @@ export class DeviceGasLevel extends Entity<DeviceGasLevel> implements DeviceIsOn
         if (percentage < 0)
             percentage = 0;
 
-        if (percentage > 100)
+        if (percentage > 92)
             percentage = 100;
 
         return percentage;
@@ -98,10 +98,10 @@ export class DeviceGasLevel extends Entity<DeviceGasLevel> implements DeviceIsOn
                 config: device.notificationConfiguration,
                 email: {
                     subject: `Mensagem sobre o nível do seu gás`,
-                    message: `<span>Repy informa que seu dispositivo ${device.name} está com o nível em <strong>${Math.round(percentage)}%</strong></span>`
+                    message: `<span>Repy informa que seu dispositivo <strong>${device.name}</strong> está com o nível em <strong>${Math.round(percentage)}%</strong></span>`
                 },
                 voiceCall: {
-                    message: `O Repy informa que seu dispositivo ${device.name} está com o nível em ${Math.round(percentage)}porcento`
+                    message: `Olá, informamos que seu dispositivo ${device.name} está com o nível em ${Math.round(percentage)}porcento. `.repeat(2)
                 },
                 whatsApp: {
                     message: `O Repy informa que seu dispositivo *${device.name}* está com o nível em *${Math.round(percentage)}%*`

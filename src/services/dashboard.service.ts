@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { cast, col, Op, where } from "sequelize";
+import { Op } from "sequelize";
 import { CompanyBranch } from "../models/entities/company-branch";
 import { SaleOrder } from "../models/entities/sale-order";
 import { SaleOrderProduct } from "../models/entities/sale-order-product";
@@ -22,9 +22,8 @@ export class DashboardService {
 
     public async getSalesByDay(
         input: {
-            startDate: string,
-            endDate: string,
-            companyBranchId: number
+            startDateOfIssue: string,
+            endDateOfIssue: string
         },
         userId: number
     ): Promise<SalesByDateViewModel> {
@@ -35,10 +34,10 @@ export class DashboardService {
             where: {
                 [Op.and]: [
                     { '$saleOrder.companyBranch.companyId$': user.companyId },
-                    { '$saleOrder.companyBranchId$': input.companyBranchId },
+                    { '$saleOrder.companyBranchId$': user.companyId },
                     { '$saleOrder.status$': { [Op.not]: SaleOrderStatus.CANCELED } },
-                    { '$saleOrder.dateOfIssue$': { [Op.gte]: moment.utc(input.startDate).toDate() } },
-                    { '$saleOrder.dateOfIssue$': { [Op.lte]: moment.utc(input.endDate).toDate() } }
+                    { '$saleOrder.dateOfIssue$': { [Op.gte]: moment.utc(input.startDateOfIssue).toDate() } },
+                    { '$saleOrder.dateOfIssue$': { [Op.lte]: moment.utc(input.endDateOfIssue).toDate() } }
                 ]
             },
             include: [

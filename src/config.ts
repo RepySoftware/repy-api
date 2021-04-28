@@ -15,7 +15,9 @@ export const CONFIG: {
 
     TWILIO_ACCOUNT_SID: string,
     TWILIO_AUTH_TOKEN: string,
-    TWILIO_WHATS_APP_FROM: string
+    TWILIO_WHATS_APP_FROM: string,
+
+    ZENVIA_TOKEN: string
 
 } = process.env as any;
 

@@ -74,15 +74,18 @@ export class DeviceSyncDataStrategy extends Strategy<DeviceSyncDataInputModel, P
             }
 
             if (notificationResult.config.phonesToNotify) {
-                // TODO: implement voice call
-                console.log('TODO: implement voice call');
+                this._messagingService.sendVoiceCall({
+                    phones: notificationResult.config.phonesToNotify,
+                    message: notificationResult.voiceCall.message
+                });
             }
 
             if (notificationResult.config.whatsAppsToNotify.length) {
-                this._messagingService.sendWhatsApp({
-                    whatsAppPhones: notificationResult.config.whatsAppsToNotify,
-                    message: notificationResult.whatsApp.message
-                });
+                // TODO: send whatsapp messages
+                // this._messagingService.sendWhatsApp({
+                //     whatsAppPhones: notificationResult.config.whatsAppsToNotify,
+                //     message: notificationResult.whatsApp.message
+                // });
             }
 
         }
