@@ -137,6 +137,10 @@ export class SaleOrderService {
             whereAnd.push({ personCustomerId: input.personCustomerId });
         }
 
+        if (input.paymentMethodId) {
+            whereAnd.push({ paymentMethodId: input.paymentMethodId });
+        }
+
         const saleOrders: SaleOrder[] = await SaleOrder.findAll({
             where: {
                 [Op.and]: whereAnd
