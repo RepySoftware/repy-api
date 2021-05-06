@@ -53,17 +53,17 @@ export class LoginStrategy extends Strategy<LoginInputModel, Promise<User>> {
         return user;
     }
 
-    // public async customer(input: LoginInputModel): Promise<User> {
+    public async customer(input: LoginInputModel): Promise<User> {
 
-    //     const user = await this.getUser(input);
+        const user = await this.getUser(input);
 
-    //     if (!user.person.isCustomer())
-    //         throw new PersonException('Usuário não é um fornecedor');
+        if (!user.person?.isCustomer)
+            throw new PersonException('Usuário não é um fornecedor');
 
-    //     this.verifyPassword(input.password, user.password);
+        this.verifyPassword(input.password, user.password);
 
-    //     return user;
-    // }
+        return user;
+    }
 
     public async driver(input: LoginInputModel): Promise<User> {
 
