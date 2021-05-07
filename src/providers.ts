@@ -13,6 +13,7 @@ import { DashboardService } from './services/dashboard.service';
 import { MessagingService } from './services/messaging.service';
 import { DeliveryInstructionService } from './services/delivery-instruction.service';
 import { DeliveryService } from './services/delivery.service';
+import { GeocodingService } from './services/geocoding.service';
 
 const ServicesCollection = new Container();
 
@@ -31,5 +32,6 @@ ServicesCollection.bind(DashboardService).toSelf();
 ServicesCollection.bind(MessagingService).toSelf();
 ServicesCollection.bind(DeliveryService).toSelf();
 ServicesCollection.bind(DeliveryInstructionService).toSelf();
+ServicesCollection.bind(GeocodingService).toSelf();
 
 export { ServicesCollection };

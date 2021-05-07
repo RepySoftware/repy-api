@@ -23,6 +23,8 @@ import { ProductCategory } from "../models/entities/product-category";
 import { DeliveryService } from "./delivery.service";
 import { SaleOrderDriverFilter } from "../models/input-models/filter/sale-order-driver.filter";
 import { DriverSaleOrderViewModel } from "../models/view-models/driver-sale-order.view-model";
+import { GeocodingService } from "./geocoding.service";
+import { SaleOrderException } from "../common/exceptions/sale-order.exception";
 
 @injectable()
 export class SaleOrderService {
@@ -30,7 +32,8 @@ export class SaleOrderService {
     constructor(
         @inject(UserService) private _userService: UserService,
         @inject(Database) private _database: Database,
-        @inject(DeliveryService) private _deliveryService: DeliveryService
+        @inject(DeliveryService) private _deliveryService: DeliveryService,
+        @inject(GeocodingService) private _geocodingService: GeocodingService
     ) { }
 
     public async getById(id: number, userId: number): Promise<SaleOrder | SaleOrderViewModel> {
@@ -290,6 +293,19 @@ export class SaleOrderService {
 
         if (!personCustomer)
             throw new NotFoundException('Cliente não encontrado');
+
+        if (!personCustomer.address.latitude || !personCustomer.address.longitude) {
+            const coordinates = await this._geocodingService.addressToCoordinates(personCustomer.address.description);
+
+            if (!coordinates)
+                throw new SaleOrderException('Erro ao buscar endereço. Por favor revise o endereço do cliente');
+
+            personCustomer.address.latitude = coordinates.latitude;
+            personCustomer.address.longitude = coordinates.longitude;
+
+            await personCustomer.address.save();
+
+        }
 
         const index = await this._deliveryService.getNextIndex(userId);
 
