@@ -25,6 +25,9 @@ export class Employee extends Entity<Employee> {
     @BelongsTo(() => Company, 'companyId')
     public company: Company;
 
+    @Column
+    public color?: string; 
+
     @AllowNull(false)
     @Column
     public isManager: boolean;

@@ -7,6 +7,7 @@ export class EmployeeViewModel {
     public name: string;
     public documentNumber: string;
     public email: string;
+    public color?: string;
     public isManager: boolean;
     public isAgent: boolean;
     public isDriver: boolean;
@@ -22,6 +23,7 @@ export class EmployeeViewModel {
         employee.name = e.name;
         employee.documentNumber = e.documentNumber;
         employee.email = e.email;
+        employee.color = e.color;
         employee.isManager = e.isManager;
         employee.isAgent = e.isAgent;
         employee.isDriver = e.isDriver;
