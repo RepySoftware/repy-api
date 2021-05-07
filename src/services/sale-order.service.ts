@@ -21,6 +21,8 @@ import { SaleOrderUpdateInputModel } from "../models/input-models/sale-order-upd
 import { CompanyBranchProductPrice } from "../models/entities/company-branch-product-price";
 import { ProductCategory } from "../models/entities/product-category";
 import { DeliveryService } from "./delivery.service";
+import { SaleOrderDriverFilter } from "../models/input-models/filter/sale-order-driver.filter";
+import { DriverSaleOrderViewModel } from "../models/view-models/driver-sale-order.view-model";
 
 @injectable()
 export class SaleOrderService {
@@ -194,6 +196,78 @@ export class SaleOrderService {
         });
 
         return saleOrders.map(SaleOrderViewModel.fromEntity);
+    }
+
+    public async getByDriver(input: SaleOrderDriverFilter, userId: number): Promise<DriverSaleOrderViewModel[]> {
+
+        const user = await this._userService.getEntityById(userId, [
+            {
+                model: Employee,
+                as: 'employee'
+            }
+        ]);
+
+        const limit = Number(input.limit || 20);
+        const offset = Number((input.index || 0) * limit);
+
+        const whereAnd: any[] = [
+            { '$companyBranch.companyId$': user.companyId },
+            { employeeDriverId: user.employeeId }
+        ];
+
+        if (input.startDeliveredAt) {
+            whereAnd.push({ deliveredAt: { [Op.gte]: moment.utc(input.startDeliveredAt).toDate() } });
+        }
+
+        if (input.endDeliveredAt) {
+            whereAnd.push({ deliveredAt: { [Op.lte]: moment.utc(input.endDeliveredAt).toDate() } });
+        }
+
+        const saleOrders: SaleOrder[] = await SaleOrder.findAll({
+            where: {
+                [Op.and]: whereAnd
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                },
+                {
+                    model: Person,
+                    as: 'personCustomer'
+                },
+                {
+                    model: Address,
+                    as: 'deliveryAddress'
+                },
+                {
+                    model: PaymentMethod,
+                    as: 'paymentMethod'
+                },
+                {
+                    model: SaleOrderProduct,
+                    as: 'products',
+                    separate: true,
+                    include: [
+                        {
+                            model: CompanyBranchProduct,
+                            as: 'companyBranchProduct',
+                            include: [
+                                {
+                                    model: Product,
+                                    as: 'product'
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            limit,
+            offset,
+            order: [['deliveredAt', 'DESC']]
+        });
+
+        return saleOrders.map(DriverSaleOrderViewModel.fromEntity);
     }
 
     public async create(input: SaleOrderCreateInputModel, userId: number): Promise<SaleOrderViewModel> {

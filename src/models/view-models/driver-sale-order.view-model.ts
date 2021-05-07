@@ -10,6 +10,7 @@ export class DriverSaleOrderViewModel {
     id: number;
     personCustomerName: string;
     status: SaleOrderStatus;
+    deliveredAt?: string;
     scheduledAt?: string;
     totalSalePrice: number;
     addressFormatted: string;
@@ -25,6 +26,7 @@ export class DriverSaleOrderViewModel {
         saleOrder.id = so.id;
         saleOrder.personCustomerName = so.personCustomer.name;
         saleOrder.status = so.status;
+        saleOrder.deliveredAt = DateHelper.toStringViewModel(so.deliveredAt);
         saleOrder.scheduledAt = DateHelper.toStringViewModel(so.scheduledAt);
         saleOrder.totalSalePrice = so.totalSalePrice;
         saleOrder.addressFormatted = AddressHelper.format(so.deliveryAddress);
