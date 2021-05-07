@@ -212,7 +212,8 @@ export class SaleOrderService {
 
         const whereAnd: any[] = [
             { '$companyBranch.companyId$': user.companyId },
-            { employeeDriverId: user.employeeId }
+            { employeeDriverId: user.employeeId },
+            { status: SaleOrderStatus.FINISHED }
         ];
 
         if (input.startDeliveredAt) {
