@@ -6,7 +6,7 @@ import { CONFIG } from "../config";
 export class GeocodingService {
 
     public async addressToCoordinates(address: string): Promise<{ latitude: number, longitude: number }> {
-        const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${CONFIG.GOOGLE_KEY}`);
+        const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURI(address)}&key=${CONFIG.GOOGLE_KEY}`);
 
         const location = response.data?.results[0]?.geometry?.location;
 
