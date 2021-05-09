@@ -14,6 +14,7 @@ import { CompanyBranch } from "../models/entities/company-branch";
 import { SaleOrderStatus } from "../common/enums/sale-order-status";
 import { DeliveryInstruction } from "../models/entities/delivery-instruction";
 import { DeliveryInstructionStatus } from "../common/enums/delivery-instruction-status";
+import { SaleOrderService } from "./sale-order.service";
 
 @injectable()
 export class DeliveryService {

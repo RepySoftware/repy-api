@@ -13,10 +13,11 @@ import { CompanyBranchProduct } from "../../models/entities/company-branch-produ
 import { Product } from "../../models/entities/product";
 import { PaymentMethod } from "../../models/entities/payment-method";
 import { NotFoundException } from "../../common/exceptions/not-fount.exception";
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import { Database } from "../../data/database-config";
 import * as moment from 'moment-timezone';
 import { DeliveryInstruction } from "../../models/entities/delivery-instruction";
+import { SaleOrderService } from "../sale-order.service";
 
 export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalizeInputModel, userId: number }, Promise<void>> {
 
@@ -93,8 +94,32 @@ export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalize
         const transaction: Transaction = await this._database.sequelize.transaction();
 
         try {
+
             await saleOrder.save({ transaction });
 
+            // update indexes
+            const saleOrdersByDriver: SaleOrder[] = await SaleOrder.findAll({
+                where: {
+                    '$companyBranch.companyId$': user.companyId,
+                    employeeDriverId: saleOrder.employeeDriverId,
+                    status: { [Op.in]: [SaleOrderStatus.ON_DELIVERY, SaleOrderStatus.PENDING] },
+                    id: { [Op.not]: saleOrder.id }
+                },
+                include: [
+                    {
+                        model: CompanyBranch,
+                        as: 'companyBranch'
+                    }
+                ],
+                order: [['index', 'ASC']]
+            });
+
+            for (const [i, so] of saleOrdersByDriver.entries()) {
+                so.index = i;
+                await so.save({ transaction });
+            }
+
+            // set isGasCustomer
             if (saleOrder.products.find(p => p.companyBranchProduct.product.isGas)) {
                 saleOrder.personCustomer.isGasCustomer = true;
                 await saleOrder.personCustomer.save({ transaction });
