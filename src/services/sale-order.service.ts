@@ -25,6 +25,7 @@ import { SaleOrderDriverFilter } from "../models/input-models/filter/sale-order-
 import { DriverSaleOrderViewModel } from "../models/view-models/driver-sale-order.view-model";
 import { GeocodingService } from "./geocoding.service";
 import { SaleOrderException } from "../common/exceptions/sale-order.exception";
+import { SaleOrderPayment } from "../models/entities/sale-order-payment";
 
 @injectable()
 export class SaleOrderService {
@@ -67,8 +68,14 @@ export class SaleOrderService {
                     as: 'deliveryAddress'
                 },
                 {
-                    model: PaymentMethod,
-                    as: 'paymentMethod'
+                    model: SaleOrderPayment,
+                    as: 'payments',
+                    include: [
+                        {
+                            model: PaymentMethod,
+                            as: 'paymentMethod'
+                        }
+                    ]
                 },
                 {
                     model: SaleOrderProduct,
@@ -143,7 +150,7 @@ export class SaleOrderService {
         }
 
         if (input.paymentMethodId) {
-            whereAnd.push({ paymentMethodId: input.paymentMethodId });
+            whereAnd.push({ '$payments.paymentMethodId$': input.paymentMethodId });
         }
 
         const saleOrders: SaleOrder[] = await SaleOrder.findAll({
@@ -172,8 +179,15 @@ export class SaleOrderService {
                     as: 'deliveryAddress'
                 },
                 {
-                    model: PaymentMethod,
-                    as: 'paymentMethod'
+                    model: SaleOrderPayment,
+                    as: 'payments',
+                    separate: true,
+                    include: [
+                        {
+                            model: PaymentMethod,
+                            as: 'paymentMethod'
+                        }
+                    ]
                 },
                 {
                     model: SaleOrderProduct,
@@ -245,8 +259,14 @@ export class SaleOrderService {
                     as: 'deliveryAddress'
                 },
                 {
-                    model: PaymentMethod,
-                    as: 'paymentMethod'
+                    model: SaleOrderPayment,
+                    as: 'payments',
+                    include: [
+                        {
+                            model: PaymentMethod,
+                            as: 'paymentMethod'
+                        }
+                    ]
                 },
                 {
                     model: SaleOrderProduct,
@@ -336,9 +356,7 @@ export class SaleOrderService {
                 employeeDriverId: input.employeeDriverId,
                 personCustomerId: input.personCustomerId,
                 deliveryAddressId: deliveryAddress.id,
-                paymentMethodId: input.paymentMethodId,
                 totalSalePrice: 0,
-                paymentInstallments: input.paymentInstallments,
                 status: SaleOrderStatus.PENDING,
                 observation: input.observation,
                 dateOfIssue: moment.utc().toDate(),
@@ -363,6 +381,18 @@ export class SaleOrderService {
 
             saleOrder.calculeTotalSalePrice(saleOrderProducts);
             await saleOrder.save({ transaction });
+
+            for (const inputPayment of input.payments) {
+                const p = SaleOrderPayment.create({
+                    saleOrderId: saleOrder.id,
+                    paymentMethodId: inputPayment.paymentMethodId,
+                    value: inputPayment.value,
+                    dueDate: inputPayment.dueDate ? moment.utc(inputPayment.dueDate).toDate() : moment.utc().toDate(),
+                    payDate: inputPayment.payDate ? moment.utc(inputPayment.payDate).toDate() : null,
+                });
+
+                await p.save({ transaction });
+            }
 
             await transaction.commit();
 
@@ -411,6 +441,10 @@ export class SaleOrderService {
                 {
                     model: SaleOrderProduct,
                     as: 'products'
+                },
+                {
+                    model: SaleOrderPayment,
+                    as: 'payments'
                 }
             ]
         });
@@ -441,8 +475,6 @@ export class SaleOrderService {
             saleOrder.companyBranchId = input.companyBranchId;
             saleOrder.employeeDriverId = input.employeeDriverId || null;
             saleOrder.personCustomerId = input.personCustomerId;
-            saleOrder.paymentMethodId = input.paymentMethodId || null;
-            saleOrder.paymentInstallments = input.paymentInstallments || null;
             saleOrder.observation = input.observation || null;
             saleOrder.dateOfIssue = moment.utc(input.dateOfIssue).toDate();
             saleOrder.scheduledAt = input.scheduledAt ? moment.utc(input.scheduledAt).toDate() : null;
@@ -450,6 +482,55 @@ export class SaleOrderService {
 
             await saleOrder.save({ transaction });
 
+            //#region payments
+            // update payments
+            for (const sopInput of input.payments) {
+                const saleOrderPayment = saleOrder.payments.find(x => x.id == sopInput.id);
+
+                if (saleOrderPayment) {
+                    saleOrderPayment.paymentMethodId = sopInput.paymentMethodId;
+                    saleOrderPayment.value = sopInput.value;
+                    saleOrderPayment.dueDate = sopInput.dueDate ? moment.utc(sopInput.dueDate).toDate() : moment.utc().toDate();
+                    saleOrderPayment.payDate = sopInput.payDate ? moment.utc(sopInput.payDate).toDate() : null;
+
+                    await saleOrderPayment.save({ transaction });
+                }
+            }
+
+            // delete payments
+            for (const sop of saleOrder.payments) {
+                if (!input.payments.find(x => x.id == sop.id)) {
+                    await SaleOrderPayment.destroy({
+                        where: { id: sop.id },
+                        transaction
+                    });
+
+                    saleOrder.payments.splice(
+                        saleOrder.payments.findIndex(x => x.id == sop.id),
+                        1
+                    );
+                }
+            }
+
+            // add payments
+            for (const sopInput of input.payments) {
+                if (!sopInput.id) {
+                    const newSaleOrderPayment = SaleOrderPayment.create({
+                        saleOrderId: saleOrder.id,
+                        paymentMethodId: sopInput.paymentMethodId,
+                        value: sopInput.value,
+                        dueDate: sopInput.dueDate ? moment.utc(sopInput.dueDate).toDate() : moment.utc().toDate(),
+                        payDate: sopInput.payDate ? moment.utc(sopInput.payDate).toDate() : null,
+                    });
+
+                    await newSaleOrderPayment.save({ transaction });
+
+                    saleOrder.payments.push(newSaleOrderPayment);
+                }
+            }
+            //#endregion payments
+
+            //#region products
             // update products
             for (const sopInput of input.products) {
                 const saleOrderProduct = saleOrder.products.find(x => x.id == sopInput.id);
@@ -495,6 +576,7 @@ export class SaleOrderService {
                     saleOrder.products.push(newSaleOrderProduct);
                 }
             }
+            //#endregion products
 
             saleOrder.calculeTotalSalePrice();
             await saleOrder.save({ transaction });

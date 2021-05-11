@@ -8,6 +8,7 @@ import { PaymentMethod } from "./payment-method";
 import { Person } from "./person";
 import { SaleOrderProduct } from "./sale-order-product";
 import * as moment from 'moment-timezone';
+import { SaleOrderPayment } from "./sale-order-payment";
 
 @Table({
     tableName: 'SaleOrders',
@@ -21,9 +22,7 @@ export class SaleOrder extends Entity<SaleOrder> {
         employeeDriverId: number;
         personCustomerId: number;
         deliveryAddressId: number;
-        paymentMethodId: number;
         totalSalePrice: number;
-        paymentInstallments: number;
         status: SaleOrderStatus;
         index: number;
         observation: string;
@@ -68,18 +67,9 @@ export class SaleOrder extends Entity<SaleOrder> {
     @BelongsTo(() => Address, 'deliveryAddressId')
     public deliveryAddress: Address;
 
-    @ForeignKey(() => PaymentMethod)
-    @Column
-    public paymentMethodId: number;
-    @BelongsTo(() => PaymentMethod, 'paymentMethodId')
-    public paymentMethod: PaymentMethod;
-
     @AllowNull(false)
     @Column
     public totalSalePrice: number;
-
-    @Column
-    public paymentInstallments?: number;
 
     @AllowNull(false)
     @Column
@@ -121,6 +111,9 @@ export class SaleOrder extends Entity<SaleOrder> {
 
     @HasMany(() => SaleOrderProduct)
     public products: SaleOrderProduct[];
+
+    @HasMany(() => SaleOrderPayment)
+    public payments: SaleOrderPayment[];
 
     public calculeTotalSalePrice(products: SaleOrderProduct[] = this.products): void {
         this.totalSalePrice = products

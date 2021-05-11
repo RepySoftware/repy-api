@@ -6,6 +6,7 @@ import { CompanyBranchViewModel } from "./company-branch.view-model";
 import { EmployeeViewModel } from "./employee.view-model";
 import { PaymentMethodViewModel } from "./payment-method.view-model";
 import { PersonViewModel } from "./person.view-model";
+import { SaleOrderPaymentViewModel } from "./sale-order-payment.view-model";
 import { SaleOrderProductViewModel } from "./sale-order-product.view-model";
 
 export class SaleOrderViewModel {
@@ -16,9 +17,7 @@ export class SaleOrderViewModel {
     public employeeDriver?: EmployeeViewModel;
     public personCustomer: PersonViewModel;
     public deliveryAddress: AddressViewModel;
-    public paymentMethod: PaymentMethodViewModel;
     public totalSalePrice: number;
-    public paymentInstallments: number;
     public status: SaleOrderStatus;
     public index: number;
     public observation: string;
@@ -29,6 +28,7 @@ export class SaleOrderViewModel {
     public createdAt: string;
     public updatedAt: string;
     public products: SaleOrderProductViewModel[];
+    public payments: SaleOrderPaymentViewModel[];
 
     public static fromEntity(so: SaleOrder): SaleOrderViewModel {
 
@@ -40,9 +40,7 @@ export class SaleOrderViewModel {
         saleOrder.employeeDriver = so.employeeDriver ? EmployeeViewModel.fromEntity(so.employeeDriver) : null;
         saleOrder.personCustomer = so.personCustomer ? PersonViewModel.fromEntity(so.personCustomer) : null;
         saleOrder.deliveryAddress = so.deliveryAddress ? AddressViewModel.fromEntity(so.deliveryAddress) : null;
-        saleOrder.paymentMethod = so.paymentMethod;
         saleOrder.totalSalePrice = so.totalSalePrice;
-        saleOrder.paymentInstallments = so.paymentInstallments;
         saleOrder.status = so.status;
         saleOrder.index = so.index;
         saleOrder.observation = so.observation;
@@ -53,6 +51,7 @@ export class SaleOrderViewModel {
         saleOrder.createdAt = DateHelper.toStringViewModel(so.createdAt);
         saleOrder.updatedAt = DateHelper.toStringViewModel(so.updatedAt);
         saleOrder.products = so.products ? so.products.map(SaleOrderProductViewModel.fromEntity) : null;
+        saleOrder.payments = so.payments ? so.payments.map(SaleOrderPaymentViewModel.fromEntity) : null;
 
         return saleOrder;
     }

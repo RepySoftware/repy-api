@@ -12,6 +12,7 @@ import { PaymentMethod } from "../../models/entities/payment-method";
 import { Person } from "../../models/entities/person";
 import { Product } from "../../models/entities/product";
 import { SaleOrder } from "../../models/entities/sale-order";
+import { SaleOrderPayment } from "../../models/entities/sale-order-payment";
 import { SaleOrderProduct } from "../../models/entities/sale-order-product";
 import { DeliveryViewModel } from "../../models/view-models/delivery.view-model";
 import { DriverDeliveryViewModel } from "../../models/view-models/driver-delivery.view-model";
@@ -42,8 +43,14 @@ export class DeliveryGetStrategy extends Strategy<{ userId: number }, Promise<De
             as: 'deliveryAddress'
         },
         {
-            model: PaymentMethod,
-            as: 'paymentMethod'
+            model: SaleOrderPayment,
+            as: 'payments',
+            include: [
+                {
+                    model: PaymentMethod,
+                    as: 'paymentMethod'
+                }
+            ]
         },
         {
             model: SaleOrderProduct,

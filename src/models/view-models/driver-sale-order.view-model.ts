@@ -2,6 +2,7 @@ import { SaleOrderStatus } from "../../common/enums/sale-order-status";
 import { AddressHelper } from "../../common/helpers/address.helper";
 import { DateHelper } from "../../common/helpers/date.helper";
 import { SaleOrder } from "../entities/sale-order";
+import { DriverSaleOrderPaymentViewModel } from "./driver-sale-order-payment.view-model";
 import { DriverSaleOrderProductViewModel } from "./driver-sale-order-product.view-model";
 import { PaymentMethodViewModel } from "./payment-method.view-model";
 
@@ -15,7 +16,7 @@ export class DriverSaleOrderViewModel {
     totalSalePrice: number;
     addressFormatted: string;
     addressToMap: string;
-    paymentMethod?: PaymentMethodViewModel;
+    payments: DriverSaleOrderPaymentViewModel[];
     observation?: string;
     products: DriverSaleOrderProductViewModel[];
 
@@ -31,7 +32,7 @@ export class DriverSaleOrderViewModel {
         saleOrder.totalSalePrice = so.totalSalePrice;
         saleOrder.addressFormatted = AddressHelper.format(so.deliveryAddress);
         saleOrder.addressToMap = AddressHelper.format(so.deliveryAddress, { includeComplement: false });
-        saleOrder.paymentMethod = so.paymentMethod ? PaymentMethodViewModel.fromEntity(so.paymentMethod) : null;
+        saleOrder.payments = so.payments ? so.payments.map(DriverSaleOrderPaymentViewModel.fromEntity) : null;
         saleOrder.observation = so.showObservationToDriver ? so.observation : null;
         saleOrder.products = so.products.map(DriverSaleOrderProductViewModel.fromEntity);
 
