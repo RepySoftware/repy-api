@@ -150,7 +150,31 @@ export class SaleOrderService {
         }
 
         if (input.paymentMethodId) {
-            whereAnd.push({ '$payments.paymentMethodId$': input.paymentMethodId });
+
+            const paymentsSaleOrdersIds: { saleOrderId: number }[] = await SaleOrderPayment.findAll({
+                attributes: ['saleOrderId'],
+                where: {
+                    '$saleOrder.companyBranch.companyId$': user.companyId,
+                    paymentMethodId: input.paymentMethodId,
+                },
+                include: [
+                    {
+                        model: SaleOrder,
+                        as: 'saleOrder',
+                        include: [
+                            {
+                                model: CompanyBranch,
+                                as: 'companyBranch'
+                            }
+                        ]
+                    }
+                ],
+                limit,
+                offset,
+                order: [[{ model: SaleOrder, as: 'saleOrder' }, 'createdAt', 'DESC']]
+            });
+
+            whereAnd.push({ id: { [Op.in]: paymentsSaleOrdersIds.map(x => x.saleOrderId) } });
         }
 
         const saleOrders: SaleOrder[] = await SaleOrder.findAll({
