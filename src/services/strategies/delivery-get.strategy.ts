@@ -45,6 +45,7 @@ export class DeliveryGetStrategy extends Strategy<{ userId: number }, Promise<De
         {
             model: SaleOrderPayment,
             as: 'payments',
+            separate: true,
             include: [
                 {
                     model: PaymentMethod,
