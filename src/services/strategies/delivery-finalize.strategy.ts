@@ -49,6 +49,11 @@ export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalize
                     as: 'personCustomer'
                 },
                 {
+                    model: SaleOrderPayment,
+                    as: 'payments',
+                    separate: true
+                },
+                {
                     model: SaleOrderProduct,
                     as: 'products',
                     separate: true,
