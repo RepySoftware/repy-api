@@ -2,6 +2,7 @@ import { inject, injectable } from "inversify";
 import { FindOptions, Op, Transaction, WhereOptions } from "sequelize";
 import { NotFoundException } from "../common/exceptions/not-fount.exception";
 import { PersonException } from "../common/exceptions/person.exception";
+import { AddressHelper } from "../common/helpers/address.helper";
 import { StringHelper } from "../common/helpers/string.helper";
 import { Database } from "../data/database-config";
 import { Address } from "../models/entities/address";
@@ -14,6 +15,7 @@ import { PersonFilter } from "../models/input-models/filter/person.filter";
 import { PersonInputModel } from "../models/input-models/person.input-model";
 import { PersonSearchViewModel } from "../models/view-models/person-search.view-model";
 import { PersonViewModel } from "../models/view-models/person.view-model";
+import { GeocodingService } from "./geocoding.service";
 import { UserService } from "./user.service";
 
 @injectable()
@@ -21,7 +23,8 @@ export class PersonService {
 
     constructor(
         @inject(Database) private _database: Database,
-        @inject(UserService) private _userService: UserService
+        @inject(UserService) private _userService: UserService,
+        @inject(GeocodingService) private _geocodingService: GeocodingService
     ) { }
 
     public async getAll(input: PersonFilter, userId: number): Promise<PersonViewModel[]> {
@@ -112,10 +115,18 @@ export class PersonService {
                     region: input.address.region,
                     country: input.address.country,
                     complement: input.address.complement,
-                    referencePoint: input.address.referencePoint,
-                    latitude: input.address.latitude,
-                    longitude: input.address.longitude
+                    referencePoint: input.address.referencePoint
                 });
+
+                const coordinates = await this._geocodingService.addressToCoordinates(
+                    AddressHelper.format(address, { includeComplement: false })
+                );
+
+                if (!coordinates)
+                    throw new PersonException('Erro ao buscar endereço. Por favor revise.');
+
+                address.latitude = coordinates.latitude;
+                address.longitude = coordinates.longitude;
 
                 await address.save({ transaction });
             }
@@ -196,10 +207,18 @@ export class PersonService {
                         region: input.address.region,
                         country: input.address.country,
                         complement: input.address.complement,
-                        referencePoint: input.address.referencePoint,
-                        latitude: input.address.latitude,
-                        longitude: input.address.longitude
+                        referencePoint: input.address.referencePoint
                     });
+
+                    const coordinates = await this._geocodingService.addressToCoordinates(
+                        AddressHelper.format(address, { includeComplement: false })
+                    );
+
+                    if (!coordinates)
+                        throw new PersonException('Erro ao buscar endereço. Por favor revise.');
+
+                    address.latitude = coordinates.latitude;
+                    address.longitude = coordinates.longitude;
 
                     await address.save({ transaction });
 
@@ -215,8 +234,16 @@ export class PersonService {
                     person.address.country = input.address.country;
                     person.address.complement = input.address.complement;
                     person.address.referencePoint = input.address.referencePoint;
-                    person.address.latitude = input.address.latitude;
-                    person.address.longitude = input.address.longitude;
+
+                    const coordinates = await this._geocodingService.addressToCoordinates(
+                        AddressHelper.format(person.address, { includeComplement: false })
+                    );
+
+                    if (!coordinates)
+                        throw new PersonException('Erro ao buscar endereço. Por favor revise.');
+
+                    person.address.latitude = coordinates.latitude;
+                    person.address.longitude = coordinates.longitude;
 
                     await person.address.save({ transaction });
                 }

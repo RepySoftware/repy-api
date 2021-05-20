@@ -18,8 +18,8 @@ export class Address extends Entity<Address> {
         country: string;
         complement: string;
         referencePoint: string;
-        latitude: number;
-        longitude: number;
+        latitude?: number;
+        longitude?: number;
     }): Address {
         return new Address(input);
     }

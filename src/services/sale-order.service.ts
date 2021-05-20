@@ -26,6 +26,7 @@ import { DriverSaleOrderViewModel } from "../models/view-models/driver-sale-orde
 import { GeocodingService } from "./geocoding.service";
 import { SaleOrderException } from "../common/exceptions/sale-order.exception";
 import { SaleOrderPayment } from "../models/entities/sale-order-payment";
+import { AddressHelper } from "../common/helpers/address.helper";
 
 @injectable()
 export class SaleOrderService {
@@ -339,7 +340,9 @@ export class SaleOrderService {
             throw new NotFoundException('Cliente não encontrado');
 
         if (!personCustomer.address.latitude || !personCustomer.address.longitude) {
-            const coordinates = await this._geocodingService.addressToCoordinates(personCustomer.address.description);
+            const coordinates = await this._geocodingService.addressToCoordinates(
+                AddressHelper.format(personCustomer.address, { includeComplement: false })
+            );
 
             if (!coordinates)
                 throw new SaleOrderException('Erro ao buscar endereço. Por favor revise o endereço do cliente');
@@ -348,7 +351,6 @@ export class SaleOrderService {
             personCustomer.address.longitude = coordinates.longitude;
 
             await personCustomer.address.save();
-
         }
 
         const index = await this._deliveryService.getNextIndex(userId);
@@ -638,6 +640,13 @@ export class SaleOrderService {
         const transaction: Transaction = await this._database.sequelize.transaction();
 
         try {
+
+            await SaleOrderPayment.destroy({
+                where: {
+                    saleOrderId: saleOrder.id
+                },
+                transaction
+            });
 
             await SaleOrderProduct.destroy({
                 where: {
