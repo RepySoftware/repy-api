@@ -12,6 +12,9 @@ export class EmployeeViewModel {
     public isAgent: boolean;
     public isDriver: boolean;
     public isActive: boolean;
+    public currentLatitude: number;
+    public currentLongitude: number;
+    public currentSpeed: number;
     public createdAt: string;
     public updatedAt: string;
 
@@ -28,6 +31,9 @@ export class EmployeeViewModel {
         employee.isAgent = e.isAgent;
         employee.isDriver = e.isDriver;
         employee.isActive = e.isActive;
+        employee.currentLatitude = e.currentLatitude;
+        employee.currentLongitude = e.currentLongitude;
+        employee.currentSpeed = e.currentSpeed;
         employee.createdAt = DateHelper.toStringViewModel(e.createdAt);
         employee.updatedAt = DateHelper.toStringViewModel(e.updatedAt);
 

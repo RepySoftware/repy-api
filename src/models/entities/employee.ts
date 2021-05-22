@@ -13,10 +13,10 @@ export class Employee extends Entity<Employee> {
     public name: string;
 
     @Column
-    public documentNumber: string;   
+    public documentNumber: string;
 
     @Column
-    public email: string;   
+    public email: string;
 
     @ForeignKey(() => Company)
     @AllowNull(false)
@@ -26,7 +26,7 @@ export class Employee extends Entity<Employee> {
     public company: Company;
 
     @Column
-    public color?: string; 
+    public color?: string;
 
     @AllowNull(false)
     @Column
@@ -43,6 +43,15 @@ export class Employee extends Entity<Employee> {
     @AllowNull(false)
     @Column
     public isActive: boolean;
+
+    @Column
+    public currentLatitude: number;
+
+    @Column
+    public currentLongitude: number;
+
+    @Column
+    public currentSpeed: number;
 
     @AllowNull(false)
     @CreatedAt

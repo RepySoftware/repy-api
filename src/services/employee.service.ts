@@ -4,6 +4,7 @@ import { NotFoundException } from "../common/exceptions/not-fount.exception";
 import { Database } from "../data/database-config";
 import { Employee } from "../models/entities/employee";
 import { User } from "../models/entities/user";
+import { EmployeeGeolocationInputModel } from "../models/input-models/employee-geolocation.input-model";
 import { EmployeeFilter } from "../models/input-models/filter/employee.filter";
 import { CompanyBranchProductViewModel } from "../models/view-models/company-branch-product.view-model";
 import { EmployeeViewModel } from "../models/view-models/employee.view-model";
@@ -34,7 +35,7 @@ export class EmployeeService {
         }
 
         if (input.isDriver !== undefined && input.isDriver !== null) {
-            where['isDriver'] = typeof(input.isDriver) == 'string' ? JSON.parse(input.isDriver) : input.isDriver;
+            where['isDriver'] = typeof (input.isDriver) == 'string' ? JSON.parse(input.isDriver) : input.isDriver;
         }
 
         const employees: Employee[] = await Employee.findAll({
@@ -45,5 +46,26 @@ export class EmployeeService {
         });
 
         return employees.map(EmployeeViewModel.fromEntity);
+    }
+
+    public async updateGeolocation(input: EmployeeGeolocationInputModel, userId: number): Promise<void> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const employee: Employee = await Employee.findOne({
+            where: {
+                companyId: user.companyId,
+                id: input.employeeId
+            }
+        });
+
+        if (!employee)
+            throw new NotFoundException('Funcionário não encontrado');
+
+        employee.currentLatitude = input.latitude;
+        employee.currentLongitude = input.longitude;
+        employee.currentSpeed = input.speed;
+
+        await employee.save();
     }
 }

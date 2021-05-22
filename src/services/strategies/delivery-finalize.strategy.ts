@@ -19,6 +19,7 @@ import * as moment from 'moment-timezone';
 import { DeliveryInstruction } from "../../models/entities/delivery-instruction";
 import { SaleOrderService } from "../sale-order.service";
 import { SaleOrderPayment } from "../../models/entities/sale-order-payment";
+import { User } from "../../models/entities/user";
 
 export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalizeInputModel, userId: number }, Promise<void>> {
 
@@ -88,7 +89,6 @@ export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalize
         try {
             await saleOrder.save({ transaction });
 
-            //#region payments
             // update payments
             for (const sopInput of params.input.payments) {
                 const saleOrderPayment = saleOrder.payments.find(x => x.id == sopInput.id);
@@ -134,29 +134,13 @@ export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalize
                     saleOrder.payments.push(newSaleOrderPayment);
                 }
             }
-            //#endregion payments
 
-            // update indexes
-            const saleOrdersByDriver: SaleOrder[] = await SaleOrder.findAll({
-                where: {
-                    '$companyBranch.companyId$': user.companyId,
-                    employeeDriverId: saleOrder.employeeDriverId,
-                    status: { [Op.in]: [SaleOrderStatus.ON_DELIVERY, SaleOrderStatus.PENDING] },
-                    id: { [Op.not]: saleOrder.id }
-                },
-                include: [
-                    {
-                        model: CompanyBranch,
-                        as: 'companyBranch'
-                    }
-                ],
-                order: [['index', 'ASC']]
+            await this.updateIndexes({
+                companyId: user.companyId,
+                saleOrderId: saleOrder.id,
+                employeeDriverId: saleOrder.employeeDriverId,
+                transaction
             });
-
-            for (const [i, so] of saleOrdersByDriver.entries()) {
-                so.index = i;
-                await so.save({ transaction });
-            }
 
             // set isGasCustomer
             if (saleOrder.products.find(p => p.companyBranchProduct.product.isGas)) {
@@ -193,6 +177,78 @@ export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalize
 
         deliveryInstruction.setStatus(DeliveryInstructionStatus.FINISHED);
 
-        await deliveryInstruction.save();
+        const transaction: Transaction = await this._database.sequelize.transaction();
+
+        try {
+            await deliveryInstruction.save();
+
+            await this.updateIndexes({
+                companyId: user.companyId,
+                deliveryInstructionId: deliveryInstruction.id,
+                employeeDriverId: deliveryInstruction.employeeDriverId,
+                transaction
+            });
+
+            await transaction.commit();
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
+    private async updateIndexes(options: {
+        companyId: number;
+        saleOrderId?: number;
+        deliveryInstructionId?: number;
+        employeeDriverId: number;
+        transaction: Transaction;
+    }): Promise<void> {
+
+        const saleOrderWhere = {
+            '$companyBranch.companyId$': options.companyId,
+            employeeDriverId: options.employeeDriverId,
+            status: { [Op.in]: [SaleOrderStatus.ON_DELIVERY, SaleOrderStatus.PENDING] }
+        };
+
+        if (options.saleOrderId)
+            saleOrderWhere['id'] = { [Op.not]: options.saleOrderId };
+
+        const saleOrdersByDriver: SaleOrder[] = await SaleOrder.findAll({
+            where: saleOrderWhere,
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                }
+            ]
+        });
+
+        const deliveryInstructionsWhere = {
+            companyId: options.companyId,
+            employeeDriverId: options.employeeDriverId,
+            status: { [Op.in]: [DeliveryInstructionStatus.IN_PROGRESS, DeliveryInstructionStatus.PENDING] }
+        };
+
+        if (options.deliveryInstructionId)
+            deliveryInstructionsWhere['id'] = { [Op.not]: options.deliveryInstructionId };
+
+        const deliveryInstructions: DeliveryInstruction[] = await DeliveryInstruction.findAll({
+            where: deliveryInstructionsWhere
+        });
+
+        const deliveries = [
+            ...saleOrdersByDriver,
+            ...deliveryInstructions
+        ];
+
+        for (const [i, d] of deliveries.sort((a, b) => a.index - b.index).entries()) {
+            d.index = i;
+            await d.save({ transaction: options.transaction });
+        }
+
+        // for (const [i, so] of saleOrdersByDriver.entries()) {
+        //     so.index = i;
+        //     await so.save({ transaction: options.transaction });
+        // }
     }
 }
