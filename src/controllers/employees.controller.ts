@@ -19,4 +19,13 @@ EmployeesController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_
     }
 });
 
+EmployeesController.patch('/geolocation', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT, AccessControlRole.EMPLOYEE_DRIVER])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await employeeService.updateGeolocation(req.body, TokenHelper.getPayload(res).userId);
+        res.json({ ok: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
 export { EmployeesController };

@@ -1,5 +1,6 @@
 import { inject, injectable } from "inversify";
 import { Op, WhereOptions } from "sequelize";
+import { EmployeeException } from "../common/exceptions/employee.exception";
 import { NotFoundException } from "../common/exceptions/not-fount.exception";
 import { Database } from "../data/database-config";
 import { Employee } from "../models/entities/employee";
@@ -52,10 +53,13 @@ export class EmployeeService {
 
         const user = await this._userService.getEntityById(userId);
 
+        if (!user.employeeId)
+            throw new EmployeeException('Usuário nao é um funcionário');
+
         const employee: Employee = await Employee.findOne({
             where: {
                 companyId: user.companyId,
-                id: input.employeeId
+                id: user.employeeId
             }
         });
 
