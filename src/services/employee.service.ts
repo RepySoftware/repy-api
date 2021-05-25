@@ -67,7 +67,7 @@ export class EmployeeService {
             include: [
                 {
                     model: Coordinates,
-                    as: 'coordinate'
+                    as: 'coordinates'
                 }
             ]
         });
