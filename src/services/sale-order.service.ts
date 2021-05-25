@@ -286,6 +286,7 @@ export class SaleOrderService {
                 {
                     model: SaleOrderPayment,
                     as: 'payments',
+                    separate: true,
                     include: [
                         {
                             model: PaymentMethod,
