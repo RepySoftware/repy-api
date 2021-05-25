@@ -6,6 +6,7 @@ import { verifyUserRole } from "../../middlewares/check-role";
 import { Address } from "../../models/entities/address";
 import { CompanyBranch } from "../../models/entities/company-branch";
 import { CompanyBranchProduct } from "../../models/entities/company-branch-product";
+import { Coordinates } from "../../models/entities/coordinates";
 import { DeliveryInstruction } from "../../models/entities/delivery-instruction";
 import { Employee } from "../../models/entities/employee";
 import { PaymentMethod } from "../../models/entities/payment-method";
@@ -32,7 +33,13 @@ export class DeliveryGetStrategy extends Strategy<{ userId: number }, Promise<De
         },
         {
             model: Employee,
-            as: 'employeeDriver'
+            as: 'employeeDriver',
+            include: [
+                {
+                    model: Coordinates,
+                    as: 'coordinates'
+                }
+            ]
         },
         {
             model: Person,

@@ -1,6 +1,7 @@
 import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, Table, Unique, UpdatedAt } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
 import { Company } from "./company";
+import { Coordinates } from "./coordinates";
 
 @Table({
     tableName: 'Employees',
@@ -44,14 +45,11 @@ export class Employee extends Entity<Employee> {
     @Column
     public isActive: boolean;
 
+    @ForeignKey(() => Coordinates)
     @Column
-    public currentLatitude: number;
-
-    @Column
-    public currentLongitude: number;
-
-    @Column
-    public currentSpeed: number;
+    public coordinatesId?: number;
+    @BelongsTo(() => Coordinates, 'coordinatesId')
+    public coordinates?: Coordinates;
 
     @AllowNull(false)
     @CreatedAt

@@ -28,4 +28,15 @@ EmployeesController.patch('/geolocation', [checkToken, checkRole([AccessControlR
     }
 });
 
+EmployeesController.get('/geolocation', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT, AccessControlRole.EMPLOYEE_DRIVER])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const employeesIds: number[] = (<string>req.query.employeesIds).split(',').map(x => Number(x));
+
+        const employeesCoordinates = await employeeService.getCoordinates(employeesIds, TokenHelper.getPayload(res).userId);
+        res.json(employeesCoordinates);
+    } catch (error) {
+        next(error);
+    }
+});
+
 export { EmployeesController };
