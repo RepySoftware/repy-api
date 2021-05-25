@@ -80,7 +80,7 @@ export class EmployeeService {
             employee.coordinates.longitude = input.longitude;
             employee.coordinates.speed = input.speed;
 
-            await employee.save();
+            await employee.coordinates.save();
         } else {
             const transaction: Transaction = await this._database.sequelize.transaction();
 
