@@ -23,7 +23,9 @@ export class DashboardService {
     public async getSalesByDay(
         input: {
             startDateOfIssue: string,
-            endDateOfIssue: string
+            endDateOfIssue: string,
+            scheduleNextDays: number,
+            paymentNextDays: number
         },
         userId: number
     ): Promise<SalesByDateViewModel> {
@@ -36,9 +38,24 @@ export class DashboardService {
                     { '$saleOrder.companyBranch.companyId$': user.companyId },
                     { '$saleOrder.companyBranchId$': user.companyId },
                     { '$saleOrder.status$': { [Op.not]: SaleOrderStatus.CANCELED } },
-                    { '$saleOrder.dateOfIssue$': { [Op.gte]: moment.utc(input.startDateOfIssue).toDate() } },
-                    { '$saleOrder.dateOfIssue$': { [Op.lte]: moment.utc(input.endDateOfIssue).toDate() } }
+                    {
+                        [Op.or]: [
+                            {
+                                [Op.and]: [
+                                    { '$saleOrder.dateOfIssue$': { [Op.gte]: moment.utc(input.startDateOfIssue).toDate() } },
+                                    { '$saleOrder.dateOfIssue$': { [Op.lte]: moment.utc(input.endDateOfIssue).toDate() } },
+                                ]
+                            },
+                            {
+                                [Op.and]: [
+                                    { '$saleOrder.scheduledAt$': { [Op.gte]: moment.utc(input.startDateOfIssue).toDate() } },
+                                    { '$saleOrder.scheduledAt$': { [Op.lte]: moment.utc().add(input.scheduleNextDays || 0, 'days').endOf('day').toDate() } }
+                                ]
+                            }
+                        ]
+                    },
                 ]
+                // TODO: filter paymentNextDays
             },
             include: [
                 {

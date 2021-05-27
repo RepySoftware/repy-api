@@ -99,7 +99,7 @@ export class DeliveryGetStrategy extends Strategy<{ userId: number }, Promise<De
                 status: { [Op.in]: [SaleOrderStatus.PENDING, SaleOrderStatus.ON_DELIVERY] },
                 [Op.or]: [
                     { scheduledAt: { [Op.is]: null } },
-                    { scheduledAt: { [Op.lte]: moment.utc().add(3, 'days').toDate() } } // show only next 3 days
+                    { scheduledAt: { [Op.lte]: moment.utc().add(3, 'days').endOf('day').toDate() } } // show only next 3 days
                 ]
             },
             include: this._defaultSaleOrderIncludes,
