@@ -8,6 +8,7 @@ export class DriverDeliveryInstructionViewModel {
     public description: string;
     public status: DeliveryInstructionStatus;
     public index: number;
+    public checkableByDriver: boolean;
     public startedAt: string;
     public finishedAt: string;
     public createdAt: string;
@@ -21,6 +22,7 @@ export class DriverDeliveryInstructionViewModel {
         deliveryInstruction.description = edi.description;
         deliveryInstruction.status = edi.status;
         deliveryInstruction.index = edi.index;
+        deliveryInstruction.checkableByDriver = edi.checkableByDriver;
         deliveryInstruction.startedAt = DateHelper.toStringViewModel(edi.startedAt);
         deliveryInstruction.finishedAt = DateHelper.toStringViewModel(edi.finishedAt);
         deliveryInstruction.createdAt = DateHelper.toStringViewModel(edi.createdAt);
