@@ -19,6 +19,7 @@ import { DeliveryViewModel } from "../../models/view-models/delivery.view-model"
 import { DriverDeliveryViewModel } from "../../models/view-models/driver-delivery.view-model";
 import { Strategy } from "../abstraction/strategy";
 import { UserService } from "../user.service";
+import * as moment from 'moment-timezone';
 
 export class DeliveryGetStrategy extends Strategy<{ userId: number }, Promise<DeliveryViewModel[] | DriverDeliveryViewModel[]>> {
 
@@ -95,7 +96,11 @@ export class DeliveryGetStrategy extends Strategy<{ userId: number }, Promise<De
         const saleOrders: SaleOrder[] = await SaleOrder.findAll({
             where: {
                 '$companyBranch.companyId$': user.companyId,
-                status: { [Op.in]: [SaleOrderStatus.PENDING, SaleOrderStatus.ON_DELIVERY] }
+                status: { [Op.in]: [SaleOrderStatus.PENDING, SaleOrderStatus.ON_DELIVERY] },
+                [Op.or]: [
+                    { scheduledAt: { [Op.is]: null } },
+                    { scheduledAt: { [Op.lte]: moment.utc().add(3, 'days').toDate() } } // show only next 3 days
+                ]
             },
             include: this._defaultSaleOrderIncludes,
             order: [['createdAt', 'DESC']]

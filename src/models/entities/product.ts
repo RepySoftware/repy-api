@@ -1,7 +1,8 @@
-import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, Table, UpdatedAt } from "sequelize-typescript";
+import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, HasMany, Table, UpdatedAt } from "sequelize-typescript";
 import { MeasurementUnit } from "../../common/enums/measurement-unit";
 import { Entity } from "../abstraction/entity";
 import { Company } from "./company";
+import { CompanyBranchProduct } from "./company-branch-product";
 import { ProductCategory } from "./product-category";
 
 @Table({
@@ -52,4 +53,7 @@ export class Product extends Entity<Product> {
     @UpdatedAt
     @Column
     public updatedAt: Date;
+
+    @HasMany(() => CompanyBranchProduct)
+    public companyBranchesProduct: CompanyBranchProduct[];
 }

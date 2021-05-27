@@ -44,12 +44,25 @@ export class DeliveryInstructionService {
             description: input.description,
             status: DeliveryInstructionStatus.PENDING,
             index,
-            companyId: user.companyId
+            companyId: user.companyId,
+            checkableByDriver: input.checkableByDriver
         });
 
         await deliveryInstruction.save();
 
         return await this.getById(deliveryInstruction.id, userId);
+    }
+
+    public async delete(id: number, userId: number): Promise<void> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        await DeliveryInstruction.destroy({
+            where: {
+                companyId: user.companyId,
+                id
+            }
+        });
     }
 
     public async getById(id: number, userId: number): Promise<DeliveryInstructionViewModel> {

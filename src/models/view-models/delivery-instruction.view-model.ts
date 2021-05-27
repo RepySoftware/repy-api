@@ -11,6 +11,7 @@ export class DeliveryInstructionViewModel {
     public description: string;
     public status: DeliveryInstructionStatus;
     public index: number;
+    public checkableByDriver: boolean;
     public startedAt: string;
     public finishedAt: string;
     public createdAt: string;
@@ -25,6 +26,7 @@ export class DeliveryInstructionViewModel {
         deliveryInstruction.status = edi.status;
         deliveryInstruction.description = edi.description;
         deliveryInstruction.index = edi.index;
+        deliveryInstruction.checkableByDriver = edi.checkableByDriver;
         deliveryInstruction.startedAt = DateHelper.toStringViewModel(edi.startedAt);
         deliveryInstruction.finishedAt = DateHelper.toStringViewModel(edi.finishedAt);
         deliveryInstruction.createdAt = DateHelper.toStringViewModel(edi.createdAt);

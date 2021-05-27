@@ -46,4 +46,16 @@ DeliveryInstructionsController.post('/', [checkToken, checkRole([
     }
 });
 
+DeliveryInstructionsController.delete('/:id', [checkToken, checkRole([
+    AccessControlRole.EMPLOYEE_MANAGER,
+    AccessControlRole.EMPLOYEE_AGENT
+])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await deliveryInstructionService.delete(Number(req.params.id), TokenHelper.getPayload(res).userId);
+        res.json({ ok: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
 export { DeliveryInstructionsController };

@@ -17,6 +17,7 @@ export class DeliveryInstruction extends Entity<DeliveryInstruction> {
         status: DeliveryInstructionStatus;
         index: number;
         companyId: number;
+        checkableByDriver: boolean;
     }): DeliveryInstruction {
         return new DeliveryInstruction(input);
     }
@@ -47,6 +48,9 @@ export class DeliveryInstruction extends Entity<DeliveryInstruction> {
     public companyId: number;
     @BelongsTo(() => Company, 'companyId')
     public company: Company;
+
+    @Column
+    public checkableByDriver: boolean;
 
     @Column
     public startedAt: Date;
