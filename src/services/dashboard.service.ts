@@ -42,14 +42,15 @@ export class DashboardService {
                         [Op.or]: [
                             {
                                 [Op.and]: [
-                                    { '$saleOrder.dateOfIssue$': { [Op.gte]: moment.utc(input.startDateOfIssue).toDate() } },
-                                    { '$saleOrder.dateOfIssue$': { [Op.lte]: moment.utc(input.endDateOfIssue).toDate() } },
+                                    { '$saleOrder.scheduledAt$': { [Op.gte]: moment.utc(input.startDateOfIssue).toDate() } },
+                                    { '$saleOrder.scheduledAt$': { [Op.lte]: moment.utc().add(input.scheduleNextDays || 0, 'days').endOf('day').toDate() } }
                                 ]
                             },
                             {
                                 [Op.and]: [
-                                    { '$saleOrder.scheduledAt$': { [Op.gte]: moment.utc(input.startDateOfIssue).toDate() } },
-                                    { '$saleOrder.scheduledAt$': { [Op.lte]: moment.utc().add(input.scheduleNextDays || 0, 'days').endOf('day').toDate() } }
+                                    { '$saleOrder.dateOfIssue$': { [Op.gte]: moment.utc(input.startDateOfIssue).toDate() } },
+                                    { '$saleOrder.dateOfIssue$': { [Op.lte]: moment.utc(input.endDateOfIssue).toDate() } },
+                                    { '$saleOrder.scheduledAt$': { [Op.is]: null } },
                                 ]
                             }
                         ]
