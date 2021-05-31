@@ -24,6 +24,7 @@ import { DeliveryInstruction } from "../models/entities/delivery-instruction";
 import { DefaultDeliveryInstruction } from "../models/entities/default-delivery-instruction";
 import { SaleOrderPayment } from "../models/entities/sale-order-payment";
 import { Coordinates } from "../models/entities/coordinates";
+import { Deposit } from "../models/entities/deposit";
 
 @injectable()
 export class Database {
@@ -62,7 +63,8 @@ export class Database {
             DeliveryInstruction,
             DefaultDeliveryInstruction,
             SaleOrderPayment,
-            Coordinates
+            Coordinates,
+            Deposit
         ]);
 
         this.sequelize.define(ViewPersonSearch.modelName, ViewPersonSearch.model, {

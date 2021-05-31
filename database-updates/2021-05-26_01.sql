@@ -31,3 +31,11 @@ create table DepositsCompanyBranchProducts (
 	CompanyBranchProductID bigint not null,
 	Quantity int not null
 );
+
+ALTER TABLE DepositsCompanyBranchProducts
+ADD CONSTRAINT FK_DepositsCompanyBranchProducts_Deposits
+FOREIGN KEY (DepositID) REFERENCES Deposits(ID);
+
+ALTER TABLE DepositsCompanyBranchProducts
+ADD CONSTRAINT FK_DepositsCompanyBranchProducts_CompanyBranchesProducts
+FOREIGN KEY (CompanyBranchProductID) REFERENCES CompanyBranchesProducts(ID);

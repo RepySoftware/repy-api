@@ -4,6 +4,7 @@ import { CompanyBranchesController } from "./controllers/company-branches.contro
 import { DashboardController } from "./controllers/dashboard.controller";
 import { DeliveryInstructionsController } from "./controllers/delivery-instructions.controller";
 import { DeliveriesController } from "./controllers/delivery.controller";
+import { DepositsController } from "./controllers/deposits.controller";
 import { DevicesController } from "./controllers/devices.controller";
 import { EmployeesController } from "./controllers/employees.controller";
 import { PaymentMethodsController } from "./controllers/payment-methods.controller";
@@ -30,5 +31,6 @@ routes.use('/saleOrders', SaleOrdersController);
 routes.use('/dashboard', DashboardController);
 routes.use('/deliveries', DeliveriesController);
 routes.use('/deliveryInstructions', DeliveryInstructionsController);
+routes.use('/deposits', DepositsController);
 
 export { routes };
