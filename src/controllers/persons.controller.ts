@@ -10,7 +10,7 @@ const PersonsController = Router();
 
 const personService = ServicesCollection.resolve(PersonService);
 
-PersonsController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+PersonsController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const persons = await personService.getAll(req.query, TokenHelper.getPayload(res).userId);
         res.json(persons);
@@ -19,7 +19,7 @@ PersonsController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MA
     }
 });
 
-PersonsController.get('/search', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+PersonsController.get('/search', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const persons = await personService.search(req.query, TokenHelper.getPayload(res).userId);
         res.json(persons);

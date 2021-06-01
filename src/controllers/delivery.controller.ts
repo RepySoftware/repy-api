@@ -11,7 +11,6 @@ const DeliveriesController = Router();
 const deliveryService = ServicesCollection.resolve(DeliveryService);
 
 DeliveriesController.get('/', [checkToken, checkRole([
-    AccessControlRole.EMPLOYEE_MANAGER,
     AccessControlRole.EMPLOYEE_AGENT,
     AccessControlRole.EMPLOYEE_DRIVER
 ])], async (req: Request, res: Response, next: NextFunction) => {
@@ -23,10 +22,7 @@ DeliveriesController.get('/', [checkToken, checkRole([
     }
 });
 
-DeliveriesController.patch('/updateIndex', [checkToken, checkRole([
-    AccessControlRole.EMPLOYEE_MANAGER,
-    AccessControlRole.EMPLOYEE_AGENT
-])], async (req: Request, res: Response, next: NextFunction) => {
+DeliveriesController.patch('/updateIndex', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         await deliveryService.updateIndex(req.body, TokenHelper.getPayload(res).userId);
         res.json({ ok: true });
@@ -35,10 +31,7 @@ DeliveriesController.patch('/updateIndex', [checkToken, checkRole([
     }
 });
 
-DeliveriesController.patch('/updateEmployeeDriver', [checkToken, checkRole([
-    AccessControlRole.EMPLOYEE_MANAGER,
-    AccessControlRole.EMPLOYEE_AGENT
-])], async (req: Request, res: Response, next: NextFunction) => {
+DeliveriesController.patch('/updateEmployeeDriver', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         await deliveryService.updateEmployeeDriver(req.body, TokenHelper.getPayload(res).userId);
         res.json({ ok: true });
@@ -47,10 +40,7 @@ DeliveriesController.patch('/updateEmployeeDriver', [checkToken, checkRole([
     }
 });
 
-DeliveriesController.patch('/updateShowObservationToDriver', [checkToken, checkRole([
-    AccessControlRole.EMPLOYEE_MANAGER,
-    AccessControlRole.EMPLOYEE_AGENT
-])], async (req: Request, res: Response, next: NextFunction) => {
+DeliveriesController.patch('/updateShowObservationToDriver', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         await deliveryService.updateShowObservationToDriver(req.body, TokenHelper.getPayload(res).userId);
         res.json({ ok: true });
@@ -59,9 +49,7 @@ DeliveriesController.patch('/updateShowObservationToDriver', [checkToken, checkR
     }
 });
 
-DeliveriesController.patch('/start', [checkToken, checkRole(
-    AccessControlRole.EMPLOYEE_DRIVER
-)], async (req: Request, res: Response, next: NextFunction) => {
+DeliveriesController.patch('/start', [checkToken, checkRole(AccessControlRole.EMPLOYEE_DRIVER)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         await deliveryService.start(req.body.id, (req.query.strategy as string), TokenHelper.getPayload(res).userId);
         res.json({ ok: true });
@@ -71,7 +59,6 @@ DeliveriesController.patch('/start', [checkToken, checkRole(
 });
 
 DeliveriesController.patch('/finalize', [checkToken, checkRole([
-    AccessControlRole.EMPLOYEE_MANAGER,
     AccessControlRole.EMPLOYEE_AGENT,
     AccessControlRole.EMPLOYEE_DRIVER
 ])], async (req: Request, res: Response, next: NextFunction) => {

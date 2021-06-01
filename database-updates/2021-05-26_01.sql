@@ -13,11 +13,13 @@ create table Vehicles (
 	Description varchar(150) not null,
 	Nickname varchar(100),
 	LicensePlate varchar(15) not null,
-	DepositID bigint not null,
+	CompanyID bigint not null,
+	DepositID bigint,
 	CreatedAt datetime not null default current_timestamp,
 	UpdatedAt datetime not null default current_timestamp on update current_timestamp
 );
 
+ALTER TABLE Vehicles ADD CONSTRAINT FK_Vehicles_Companies FOREIGN KEY (CompanyID) REFERENCES Companies(ID);
 ALTER TABLE Vehicles ADD CONSTRAINT FK_Vehicles_Deposits FOREIGN KEY (DepositID) REFERENCES Deposits(ID);
 
 ALTER TABLE Employees ADD VehicleID bigint NULL;

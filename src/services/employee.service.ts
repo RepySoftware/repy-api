@@ -6,7 +6,9 @@ import { Database } from "../data/database-config";
 import { Coordinates } from "../models/entities/coordinates";
 import { Employee } from "../models/entities/employee";
 import { User } from "../models/entities/user";
+import { Vehicle } from "../models/entities/vehicle";
 import { EmployeeGeolocationInputModel } from "../models/input-models/employee-geolocation.input-model";
+import { EmployeeInputModel } from "../models/input-models/employee.input-model";
 import { EmployeeFilter } from "../models/input-models/filter/employee.filter";
 import { CompanyBranchProductViewModel } from "../models/view-models/company-branch-product.view-model";
 import { EmployeeCoordinatesViewModel } from "../models/view-models/employee-coordinates.view-model";
@@ -25,7 +27,7 @@ export class EmployeeService {
 
         const user = await this._userService.getEntityById(userId);
 
-        const limit = Number(input.limit || 20);
+        const limit = Number(input.limit || 50);
         const offset = Number((input.index || 0) * limit);
 
         let where: WhereOptions = {
@@ -44,12 +46,92 @@ export class EmployeeService {
 
         const employees: Employee[] = await Employee.findAll({
             where,
+            include: [
+                {
+                    model: Vehicle,
+                    as: 'vehicle'
+                }
+            ],
             limit,
             offset,
             order: [['name', 'ASC']]
         });
 
         return employees.map(EmployeeViewModel.fromEntity);
+    }
+
+    public async getById(id: number, userId: number): Promise<EmployeeViewModel> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const employee: Employee = await Employee.findOne({
+            where: {
+                id,
+                companyId: user.companyId
+            },
+            include: [
+                {
+                    model: Vehicle,
+                    as: 'vehicle'
+                }
+            ],
+        });
+
+        if (!employee)
+            throw new NotFoundException('Funcionário não encontrado');
+
+        return EmployeeViewModel.fromEntity(employee);
+    }
+
+    public async create(input: EmployeeInputModel, userId: number): Promise<EmployeeViewModel> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const employee = Employee.create({
+            name: input.name,
+            documentNumber: input.documentNumber,
+            email: input.email,
+            companyId: user.companyId,
+            vehicleId: input.vehicleId,
+            color: input.color,
+            isManager: input.isManager,
+            isAgent: input.isAgent,
+            isDriver: input.isDriver,
+            isActive: input.isActive,
+        });
+
+        await employee.save();
+
+        return this.getById(employee.id, userId);
+    }
+
+    public async update(input: EmployeeInputModel, userId: number): Promise<EmployeeViewModel> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const employee: Employee = await Employee.findOne({
+            where: {
+                companyId: user.companyId,
+                id: input.id
+            }
+        });
+
+        if (!employee)
+            throw new NotFoundException('Funcionário não encontrado');
+
+        employee.name = input.name;
+        employee.documentNumber = input.documentNumber;
+        employee.email = input.email;
+        employee.color = input.color;
+        employee.vehicleId = input.vehicleId;
+        employee.isManager = input.isManager;
+        employee.isAgent = input.isAgent;
+        employee.isDriver = input.isDriver;
+        employee.isActive = input.isActive;
+
+        await employee.save();
+
+        return this.getById(employee.id, userId);
     }
 
     public async updateGeolocation(input: EmployeeGeolocationInputModel, userId: number): Promise<void> {

@@ -2,12 +2,28 @@ import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, Table, Unique, Upd
 import { Entity } from "../abstraction/entity";
 import { Company } from "./company";
 import { Coordinates } from "./coordinates";
+import { Vehicle } from "./vehicle";
 
 @Table({
     tableName: 'Employees',
     timestamps: true
 })
 export class Employee extends Entity<Employee> {
+
+    public static create(input: {
+        name: string;
+        documentNumber?: string;
+        email?: string;
+        companyId: number;
+        vehicleId?: number;
+        color?: string;
+        isManager: boolean;
+        isAgent: boolean;
+        isDriver: boolean;
+        isActive: boolean;
+    }): Employee {
+        return new Employee(input);
+    }
 
     @AllowNull(false)
     @Column
@@ -25,6 +41,12 @@ export class Employee extends Entity<Employee> {
     public companyId: number;
     @BelongsTo(() => Company, 'companyId')
     public company: Company;
+
+    @ForeignKey(() => Vehicle)
+    @Column
+    public vehicleId?: number;
+    @BelongsTo(() => Vehicle, 'vehicleId')
+    public vehicle?: Vehicle;
 
     @Column
     public color?: string;

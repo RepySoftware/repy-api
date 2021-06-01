@@ -1,6 +1,7 @@
 import { DateHelper } from "../../common/helpers/date.helper";
 import { Employee } from "../entities/employee";
 import { CoordinateViewModel } from "./coordinate.view-model";
+import { VehicleViewModel } from "./vehicle.view-model";
 
 export class EmployeeViewModel {
 
@@ -9,6 +10,7 @@ export class EmployeeViewModel {
     public documentNumber: string;
     public email: string;
     public color?: string;
+    public vehicle?: VehicleViewModel;
     public isManager: boolean;
     public isAgent: boolean;
     public isDriver: boolean;
@@ -26,6 +28,7 @@ export class EmployeeViewModel {
         employee.documentNumber = e.documentNumber;
         employee.email = e.email;
         employee.color = e.color;
+        employee.vehicle = e.vehicle ? VehicleViewModel.fromEntity(e.vehicle) : null;
         employee.isManager = e.isManager;
         employee.isAgent = e.isAgent;
         employee.isDriver = e.isDriver;

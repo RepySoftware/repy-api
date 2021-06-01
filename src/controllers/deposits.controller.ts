@@ -3,12 +3,14 @@ import { ServicesCollection } from "../providers";
 import { TokenHelper } from "../common/helpers/token.helper";
 import { checkToken } from "../middlewares/check-token";
 import { DepositService } from "../services/deposit.service";
+import { checkRole } from "../middlewares/check-role";
+import { AccessControlRole } from "../common/enums/access-control-role";
 
 const DepositsController = Router();
 
 const depositService = ServicesCollection.resolve(DepositService);
 
-DepositsController.get('/', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
+DepositsController.get('/', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const deposits = await depositService.getAll(TokenHelper.getPayload(res).userId);
         res.json(deposits);
@@ -17,7 +19,7 @@ DepositsController.get('/', [checkToken], async (req: Request, res: Response, ne
     }
 });
 
-DepositsController.get('/:id', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
+DepositsController.get('/:id', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const deposit = await depositService.getById(Number(req.params.id), TokenHelper.getPayload(res).userId);
         res.json(deposit);
@@ -26,7 +28,7 @@ DepositsController.get('/:id', [checkToken], async (req: Request, res: Response,
     }
 });
 
-DepositsController.post('/', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
+DepositsController.post('/', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const deposit = await depositService.create(req.body, TokenHelper.getPayload(res).userId);
         res.json(deposit);
@@ -35,7 +37,7 @@ DepositsController.post('/', [checkToken], async (req: Request, res: Response, n
     }
 });
 
-DepositsController.put('/', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
+DepositsController.put('/', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const deposit = await depositService.update(req.body, TokenHelper.getPayload(res).userId);
         res.json(deposit);

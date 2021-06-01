@@ -11,7 +11,7 @@ const CompanyBranchesController = Router();
 
 const companyBranchesService = ServicesCollection.resolve(CompanyBranchService);
 
-CompanyBranchesController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+CompanyBranchesController.get('/', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const companyBranches = await companyBranchesService.getAll(TokenHelper.getPayload(res).userId);
         res.json(companyBranches);

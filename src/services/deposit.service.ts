@@ -27,7 +27,7 @@ export class DepositService {
             where: {
                 '$companyBranch.companyId$': user.companyId
             },
-            order: [['name', 'ASC']]
+            order: [['companyBranch', 'name', 'ASC'], ['name', 'ASC']]
         });
 
         return deposits.map(DepositViewModel.fromEntity);
@@ -47,8 +47,7 @@ export class DepositService {
             where: {
                 '$companyBranch.companyId$': user.companyId,
                 id
-            },
-            order: [['companyBranch', 'name', 'ASC'], ['name', 'ASC']]
+            }
         });
 
         if (!deposit)

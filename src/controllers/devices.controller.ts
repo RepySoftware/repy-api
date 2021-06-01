@@ -5,12 +5,14 @@ import { checkToken } from "../middlewares/check-token";
 import { DeviceService } from "../services/device.service";
 import { HttpHelper } from "../common/helpers/http.helper";
 import { HttpResponseFormat } from "../common/enums/http-response-format";
+import { checkRole } from "../middlewares/check-role";
+import { AccessControlRole } from "../common/enums/access-control-role";
 
 const DevicesController = Router();
 
 const deviceService = ServicesCollection.resolve(DeviceService);
 
-DevicesController.get('/', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
+DevicesController.get('/', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const devices = await deviceService.get(req.query.strategy ? String(req.query.strategy) : null, TokenHelper.getPayload(res).userId, req.query);
         res.json(devices);
@@ -19,7 +21,7 @@ DevicesController.get('/', [checkToken], async (req: Request, res: Response, nex
     }
 });
 
-DevicesController.get('/:id', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
+DevicesController.get('/:id', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const device = await deviceService.getById(Number(req.params.id), TokenHelper.getPayload(res).userId);
         res.json(device);

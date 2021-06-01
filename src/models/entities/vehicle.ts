@@ -1,5 +1,6 @@
 import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, Table, UpdatedAt } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
+import { Company } from "./company";
 import { Deposit } from "./deposit";
 
 @Table({
@@ -8,23 +9,39 @@ import { Deposit } from "./deposit";
 })
 export class Vehicle extends Entity<Vehicle> {
 
+    public static create(input: {
+        description: string;
+        nickname?: string;
+        licensePlate: string;
+        companyId: number;
+        depositId?: number;
+    }): Vehicle {
+        return new Vehicle(input);
+    }
+
     @AllowNull(false)
     @Column
     public description: string;
 
     @Column
-    public nickname: string;
+    public nickname?: string;
 
     @AllowNull(false)
     @Column
     public licensePlate: string;
 
-    @ForeignKey(() => Deposit)
+    @ForeignKey(() => Company)
     @AllowNull(false)
     @Column
-    public depositId: number;
+    public companyId: number;
+    @BelongsTo(() => Company, 'companyId')
+    public company: Company;
+
+    @ForeignKey(() => Deposit)
+    @Column
+    public depositId?: number;
     @BelongsTo(() => Deposit, 'depositId')
-    public deposit: Deposit;
+    public deposit?: Deposit;
 
     @AllowNull(false)
     @CreatedAt

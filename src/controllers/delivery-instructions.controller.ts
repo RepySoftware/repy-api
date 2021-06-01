@@ -10,10 +10,7 @@ const DeliveryInstructionsController = Router();
 
 const deliveryInstructionService = ServicesCollection.resolve(DeliveryInstructionService);
 
-DeliveryInstructionsController.get('/default', [checkToken, checkRole([
-    AccessControlRole.EMPLOYEE_MANAGER,
-    AccessControlRole.EMPLOYEE_AGENT
-])], async (req: Request, res: Response, next: NextFunction) => {
+DeliveryInstructionsController.get('/default', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const defaultDeliveryInstructions = await deliveryInstructionService.getDefault(TokenHelper.getPayload(res).userId);
         res.json(defaultDeliveryInstructions);
@@ -22,10 +19,7 @@ DeliveryInstructionsController.get('/default', [checkToken, checkRole([
     }
 });
 
-DeliveryInstructionsController.get('/:id', [checkToken, checkRole([
-    AccessControlRole.EMPLOYEE_MANAGER,
-    AccessControlRole.EMPLOYEE_AGENT
-])], async (req: Request, res: Response, next: NextFunction) => {
+DeliveryInstructionsController.get('/:id', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const defaultDeliveryInstruction = await deliveryInstructionService.getById(Number(req.params.id), TokenHelper.getPayload(res).userId);
         res.json(defaultDeliveryInstruction);
@@ -34,10 +28,7 @@ DeliveryInstructionsController.get('/:id', [checkToken, checkRole([
     }
 });
 
-DeliveryInstructionsController.post('/', [checkToken, checkRole([
-    AccessControlRole.EMPLOYEE_MANAGER,
-    AccessControlRole.EMPLOYEE_AGENT
-])], async (req: Request, res: Response, next: NextFunction) => {
+DeliveryInstructionsController.post('/', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const defaultDeliveryInstruction = await deliveryInstructionService.create(req.body, TokenHelper.getPayload(res).userId);
         res.json(defaultDeliveryInstruction);
@@ -46,10 +37,7 @@ DeliveryInstructionsController.post('/', [checkToken, checkRole([
     }
 });
 
-DeliveryInstructionsController.delete('/:id', [checkToken, checkRole([
-    AccessControlRole.EMPLOYEE_MANAGER,
-    AccessControlRole.EMPLOYEE_AGENT
-])], async (req: Request, res: Response, next: NextFunction) => {
+DeliveryInstructionsController.delete('/:id', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
         await deliveryInstructionService.delete(Number(req.params.id), TokenHelper.getPayload(res).userId);
         res.json({ ok: true });

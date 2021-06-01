@@ -10,7 +10,7 @@ const EmployeesController = Router();
 
 const employeeService = ServicesCollection.resolve(EmployeeService);
 
-EmployeesController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+EmployeesController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const employees = await employeeService.getAll(req.query, TokenHelper.getPayload(res).userId);
         res.json(employees);
@@ -19,7 +19,34 @@ EmployeesController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_
     }
 });
 
-EmployeesController.patch('/geolocation', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT, AccessControlRole.EMPLOYEE_DRIVER])], async (req: Request, res: Response, next: NextFunction) => {
+EmployeesController.get('/:id', [checkToken, checkRole([AccessControlRole.EMPLOYEE])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const employees = await employeeService.getById(Number(req.params.id), TokenHelper.getPayload(res).userId);
+        res.json(employees);
+    } catch (error) {
+        next(error);
+    }
+});
+
+EmployeesController.post('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const employee = await employeeService.create(req.body, TokenHelper.getPayload(res).userId);
+        res.json(employee);
+    } catch (error) {
+        next(error);
+    }
+});
+
+EmployeesController.put('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const employee = await employeeService.update(req.body, TokenHelper.getPayload(res).userId);
+        res.json(employee);
+    } catch (error) {
+        next(error);
+    }
+});
+
+EmployeesController.patch('/geolocation', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT, AccessControlRole.EMPLOYEE_DRIVER])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         await employeeService.updateGeolocation(req.body, TokenHelper.getPayload(res).userId);
         res.json({ ok: true });
@@ -28,7 +55,7 @@ EmployeesController.patch('/geolocation', [checkToken, checkRole([AccessControlR
     }
 });
 
-EmployeesController.get('/geolocation', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT, AccessControlRole.EMPLOYEE_DRIVER])], async (req: Request, res: Response, next: NextFunction) => {
+EmployeesController.get('/geolocation', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT, AccessControlRole.EMPLOYEE_DRIVER])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const employeesIds: number[] = (<string>req.query.employeesIds).split(',').map(x => Number(x));
 

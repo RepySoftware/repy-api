@@ -10,7 +10,7 @@ const SaleOrdersController = Router();
 
 const saleOrderService = ServicesCollection.resolve(SaleOrderService);
 
-SaleOrdersController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_MANAGER, AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+SaleOrdersController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const saleOrders = await saleOrderService.getAll(req.query, TokenHelper.getPayload(res).userId);
         res.json(saleOrders);
