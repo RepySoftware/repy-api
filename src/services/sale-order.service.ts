@@ -146,6 +146,14 @@ export class SaleOrderService {
             whereAnd.push({ dateOfIssue: { [Op.lte]: moment.utc(input.endDateOfIssue).toDate() } });
         }
 
+        if (input.startDeliveredAt) {
+            whereAnd.push({ deliveredAt: { [Op.gte]: moment.utc(input.startDeliveredAt).toDate() } });
+        }
+
+        if (input.endDeliveredAt) {
+            whereAnd.push({ deliveredAt: { [Op.lte]: moment.utc(input.endDeliveredAt).toDate() } });
+        }
+
         if (input.personCustomerId) {
             whereAnd.push({ personCustomerId: input.personCustomerId });
         }

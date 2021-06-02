@@ -10,6 +10,17 @@ const EmployeesController = Router();
 
 const employeeService = ServicesCollection.resolve(EmployeeService);
 
+EmployeesController.get('/geolocation', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT, AccessControlRole.EMPLOYEE_DRIVER])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const employeesIds: number[] = (<string>req.query.employeesIds).split(',').map(x => Number(x));
+
+        const employeesCoordinates = await employeeService.getCoordinates(employeesIds, TokenHelper.getPayload(res).userId);
+        res.json(employeesCoordinates);
+    } catch (error) {
+        next(error);
+    }
+});
+
 EmployeesController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const employees = await employeeService.getAll(req.query, TokenHelper.getPayload(res).userId);
@@ -50,17 +61,6 @@ EmployeesController.patch('/geolocation', [checkToken, checkRole([AccessControlR
     try {
         await employeeService.updateGeolocation(req.body, TokenHelper.getPayload(res).userId);
         res.json({ ok: true });
-    } catch (error) {
-        next(error);
-    }
-});
-
-EmployeesController.get('/geolocation', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT, AccessControlRole.EMPLOYEE_DRIVER])], async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const employeesIds: number[] = (<string>req.query.employeesIds).split(',').map(x => Number(x));
-
-        const employeesCoordinates = await employeeService.getCoordinates(employeesIds, TokenHelper.getPayload(res).userId);
-        res.json(employeesCoordinates);
     } catch (error) {
         next(error);
     }

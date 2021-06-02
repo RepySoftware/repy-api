@@ -1,4 +1,3 @@
-import { SaleOrderStatus } from "../../../common/enums/sale-order-status";
 import { PaginationFilter } from "../abstraction/pagination.filter";
 
 export interface SaleOrderFilter extends PaginationFilter {
@@ -6,6 +5,8 @@ export interface SaleOrderFilter extends PaginationFilter {
     employeeDriverId?: number;
     startDateOfIssue?: string;
     endDateOfIssue?: string;
+    startDeliveredAt?: string;
+    endDeliveredAt?: string;
     personCustomerId?: number;
     paymentMethodId?: number;
 }
