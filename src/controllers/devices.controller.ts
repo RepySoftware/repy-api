@@ -12,10 +12,7 @@ const DevicesController = Router();
 
 const deviceService = ServicesCollection.resolve(DeviceService);
 
-DevicesController.get('/', [checkToken, checkRole([
-    AccessControlRole.EMPLOYEE,
-    AccessControlRole.CUSTOMER
-])], async (req: Request, res: Response, next: NextFunction) => {
+DevicesController.get('/', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const devices = await deviceService.get(req.query.strategy ? String(req.query.strategy) : null, TokenHelper.getPayload(res).userId, req.query);
         res.json(devices);
@@ -24,10 +21,7 @@ DevicesController.get('/', [checkToken, checkRole([
     }
 });
 
-DevicesController.get('/:id', [checkToken, checkRole([
-    AccessControlRole.EMPLOYEE,
-    AccessControlRole.CUSTOMER
-])], async (req: Request, res: Response, next: NextFunction) => {
+DevicesController.get('/:id', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const device = await deviceService.getById(Number(req.params.id), TokenHelper.getPayload(res).userId);
         res.json(device);
