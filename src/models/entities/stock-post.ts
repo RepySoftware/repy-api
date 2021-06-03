@@ -14,6 +14,7 @@ export class StockPost extends Entity<StockPost> {
         depositProductId: number;
         quantity: number;
         observation?: string;
+        dateOfIssue: Date;
     }): StockPost {
         return new StockPost(input);
     }
@@ -38,6 +39,10 @@ export class StockPost extends Entity<StockPost> {
 
     @Column
     public observation?: string;
+
+    @AllowNull(false)
+    @Column
+    public dateOfIssue: Date;
 
     @AllowNull(false)
     @CreatedAt

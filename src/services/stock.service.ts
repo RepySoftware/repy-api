@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { Transaction } from "sequelize/types";
+import { Op, Transaction } from "sequelize";
 import { NotFoundException } from "../common/exceptions/not-fount.exception";
 import { Database } from "../data/database-config";
 import { CompanyBranch } from "../models/entities/company-branch";
@@ -8,12 +8,12 @@ import { Deposit } from "../models/entities/deposit";
 import { DepositProduct } from "../models/entities/deposit-product";
 import { Product } from "../models/entities/product";
 import { StockPost } from "../models/entities/stock-post";
-import { PaginationFilter } from "../models/input-models/abstraction/pagination.filter";
 import { StockPostFilter } from "../models/input-models/filter/stock-post.filter";
 import { StockPostInputModel } from "../models/input-models/stock-post.input-model";
 import { DepositViewModel } from "../models/view-models/deposit.view-model";
 import { StockPostViewModel } from "../models/view-models/stock-post.view-model";
 import { UserService } from "./user.service";
+import * as moment from 'moment-timezone';
 
 @injectable()
 export class StockService {
@@ -40,6 +40,9 @@ export class StockService {
                 {
                     model: DepositProduct,
                     as: 'products',
+                    where: {
+                        quantity: { [Op.gt]: 0 }
+                    },
                     separate: true,
                     include: [
                         {
@@ -77,6 +80,9 @@ export class StockService {
                 {
                     model: DepositProduct,
                     as: 'products',
+                    where: {
+                        quantity: { [Op.gt]: 0 }
+                    },
                     separate: true,
                     include: [
                         {
@@ -144,13 +150,13 @@ export class StockService {
             ],
             limit,
             offset,
-            order: [['createdAt', 'DESC']]
+            order: [['dateOfIssue', 'DESC']]
         });
 
         return posts.map(StockPostViewModel.fromEntity);
     }
 
-    public async post(input: StockPostInputModel, userId: number): Promise<StockPostViewModel> {
+    public async createPost(input: StockPostInputModel, userId: number): Promise<StockPostViewModel> {
 
         const user = await this._userService.getEntityById(userId);
 
@@ -194,7 +200,9 @@ export class StockService {
             const stockPost: StockPost = StockPost.create({
                 depositId: input.depositId,
                 depositProductId: depositProduct.id,
-                quantity: input.quantity
+                quantity: input.quantity,
+                observation: input.observation,
+                dateOfIssue: moment.utc(input.dateOfIssue).toDate()
             });
 
             await stockPost.save({ transaction });
@@ -211,5 +219,54 @@ export class StockService {
             await transaction.rollback();
             throw error;
         }
+    }
+
+    public async deletePost(postId: number, userId: number): Promise<void> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const stockPost: StockPost = await StockPost.findOne({
+            where: {
+                id: postId,
+                '$deposit.companyBranch.companyId$': user.companyId
+            },
+            include: [
+                {
+                    model: Deposit,
+                    as: 'deposit',
+                    include: [
+                        {
+                            model: CompanyBranch,
+                            as: 'companyBranch'
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!stockPost)
+            throw new NotFoundException('Lançamento não encontrado');
+
+        const depositProduct: DepositProduct = await DepositProduct.findOne({
+            where: {
+                id: stockPost.depositProductId
+            }
+        });
+
+        const transaction: Transaction = await this._database.sequelize.transaction();
+
+        try {
+
+            depositProduct.quantity -= stockPost.quantity;
+            await depositProduct.save({ transaction });
+
+            await stockPost.destroy({ transaction });
+
+            await transaction.commit();
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+
     }
 }

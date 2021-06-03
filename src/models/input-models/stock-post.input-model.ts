@@ -3,4 +3,5 @@ export interface StockPostInputModel {
     companyBranchProductId: number;
     quantity: number;
     observation?: string;
+    dateOfIssue: string;
 }

@@ -37,10 +37,19 @@ StockController.get('/deposits/:depositId', [checkToken, checkRole([AccessContro
     }
 });
 
-StockController.post('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+StockController.post('/posts', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const stockPost = await stockService.post(req.body, TokenHelper.getPayload(res).userId);
+        const stockPost = await stockService.createPost(req.body, TokenHelper.getPayload(res).userId);
         res.json(stockPost);
+    } catch (error) {
+        next(error);
+    }
+});
+
+StockController.delete('/posts/:postId', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await stockService.deletePost(Number(req.params.postId), TokenHelper.getPayload(res).userId);
+        res.json({ ok: true });
     } catch (error) {
         next(error);
     }

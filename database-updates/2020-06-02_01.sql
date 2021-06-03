@@ -15,3 +15,6 @@ ALTER TABLE StockPosts ADD CONSTRAINT FK_StockPosts_DepositsProducts FOREIGN KEY
 
 ALTER TABLE DepositsProducts ADD CONSTRAINT DepositsProducts_Deposits FOREIGN KEY (DepositID) REFERENCES Deposits(ID);
 ALTER TABLE DepositsProducts ADD CONSTRAINT DepositsProducts_CompanyBranchesProducts FOREIGN KEY (CompanyBranchProductID) REFERENCES CompanyBranchesProducts(ID);
+
+ALTER TABLE StockPosts ADD DateOfIssue datetime DEFAULT current_timestamp NOT NULL;
+ALTER TABLE StockPosts CHANGE DateOfIssue DateOfIssue datetime DEFAULT current_timestamp NOT NULL AFTER Observation;
