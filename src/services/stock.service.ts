@@ -14,6 +14,7 @@ import { DepositViewModel } from "../models/view-models/deposit.view-model";
 import { StockPostViewModel } from "../models/view-models/stock-post.view-model";
 import { UserService } from "./user.service";
 import * as moment from 'moment-timezone';
+import { DepositTransferInputModel } from "../models/input-models/deposit-transfer.input-model";
 
 @injectable()
 export class StockService {
@@ -156,7 +157,7 @@ export class StockService {
         return posts.map(StockPostViewModel.fromEntity);
     }
 
-    public async createPost(input: StockPostInputModel, userId: number): Promise<StockPostViewModel> {
+    public async createPost(input: StockPostInputModel, userId: number, options?: { transaction?: Transaction }): Promise<StockPostViewModel> {
 
         const user = await this._userService.getEntityById(userId);
 
@@ -183,7 +184,7 @@ export class StockService {
             }
         });
 
-        const transaction: Transaction = await this._database.sequelize.transaction();
+        const transaction: Transaction = options?.transaction || await this._database.sequelize.transaction();
 
         try {
 
@@ -211,7 +212,8 @@ export class StockService {
 
             await depositProduct.save({ transaction });
 
-            await transaction.commit();
+            if (!options?.transaction)
+                await transaction.commit();
 
             return StockPostViewModel.fromEntity(stockPost);
 
@@ -268,5 +270,86 @@ export class StockService {
             throw error;
         }
 
+    }
+
+    public async depositTransfer(input: DepositTransferInputModel, userId: number): Promise<void> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const originDeposit: Deposit = await Deposit.findOne({
+            where: {
+                id: input.originDepositId,
+                '$companyBranch.companyId$': user.companyId
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                }
+            ]
+        });
+
+        const destinationDeposit: Deposit = await Deposit.findOne({
+            where: {
+                id: input.destinationDepositId,
+                '$companyBranch.companyId$': user.companyId
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                }
+            ]
+        });
+
+        if (!originDeposit || !destinationDeposit)
+            throw new NotFoundException('Depósito não encontrado');
+
+        const companyBranchProduct: CompanyBranchProduct = await CompanyBranchProduct.findOne({
+            where: {
+                id: input.companyBranchProductId,
+                '$companyBranch.companyId$': user.companyId
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                }
+            ]
+        });
+
+        if (!companyBranchProduct)
+            throw new NotFoundException('Produto não encontrado');
+
+        const observation = `[Transferência '${originDeposit.name}' => '${destinationDeposit.name}']${input.observation ? ' - ' + input.observation : ''}`;
+
+        const dateOfIssue = input.dateOfIssue || moment.utc().toISOString();
+
+        const transaction: Transaction = await this._database.sequelize.transaction();
+
+        try {
+
+            await this.createPost({
+                companyBranchProductId: input.companyBranchProductId,
+                depositId: input.originDepositId,
+                quantity: input.quantity * (-1),
+                dateOfIssue,
+                observation
+            }, userId, { transaction });
+
+            await this.createPost({
+                companyBranchProductId: input.companyBranchProductId,
+                depositId: input.destinationDepositId,
+                quantity: input.quantity,
+                dateOfIssue,
+                observation
+            }, userId, { transaction });
+
+            await transaction.commit();
+
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
     }
 }

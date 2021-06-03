@@ -12,7 +12,7 @@ const depositService = ServicesCollection.resolve(DepositService);
 
 DepositsController.get('/', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const deposits = await depositService.getAll(TokenHelper.getPayload(res).userId);
+        const deposits = await depositService.getAll(req.query, TokenHelper.getPayload(res).userId);
         res.json(deposits);
     } catch (error) {
         next(error);

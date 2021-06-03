@@ -3,6 +3,7 @@ import { NotFoundException } from "../common/exceptions/not-fount.exception";
 import { CompanyBranch } from "../models/entities/company-branch";
 import { Deposit } from "../models/entities/deposit";
 import { DepositInputModel } from "../models/input-models/deposit.input-model";
+import { DepositFilter } from "../models/input-models/filter/deposit.filter";
 import { DepositViewModel } from "../models/view-models/deposit.view-model";
 import { UserService } from "./user.service";
 
@@ -13,9 +14,17 @@ export class DepositService {
         @inject(UserService) private _userService: UserService
     ) { }
 
-    public async getAll(userId: number): Promise<DepositViewModel[]> {
+    public async getAll(filter: DepositFilter, userId: number): Promise<DepositViewModel[]> {
 
         const user = await this._userService.getEntityById(userId);
+
+        let where = {
+            '$companyBranch.companyId$': user.companyId,
+        }
+
+        if (filter.companyBranchId) {
+            where['companyBranchId'] = filter.companyBranchId;
+        }
 
         const deposits: Deposit[] = await Deposit.findAll({
             include: [
@@ -24,9 +33,7 @@ export class DepositService {
                     as: 'companyBranch'
                 }
             ],
-            where: {
-                '$companyBranch.companyId$': user.companyId
-            },
+            where,
             order: [['companyBranch', 'name', 'ASC'], ['name', 'ASC']]
         });
 
