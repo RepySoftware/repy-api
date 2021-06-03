@@ -11,6 +11,7 @@ import { PaymentMethodsController } from "./controllers/payment-methods.controll
 import { PersonsController } from "./controllers/persons.controller";
 import { ProductsController } from "./controllers/product.controller";
 import { SaleOrdersController } from "./controllers/sale-orders.controller";
+import { StockController } from "./controllers/stock.controller";
 import { VehiclesController } from "./controllers/vehicles.controller";
 import { VERSION } from "./version";
 
@@ -34,5 +35,6 @@ routes.use('/deliveries', DeliveriesController);
 routes.use('/deliveryInstructions', DeliveryInstructionsController);
 routes.use('/deposits', DepositsController);
 routes.use('/vehicles', VehiclesController);
+routes.use('/stock', StockController);
 
 export { routes };

@@ -1,7 +1,8 @@
-import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, Table, UpdatedAt } from "sequelize-typescript";
+import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, HasMany, Table, UpdatedAt } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
 import { Company } from "./company";
 import { CompanyBranch } from "./company-branch";
+import { DepositProduct } from "./deposit-product";
 
 @Table({
     tableName: 'Deposits',
@@ -36,4 +37,7 @@ export class Deposit extends Entity<Deposit> {
     @UpdatedAt
     @Column
     public updatedAt: Date;
+
+    @HasMany(() => DepositProduct)
+    public products: DepositProduct[];
 }

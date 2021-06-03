@@ -30,7 +30,6 @@ DevicesController.get('/:id', [checkToken], async (req: Request, res: Response, 
     }
 });
 
-
 DevicesController.post('/syncData', async (req: Request, res: Response, next: NextFunction) => {
     try {
 

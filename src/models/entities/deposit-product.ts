@@ -4,10 +4,18 @@ import { CompanyBranchProduct } from "./company-branch-product";
 import { Deposit } from "./deposit";
 
 @Table({
-    tableName: 'DepositsCompanyBranchProducts',
-    timestamps: true
+    tableName: 'DepositsProducts',
+    timestamps: false
 })
-export class DepositCompanyBranchProduct extends Entity<DepositCompanyBranchProduct> {
+export class DepositProduct extends Entity<DepositProduct> {
+
+    public static create(input: {
+        depositId: number;
+        companyBranchProductId: number;
+        quantity: number;
+    }) {
+        return new DepositProduct(input);
+    }
 
     @ForeignKey(() => Deposit)
     @AllowNull(false)
