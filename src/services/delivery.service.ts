@@ -15,13 +15,15 @@ import { SaleOrderStatus } from "../common/enums/sale-order-status";
 import { DeliveryInstruction } from "../models/entities/delivery-instruction";
 import { DeliveryInstructionStatus } from "../common/enums/delivery-instruction-status";
 import { SaleOrderService } from "./sale-order.service";
+import { StockService } from "./stock.service";
 
 @injectable()
 export class DeliveryService {
 
     constructor(
         @inject(UserService) private _userService: UserService,
-        @inject(Database) private _database: Database
+        @inject(Database) private _database: Database,
+        @inject(StockService) private _stockService: StockService
     ) { }
 
     public async get(userId: number, strategy: string): Promise<DeliveryViewModel[] | DriverDeliveryViewModel[]> {
@@ -39,7 +41,8 @@ export class DeliveryService {
         await (new DeliveryFinalizeStrategy(
             strategy,
             this._userService,
-            this._database
+            this._database,
+            this._stockService
         ).call({ input, userId }));
     }
 

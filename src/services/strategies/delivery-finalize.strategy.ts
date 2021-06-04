@@ -20,13 +20,17 @@ import { DeliveryInstruction } from "../../models/entities/delivery-instruction"
 import { SaleOrderService } from "../sale-order.service";
 import { SaleOrderPayment } from "../../models/entities/sale-order-payment";
 import { User } from "../../models/entities/user";
+import { StockService } from "../stock.service";
+import { Vehicle } from "../../models/entities/vehicle";
+import { Deposit } from "../../models/entities/deposit";
 
 export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalizeInputModel, userId: number }, Promise<void>> {
 
     constructor(
         type: string,
         private _userService: UserService,
-        private _database: Database
+        private _database: Database,
+        private _stockService: StockService
     ) {
         super(type, ['saleOrder', 'deliveryInstruction']);
     }
@@ -53,6 +57,22 @@ export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalize
                     model: SaleOrderPayment,
                     as: 'payments',
                     separate: true
+                },
+                {
+                    model: Employee,
+                    as: 'employeeDriver',
+                    include: [
+                        {
+                            model: Vehicle,
+                            as: 'vehicle',
+                            include: [
+                                {
+                                    model: Deposit,
+                                    as: 'deposit'
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     model: SaleOrderProduct,
@@ -146,6 +166,22 @@ export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalize
             if (saleOrder.products.find(p => p.companyBranchProduct.product.isGas)) {
                 saleOrder.personCustomer.isGasCustomer = true;
                 await saleOrder.personCustomer.save({ transaction });
+            }
+
+            if (saleOrder.employeeDriver?.vehicle?.deposit) {
+
+                const createPostsPromises = saleOrder.products.map(p => this._stockService.createPost({
+                    companyBranchProductId: p.companyBranchProductId,
+                    depositId: saleOrder.employeeDriver?.vehicle?.depositId,
+                    dateOfIssue: moment.utc().toISOString(),
+                    quantity: p.quantity * (-1),
+                    observation: `[Venda #${saleOrder.id}]`,
+                }, params.userId, {
+                    transaction,
+                    saleOrderId: saleOrder.id
+                }));
+
+                await Promise.all(createPostsPromises);
             }
 
             await transaction.commit();

@@ -2,6 +2,7 @@ import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, Table, UpdatedAt }
 import { Entity } from "../abstraction/entity";
 import { Deposit } from "./deposit";
 import { DepositProduct } from "./deposit-product";
+import { SaleOrder } from "./sale-order";
 
 @Table({
     tableName: 'StockPosts',
@@ -13,6 +14,7 @@ export class StockPost extends Entity<StockPost> {
         depositId: number;
         depositProductId: number;
         quantity: number;
+        saleOrderId?: number;
         observation?: string;
         dateOfIssue: Date;
     }): StockPost {
@@ -39,6 +41,12 @@ export class StockPost extends Entity<StockPost> {
 
     @Column
     public observation?: string;
+
+    @ForeignKey(() => SaleOrder)
+    @Column
+    public saleOrderId?: number;
+    @BelongsTo(() => SaleOrder, 'saleOrderId')
+    public saleOrder?: SaleOrder;
 
     @AllowNull(false)
     @Column

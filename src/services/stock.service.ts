@@ -157,7 +157,7 @@ export class StockService {
         return posts.map(StockPostViewModel.fromEntity);
     }
 
-    public async createPost(input: StockPostInputModel, userId: number, options?: { transaction?: Transaction }): Promise<StockPostViewModel> {
+    public async createPost(input: StockPostInputModel, userId: number, options?: { transaction?: Transaction, saleOrderId?: number }): Promise<StockPostViewModel> {
 
         const user = await this._userService.getEntityById(userId);
 
@@ -203,6 +203,7 @@ export class StockService {
                 depositProductId: depositProduct.id,
                 quantity: input.quantity,
                 observation: input.observation,
+                saleOrderId: options?.saleOrderId,
                 dateOfIssue: moment.utc(input.dateOfIssue).toDate()
             });
 
