@@ -10,10 +10,18 @@ const ProductsController = Router();
 
 const productService = ServicesCollection.resolve(ProductService);
 
-
 ProductsController.get('/sales', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const products = await productService.getAllForSales(req.query, Number(req.query.companyBranchId), TokenHelper.getPayload(res).userId);
+        res.json(products);
+    } catch (error) {
+        next(error);
+    }
+});
+
+ProductsController.get('/:companyBranchProductId/related', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const products = await productService.getRelated(Number(req.params.companyBranchProductId), TokenHelper.getPayload(res).userId);
         res.json(products);
     } catch (error) {
         next(error);

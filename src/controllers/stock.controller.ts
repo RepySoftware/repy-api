@@ -48,8 +48,8 @@ StockController.post('/depositTransfer', [checkToken, checkRole([AccessControlRo
 
 StockController.post('/posts', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const stockPost = await stockService.createPost(req.body, TokenHelper.getPayload(res).userId);
-        res.json(stockPost);
+        const stockPosts = await stockService.createPosts(req.body, TokenHelper.getPayload(res).userId);
+        res.json(stockPosts);
     } catch (error) {
         next(error);
     }

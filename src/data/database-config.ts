@@ -28,6 +28,7 @@ import { Deposit } from "../models/entities/deposit";
 import { Vehicle } from "../models/entities/vehicle";
 import { StockPost } from "../models/entities/stock-post";
 import { DepositProduct } from "../models/entities/deposit-product";
+import { RelatedProduct } from "../models/entities/related-product";
 
 @injectable()
 export class Database {
@@ -70,7 +71,8 @@ export class Database {
             Deposit,
             Vehicle,
             StockPost,
-            DepositProduct
+            DepositProduct,
+            RelatedProduct
         ]);
 
         this.sequelize.define(ViewPersonSearch.modelName, ViewPersonSearch.model, {

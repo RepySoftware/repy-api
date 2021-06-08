@@ -170,15 +170,17 @@ export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalize
 
             if (saleOrder.employeeDriver?.vehicle?.deposit) {
 
-                const createPostsPromises = saleOrder.products.map(p => this._stockService.createPost({
-                    companyBranchProductId: p.companyBranchProductId,
-                    depositId: saleOrder.employeeDriver?.vehicle?.depositId,
-                    dateOfIssue: moment.utc().toISOString(),
-                    quantity: p.quantity * (-1),
-                    observation: `[Venda #${saleOrder.id}]`,
-                }, params.userId, {
-                    transaction,
-                    saleOrderId: saleOrder.id
+                const createPostsPromises = saleOrder.products.map(p => this._stockService.createPosts([
+                    {
+                        companyBranchProductId: p.companyBranchProductId,
+                        depositId: saleOrder.employeeDriver?.vehicle?.depositId,
+                        dateOfIssue: moment.utc().toISOString(),
+                        quantity: p.quantity * (-1),
+                        observation: `[Venda #${saleOrder.id}]`,
+                        saleOrderId: saleOrder.id
+                    }
+                ], params.userId, {
+                    transaction
                 }));
 
                 await Promise.all(createPostsPromises);

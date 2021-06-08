@@ -5,9 +5,11 @@ import { CompanyBranchProduct } from "../models/entities/company-branch-product"
 import { CompanyBranchProductPrice } from "../models/entities/company-branch-product-price";
 import { Product } from "../models/entities/product";
 import { ProductCategory } from "../models/entities/product-category";
+import { RelatedProduct } from "../models/entities/related-product";
 import { ProductFilter } from "../models/input-models/filter/product.filter";
 import { CompanyBranchProductViewModel } from "../models/view-models/company-branch-product.view-model";
 import { ProductViewModel } from "../models/view-models/product.view-model";
+import { RelatedProductViewModel } from "../models/view-models/related-product.view-model";
 import { UserService } from "./user.service";
 
 @injectable()
@@ -113,5 +115,51 @@ export class ProductService {
         });
 
         return products.map(ProductViewModel.fromEntity);
+    }
+
+    public async getRelated(companyBranchProductId: number, userId: number): Promise<RelatedProductViewModel[]> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const relatedProducts: RelatedProduct[] = await RelatedProduct.findAll({
+            where: {
+                companyBranchProductId,
+                '$companyBranchProduct.companyBranch.companyId$': user.companyId,
+                '$referencedCompanyBranchProduct.companyBranch.companyId$': user.companyId
+            },
+            include: [
+                {
+                    model: CompanyBranchProduct,
+                    as: 'companyBranchProduct',
+                    include: [
+                        {
+                            model: CompanyBranch,
+                            as: 'companyBranch'
+                        },
+                        {
+                            model: Product,
+                            as: 'product'
+                        }
+                    ]
+                },
+                {
+                    model: CompanyBranchProduct,
+                    as: 'referencedCompanyBranchProduct',
+                    include: [
+                        {
+                            model: CompanyBranch,
+                            as: 'companyBranch'
+                        },
+                        {
+                            model: Product,
+                            as: 'product'
+                        }
+                    ]
+                }
+            ],
+            order: [['companyBranchProduct', 'product', 'name', 'ASC']]
+        });
+
+        return relatedProducts.map(RelatedProductViewModel.fromEntity);
     }
 }

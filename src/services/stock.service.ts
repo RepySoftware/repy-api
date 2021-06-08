@@ -81,9 +81,6 @@ export class StockService {
                 {
                     model: DepositProduct,
                     as: 'products',
-                    where: {
-                        quantity: { [Op.gt]: 0 }
-                    },
                     separate: true,
                     include: [
                         {
@@ -157,13 +154,13 @@ export class StockService {
         return posts.map(StockPostViewModel.fromEntity);
     }
 
-    public async createPost(input: StockPostInputModel, userId: number, options?: { transaction?: Transaction, saleOrderId?: number }): Promise<StockPostViewModel> {
+    public async createPosts(input: StockPostInputModel[], userId: number, options?: { transaction?: Transaction }): Promise<StockPostViewModel[]> {
 
         const user = await this._userService.getEntityById(userId);
 
-        const companyBranchProduct: CompanyBranchProduct = await CompanyBranchProduct.findOne({
+        const companyBranchProducts: CompanyBranchProduct[] = await CompanyBranchProduct.findAll({
             where: {
-                id: input.companyBranchProductId,
+                id: { [Op.in]: input.map(x => x.companyBranchProductId) },
                 '$companyBranch.companyId$': user.companyId
             },
             include: [
@@ -174,49 +171,58 @@ export class StockService {
             ]
         });
 
-        if (!companyBranchProduct)
-            throw new NotFoundException('Produto não encontrado');
-
-        let depositProduct: DepositProduct = await DepositProduct.findOne({
-            where: {
-                depositId: input.depositId,
-                companyBranchProductId: companyBranchProduct.id
-            }
-        });
+        const stockPosts: StockPost[] = [];
 
         const transaction: Transaction = options?.transaction || await this._database.sequelize.transaction();
 
         try {
 
-            if (!depositProduct) {
-                depositProduct = DepositProduct.create({
-                    depositId: input.depositId,
-                    companyBranchProductId: companyBranchProduct.id,
-                    quantity: 0
+            for (const inputItem of input) {
+
+                const companyBranchProduct = companyBranchProducts.find(cbp => cbp.id == inputItem.companyBranchProductId);
+
+                if (!companyBranchProduct)
+                    throw new NotFoundException('Produto não encontrado');
+
+                let depositProduct: DepositProduct = await DepositProduct.findOne({
+                    where: {
+                        depositId: inputItem.depositId,
+                        companyBranchProductId: companyBranchProduct.id
+                    }
                 });
 
+                if (!depositProduct) {
+                    depositProduct = DepositProduct.create({
+                        depositId: inputItem.depositId,
+                        companyBranchProductId: companyBranchProduct.id,
+                        quantity: 0
+                    });
+
+                    await depositProduct.save({ transaction });
+                }
+
+                const stockPost: StockPost = StockPost.create({
+                    depositId: inputItem.depositId,
+                    depositProductId: depositProduct.id,
+                    quantity: inputItem.quantity,
+                    observation: inputItem.observation,
+                    saleOrderId: inputItem?.saleOrderId,
+                    dateOfIssue: moment.utc(inputItem.dateOfIssue).toDate()
+                });
+
+                await stockPost.save({ transaction });
+
+                depositProduct.quantity += inputItem.quantity;
+
                 await depositProduct.save({ transaction });
+
+                stockPosts.push(stockPost);
             }
-
-            const stockPost: StockPost = StockPost.create({
-                depositId: input.depositId,
-                depositProductId: depositProduct.id,
-                quantity: input.quantity,
-                observation: input.observation,
-                saleOrderId: options?.saleOrderId,
-                dateOfIssue: moment.utc(input.dateOfIssue).toDate()
-            });
-
-            await stockPost.save({ transaction });
-
-            depositProduct.quantity += input.quantity;
-
-            await depositProduct.save({ transaction });
 
             if (!options?.transaction)
                 await transaction.commit();
 
-            return StockPostViewModel.fromEntity(stockPost);
+            return stockPosts.map(StockPostViewModel.fromEntity);
 
         } catch (error) {
             await transaction.rollback();
@@ -273,13 +279,18 @@ export class StockService {
 
     }
 
-    public async depositTransfer(input: DepositTransferInputModel, userId: number): Promise<void> {
+    public async depositTransfer(input: DepositTransferInputModel[], userId: number): Promise<void> {
 
         const user = await this._userService.getEntityById(userId);
 
-        const originDeposit: Deposit = await Deposit.findOne({
+        const deposits: Deposit[] = await Deposit.findAll({
             where: {
-                id: input.originDepositId,
+                id: {
+                    [Op.in]: [
+                        ...input.map(x => x.originDepositId),
+                        ...input.map(x => x.destinationDepositId)
+                    ]
+                },
                 '$companyBranch.companyId$': user.companyId
             },
             include: [
@@ -290,9 +301,9 @@ export class StockService {
             ]
         });
 
-        const destinationDeposit: Deposit = await Deposit.findOne({
+        const companyBranchProducts: CompanyBranchProduct[] = await CompanyBranchProduct.findAll({
             where: {
-                id: input.destinationDepositId,
+                id: { [Op.in]: input.map(x => x.companyBranchProductId) },
                 '$companyBranch.companyId$': user.companyId
             },
             include: [
@@ -302,49 +313,45 @@ export class StockService {
                 }
             ]
         });
-
-        if (!originDeposit || !destinationDeposit)
-            throw new NotFoundException('Depósito não encontrado');
-
-        const companyBranchProduct: CompanyBranchProduct = await CompanyBranchProduct.findOne({
-            where: {
-                id: input.companyBranchProductId,
-                '$companyBranch.companyId$': user.companyId
-            },
-            include: [
-                {
-                    model: CompanyBranch,
-                    as: 'companyBranch'
-                }
-            ]
-        });
-
-        if (!companyBranchProduct)
-            throw new NotFoundException('Produto não encontrado');
-
-        const observation = `[Transferência '${originDeposit.name}' => '${destinationDeposit.name}']${input.observation ? ' - ' + input.observation : ''}`;
-
-        const dateOfIssue = input.dateOfIssue || moment.utc().toISOString();
 
         const transaction: Transaction = await this._database.sequelize.transaction();
 
         try {
 
-            await this.createPost({
-                companyBranchProductId: input.companyBranchProductId,
-                depositId: input.originDepositId,
-                quantity: input.quantity * (-1),
-                dateOfIssue,
-                observation
-            }, userId, { transaction });
+            for (const inputItem of input) {
 
-            await this.createPost({
-                companyBranchProductId: input.companyBranchProductId,
-                depositId: input.destinationDepositId,
-                quantity: input.quantity,
-                dateOfIssue,
-                observation
-            }, userId, { transaction });
+                const originDeposit = deposits.find(od => od.id == inputItem.originDepositId);
+                const destinationDeposit = deposits.find(dd => dd.id == inputItem.destinationDepositId);
+
+                if (!originDeposit || !destinationDeposit)
+                    throw new NotFoundException('Depósito não encontrado');
+
+                const companyBranchProduct = companyBranchProducts.find(cbp => cbp.id == inputItem.companyBranchProductId);
+
+                if (!companyBranchProduct)
+                    throw new NotFoundException('Produto não encontrado');
+
+                const observation = `[Transferência '${originDeposit.name}' => '${destinationDeposit.name}']${inputItem.observation ? ' - ' + inputItem.observation : ''}`;
+
+                const dateOfIssue = inputItem.dateOfIssue || moment.utc().toISOString();
+
+                await this.createPosts([
+                    {
+                        companyBranchProductId: inputItem.companyBranchProductId,
+                        depositId: inputItem.originDepositId,
+                        quantity: inputItem.quantity * (-1),
+                        dateOfIssue,
+                        observation
+                    },
+                    {
+                        companyBranchProductId: inputItem.companyBranchProductId,
+                        depositId: inputItem.destinationDepositId,
+                        quantity: inputItem.quantity,
+                        dateOfIssue,
+                        observation
+                    }
+                ], userId, { transaction });
+            }
 
             await transaction.commit();
 
