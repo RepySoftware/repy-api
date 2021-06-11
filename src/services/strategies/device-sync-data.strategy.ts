@@ -55,6 +55,8 @@ export class DeviceSyncDataStrategy extends Strategy<DeviceSyncDataInputModel, P
 
             await device.deviceGasLevel.save({ transaction });
 
+            await device.deviceGasLevel.historyRead({ transaction });
+
             await transaction.commit();
         } catch (error) {
             await transaction.rollback();

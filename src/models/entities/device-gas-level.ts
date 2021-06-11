@@ -5,6 +5,9 @@ import * as moment from 'moment-timezone';
 import { DeviceIsOnline } from "../abstraction/device-is-online";
 import { Device } from "./device";
 import { DeviceVerifyNotification, DeviceVerifyNotificationResult } from "../abstraction/device-verify-notification";
+import { CONFIG } from "../../config";
+import { Transaction } from "sequelize/types";
+import { DeviceGasLevelHistoryRead } from "./device-gas-level-history-read";
 
 @Table({
     tableName: 'DevicesGasLevels',
@@ -40,6 +43,14 @@ export class DeviceGasLevel extends Entity<DeviceGasLevel> implements DeviceIsOn
     @Column
     public lastWeightUpdate: Date;
 
+    @AllowNull(false)
+    @Column
+    public lastHistoryRead: Date;
+
+    @AllowNull(false)
+    @Column
+    public alreadyHistoryRead: boolean;
+
     public getCylinderWeight(): number {
         return this.cylinderWeight || (this.cylinder ? this.cylinder.defaultCylinderWeight : null);
     }
@@ -51,6 +62,35 @@ export class DeviceGasLevel extends Entity<DeviceGasLevel> implements DeviceIsOn
     public setCurrentWeight(value: number): void {
         this.currentWeight = value;
         this.lastWeightUpdate = moment().toDate();
+    }
+
+    public async historyRead(options?: { transaction?: Transaction }): Promise<void> {
+
+        const intervalOk = moment.utc().diff(moment.utc(this.lastHistoryRead), 'minutes')
+            >= CONFIG.DEVICE_GAS_LEVEL_HISTORY_READ_INTERVAL_MINUTES;
+
+        if (!this.alreadyHistoryRead && intervalOk) {
+
+            const historyRead = DeviceGasLevelHistoryRead.create({
+                deviceGasLevelId: this.id,
+                cylinderWeight: this.cylinderWeight,
+                contentWeight: this.contentWeight,
+                weight: this.currentWeight
+            });
+
+            await historyRead.save({ transaction: options?.transaction });
+
+            this.alreadyHistoryRead = true;
+            this.lastHistoryRead = moment.utc().toDate();
+
+            await this.save({ transaction: options?.transaction });
+
+        } else if (this.alreadyHistoryRead && intervalOk) {
+
+            this.alreadyHistoryRead = false;
+
+            await this.save({ transaction: options?.transaction });
+        }
     }
 
     public calculePercentage(): number {
@@ -112,7 +152,7 @@ export class DeviceGasLevel extends Entity<DeviceGasLevel> implements DeviceIsOn
             percentage >= device.deviceGasLevel.percentageToNotify
             && device.notificationConfiguration.alreadyNotified
         ) {
-            device.notificationConfiguration.alreadyNotified = true;
+            device.notificationConfiguration.alreadyNotified = false;
             await device.notificationConfiguration.save();
         }
 

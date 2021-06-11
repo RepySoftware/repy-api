@@ -29,6 +29,7 @@ import { Vehicle } from "../models/entities/vehicle";
 import { StockPost } from "../models/entities/stock-post";
 import { DepositProduct } from "../models/entities/deposit-product";
 import { RelatedProduct } from "../models/entities/related-product";
+import { DeviceGasLevelHistoryRead } from "../models/entities/device-gas-level-history-read";
 
 @injectable()
 export class Database {
@@ -72,7 +73,8 @@ export class Database {
             Vehicle,
             StockPost,
             DepositProduct,
-            RelatedProduct
+            RelatedProduct,
+            DeviceGasLevelHistoryRead
         ]);
 
         this.sequelize.define(ViewPersonSearch.modelName, ViewPersonSearch.model, {

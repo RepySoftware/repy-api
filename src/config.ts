@@ -18,7 +18,9 @@ export const CONFIG: {
     TWILIO_WHATS_APP_FROM: string,
 
     ZENVIA_TOKEN: string,
-    GOOGLE_KEY: string
+    GOOGLE_KEY: string,
+
+    DEVICE_GAS_LEVEL_HISTORY_READ_INTERVAL_MINUTES: number
 
 } = process.env as any;
 
