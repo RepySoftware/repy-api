@@ -1,6 +1,7 @@
 import { DeviceGasLevel } from "../entities/device-gas-level";
 import { CylinderViewModel } from "./cylinder.view-model";
 import { DateHelper } from "../../common/helpers/date.helper";
+import { DeviceGasLevelStatus } from "../../common/enums/device-gas-level-status";
 
 export class DeviceGasLevelViewModel {
 
@@ -12,8 +13,8 @@ export class DeviceGasLevelViewModel {
     public percentageToNotify?: number;
     public setTare: boolean;
     public lastWeightUpdate: string;
-
     public percentage: number;
+    public status: DeviceGasLevelStatus;
 
     public static fromEntity(dgl: DeviceGasLevel): DeviceGasLevelViewModel {
 
@@ -28,6 +29,7 @@ export class DeviceGasLevelViewModel {
         device.setTare = dgl.setTare;
         device.lastWeightUpdate = DateHelper.toStringViewModel(dgl.lastWeightUpdate);
         device.percentage = dgl.calculePercentage();
+        device.status = dgl.getStatus();
 
         return device;
     }

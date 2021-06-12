@@ -8,6 +8,7 @@ import { DeviceVerifyNotification, DeviceVerifyNotificationResult } from "../abs
 import { CONFIG } from "../../config";
 import { Transaction } from "sequelize/types";
 import { DeviceGasLevelHistoryRead } from "./device-gas-level-history-read";
+import { DeviceGasLevelStatus } from "../../common/enums/device-gas-level-status";
 
 @Table({
     tableName: 'DevicesGasLevels',
@@ -50,6 +51,14 @@ export class DeviceGasLevel extends Entity<DeviceGasLevel> implements DeviceIsOn
     @AllowNull(false)
     @Column
     public alreadyHistoryRead: boolean;
+
+    @AllowNull(false)
+    @Column
+    public warningPercentage: number;
+
+    @AllowNull(false)
+    @Column
+    public dangerPercentage: number;
 
     public getCylinderWeight(): number {
         return this.cylinderWeight || (this.cylinder ? this.cylinder.defaultCylinderWeight : null);
@@ -107,6 +116,18 @@ export class DeviceGasLevel extends Entity<DeviceGasLevel> implements DeviceIsOn
             percentage = 100;
 
         return percentage;
+    }
+
+    public getStatus(): DeviceGasLevelStatus {
+
+        const percentage = this.calculePercentage();
+
+        if (percentage <= this.dangerPercentage)
+            return DeviceGasLevelStatus.DANGER;
+        else if (percentage <= this.warningPercentage)
+            return DeviceGasLevelStatus.WARNING;
+        else
+            return DeviceGasLevelStatus.SAFE;
     }
 
     public isOnline(device: Device): boolean {
