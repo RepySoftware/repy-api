@@ -11,6 +11,18 @@ import { ProductCategory } from "./product-category";
 })
 export class Product extends Entity<Product> {
 
+    public static create(input: {
+        companyId: number;
+        categoryId: number;
+        code: string;
+        name: string;
+        description: string;
+        measurementUnit: MeasurementUnit;
+        isGas: boolean;
+    }): Product {
+        return new Product(input);
+    }
+
     @ForeignKey(() => Company)
     @AllowNull(false)
     @Column

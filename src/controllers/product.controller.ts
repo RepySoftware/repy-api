@@ -10,6 +10,24 @@ const ProductsController = Router();
 
 const productService = ServicesCollection.resolve(ProductService);
 
+ProductsController.post('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const product = await productService.create(req.body, TokenHelper.getPayload(res).userId);
+        res.json(product);
+    } catch (error) {
+        next(error);
+    }
+});
+
+ProductsController.put('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const product = await productService.update(req.body, TokenHelper.getPayload(res).userId);
+        res.json(product);
+    } catch (error) {
+        next(error);
+    }
+});
+
 ProductsController.get('/sales', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const products = await productService.getAllForSales(req.query, Number(req.query.companyBranchId), TokenHelper.getPayload(res).userId);

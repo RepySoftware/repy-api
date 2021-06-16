@@ -1,5 +1,7 @@
 import { inject, injectable } from "inversify";
 import { Op, WhereOptions } from "sequelize";
+import { NotFoundException } from "../common/exceptions/not-fount.exception";
+import { Company } from "../models/entities/company";
 import { CompanyBranch } from "../models/entities/company-branch";
 import { CompanyBranchProduct } from "../models/entities/company-branch-product";
 import { CompanyBranchProductPrice } from "../models/entities/company-branch-product-price";
@@ -7,6 +9,7 @@ import { Product } from "../models/entities/product";
 import { ProductCategory } from "../models/entities/product-category";
 import { RelatedProduct } from "../models/entities/related-product";
 import { ProductFilter } from "../models/input-models/filter/product.filter";
+import { ProductInputModel } from "../models/input-models/product.input-model";
 import { CompanyBranchProductViewModel } from "../models/view-models/company-branch-product.view-model";
 import { ProductViewModel } from "../models/view-models/product.view-model";
 import { RelatedProductViewModel } from "../models/view-models/related-product.view-model";
@@ -161,5 +164,52 @@ export class ProductService {
         });
 
         return relatedProducts.map(RelatedProductViewModel.fromEntity);
+    }
+
+    public async create(input: ProductInputModel, userId: number): Promise<ProductViewModel> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const company: Company = await Company.findOne({
+            where: {
+                id: user.companyId
+            }
+        });
+
+        if (!company)
+            throw new NotFoundException('Empresa não encontrada');
+
+        const product = Product.create({
+            companyId: company.id,
+            categoryId: input.categoryId,
+            code: input.code,
+            name: input.name,
+            description: input.description,
+            measurementUnit: input.measurementUnit,
+            isGas: input.isGas,
+        });
+
+        await product.save();
+
+        return ProductViewModel.fromEntity(product);
+    }
+
+    public async update(input: ProductInputModel, userId: number): Promise<ProductViewModel> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const product: Product = await Product.findOne({
+            where: {
+                id: input.id,
+                companyId: user.companyId
+            }
+        });
+
+        if (!product)
+            throw new NotFoundException('Produto não encontrado');
+
+        await product.save();
+
+        return ProductViewModel.fromEntity(product);
     }
 }
