@@ -18,18 +18,19 @@ export class Person extends Entity<Person> {
         type: PersonType;
         documentNumber: string;
         name: string;
-        tradeName: string;
+        tradeName?: string;
         email: string;
         addressId?: number;
         companyId: number;
         isSupplier: boolean;
         isCustomer: boolean;
-        taxRegime: PersonTaxRegime;
-        icmsContributorType: PersonIcmsContributorType;
-        stateRegistration: string;
-        municipalRegistration: string;
+        taxRegime?: PersonTaxRegime;
+        icmsContributorType?: PersonIcmsContributorType;
+        stateRegistration?: string;
+        municipalRegistration?: string;
         isGasCustomer: boolean;
         isActive: boolean;
+        observation?: string;
     }): Person {
         return new Person(input);
     }
@@ -94,6 +95,9 @@ export class Person extends Entity<Person> {
     @Default(true)
     @Column
     public isActive: boolean;
+
+    @Column
+    public observation?: string;
 
     @AllowNull(false)
     @CreatedAt

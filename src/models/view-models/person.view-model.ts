@@ -25,6 +25,7 @@ export class PersonViewModel {
     public municipalRegistration: string;
     public isGasCustomer: boolean;
     public isActive: boolean;
+    public observation?: string;
     public devices: DeviceViewModel[];
     public createdAt: string;
     public updatedAt: string;
@@ -49,6 +50,7 @@ export class PersonViewModel {
         person.municipalRegistration = p.municipalRegistration;
         person.isGasCustomer = p.isGasCustomer;
         person.isActive = p.isActive;
+        person.observation = p.observation;
         person.devices = p.devices ? p.devices.map(DeviceViewModel.fromEntity) : null;
         person.createdAt = DateHelper.toStringViewModel(p.createdAt);
         person.updatedAt = DateHelper.toStringViewModel(p.updatedAt);

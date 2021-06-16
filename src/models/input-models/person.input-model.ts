@@ -19,5 +19,6 @@ export interface PersonInputModel {
     stateRegistration: string;
     municipalRegistration: string;
     isActive: boolean;
+    observation?: string;
     personPhones: PersonPhoneInputModel[];
 }

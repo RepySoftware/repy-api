@@ -1,5 +1,6 @@
 import { inject, injectable } from "inversify";
 import { FindOptions, Op, Transaction, WhereOptions } from "sequelize";
+import TrustedComms = require("twilio/lib/rest/preview/TrustedComms");
 import { NotFoundException } from "../common/exceptions/not-fount.exception";
 import { PersonException } from "../common/exceptions/person.exception";
 import { AddressHelper } from "../common/helpers/address.helper";
@@ -131,16 +132,23 @@ export class PersonService {
                 await address.save({ transaction });
             }
 
-            const person = new Person({
+            const person = Person.create({
                 type: input.type,
                 documentNumber: input.documentNumber,
-                name: input.name,
-                tradeName: input.tradeName,
+                name: input.documentNumber,
+                tradeName: input.documentNumber,
                 email: input.email,
                 addressId: address ? address.id : null,
                 companyId: user.companyId,
                 isSupplier: !!input.isSupplier,
-                isCustomer: !!input.isCustomer
+                isCustomer: !!input.isCustomer,
+                taxRegime: input.taxRegime,
+                icmsContributorType: input.icmsContributorType,
+                stateRegistration: input.stateRegistration,
+                municipalRegistration: input.municipalRegistration,
+                isGasCustomer: false,
+                isActive: true,
+                observation: input.observation,
             });
 
             await person.save({ transaction });
@@ -257,6 +265,7 @@ export class PersonService {
             person.companyId = user.companyId;
             person.isSupplier = !!input.isSupplier;
             person.isCustomer = !!input.isCustomer;
+            person.observation = input.observation;
 
             await person.save({ transaction });
 
