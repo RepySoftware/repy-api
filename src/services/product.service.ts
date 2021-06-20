@@ -11,6 +11,7 @@ import { RelatedProduct } from "../models/entities/related-product";
 import { ProductFilter } from "../models/input-models/filter/product.filter";
 import { ProductInputModel } from "../models/input-models/product.input-model";
 import { CompanyBranchProductViewModel } from "../models/view-models/company-branch-product.view-model";
+import { ProductCategoryViewModel } from "../models/view-models/product-category.view-model";
 import { ProductViewModel } from "../models/view-models/product.view-model";
 import { RelatedProductViewModel } from "../models/view-models/related-product.view-model";
 import { UserService } from "./user.service";
@@ -71,6 +72,20 @@ export class ProductService {
         return products.map(CompanyBranchProductViewModel.fromEntity);
     }
 
+    public async getCategories(userId: number): Promise<ProductCategoryViewModel[]> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const categories: ProductCategory[] = await ProductCategory.findAll({
+            where: {
+                companyId: user.id
+            },
+            order: [['name', 'ASC']]
+        });
+
+        return categories.map(ProductCategoryViewModel.fromEntity);
+    }
+
     public async getAll(input: ProductFilter, userId: number): Promise<ProductViewModel[]> {
 
         const user = await this._userService.getEntityById(userId);
@@ -118,6 +133,45 @@ export class ProductService {
         });
 
         return products.map(ProductViewModel.fromEntity);
+    }
+
+    public async getById(id: number, userId: number): Promise<ProductViewModel> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const product: Product = await Product.findOne({
+            where: {
+                companyId: user.companyId,
+                id
+            },
+            include: [
+                {
+                    model: ProductCategory,
+                    as: 'category'
+                },
+                {
+                    model: CompanyBranchProduct,
+                    as: 'companyBranchesProduct',
+                    separate: true,
+                    include: [
+                        {
+                            model: CompanyBranch,
+                            as: 'companyBranch'
+                        },
+                        {
+                            model: CompanyBranchProductPrice,
+                            as: 'prices',
+                            separate: true
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!product)
+            throw new NotFoundException('Produto não encontrado');
+
+        return ProductViewModel.fromEntity(product);
     }
 
     public async getRelated(companyBranchProductId: number, userId: number): Promise<RelatedProductViewModel[]> {

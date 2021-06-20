@@ -37,9 +37,36 @@ ProductsController.get('/sales', [checkToken, checkRole([AccessControlRole.EMPLO
     }
 });
 
+ProductsController.get('/categories', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const categories = await productService.getCategories(TokenHelper.getPayload(res).userId);
+        res.json(categories);
+    } catch (error) {
+        next(error);
+    }
+});
+
 ProductsController.get('/:companyBranchProductId/related', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
     try {
         const products = await productService.getRelated(Number(req.params.companyBranchProductId), TokenHelper.getPayload(res).userId);
+        res.json(products);
+    } catch (error) {
+        next(error);
+    }
+});
+
+ProductsController.get('/:id', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const product = await productService.getById(Number(req.params.id), TokenHelper.getPayload(res).userId);
+        res.json(product);
+    } catch (error) {
+        next(error);
+    }
+});
+
+ProductsController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const products = await productService.getAll(req.query, TokenHelper.getPayload(res).userId);
         res.json(products);
     } catch (error) {
         next(error);

@@ -135,8 +135,8 @@ export class PersonService {
             const person = Person.create({
                 type: input.type,
                 documentNumber: input.documentNumber,
-                name: input.documentNumber,
-                tradeName: input.documentNumber,
+                name: input.name,
+                tradeName: input.tradeName,
                 email: input.email,
                 addressId: address ? address.id : null,
                 companyId: user.companyId,

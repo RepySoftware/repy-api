@@ -1,3 +1,5 @@
 export enum MeasurementUnit {
-    UN = 'UN'
+    UN = 'UN',
+    M = 'M',
+    KG = 'KG'
 }
