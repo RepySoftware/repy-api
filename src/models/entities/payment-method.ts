@@ -10,6 +10,10 @@ export class PaymentMethod extends Entity<PaymentMethod> {
 
     @AllowNull(false)
     @Column
+    public code: string;
+
+    @AllowNull(false)
+    @Column
     public name: string;
 
     @ForeignKey(() => Company)
@@ -22,9 +26,6 @@ export class PaymentMethod extends Entity<PaymentMethod> {
     @AllowNull(false)
     @Column
     public hasInstallments: boolean;
-
-    @Column
-    public erpPaymentMethodId: string;
 
     @AllowNull(false)
     @Default(0)

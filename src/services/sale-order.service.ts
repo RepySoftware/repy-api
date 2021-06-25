@@ -27,6 +27,9 @@ import { GeocodingService } from "./geocoding.service";
 import { SaleOrderException } from "../common/exceptions/sale-order.exception";
 import { SaleOrderPayment } from "../models/entities/sale-order-payment";
 import { AddressHelper } from "../common/helpers/address.helper";
+import { ExternalSaleOrderInputModel } from "../models/input-models/external/external-sale-order.input-model";
+import { PersonService } from "./person.service";
+import { ExternalSaleOrderViewModel } from "../models/view-models/external/external-sale-order.view-model";
 
 @injectable()
 export class SaleOrderService {
@@ -35,7 +38,8 @@ export class SaleOrderService {
         @inject(UserService) private _userService: UserService,
         @inject(Database) private _database: Database,
         @inject(DeliveryService) private _deliveryService: DeliveryService,
-        @inject(GeocodingService) private _geocodingService: GeocodingService
+        @inject(GeocodingService) private _geocodingService: GeocodingService,
+        @inject(PersonService) private _personService: PersonService,
     ) { }
 
     public async getById(id: number, userId: number): Promise<SaleOrder | SaleOrderViewModel> {
@@ -362,7 +366,7 @@ export class SaleOrderService {
             await personCustomer.address.save();
         }
 
-        const index = await this._deliveryService.getNextIndex(userId);
+        const index = await this._deliveryService.getNextIndex(user.companyId);
 
         const transaction: Transaction = await this._database.sequelize.transaction();
 
@@ -618,6 +622,8 @@ export class SaleOrderService {
 
             await transaction.commit();
 
+            saleOrder.sendWebhook();
+
             return SaleOrderViewModel.fromEntity(saleOrder);
 
         } catch (error) {
@@ -672,6 +678,229 @@ export class SaleOrderService {
             });
 
             await transaction.commit();
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
+    public async externalCreate(input: ExternalSaleOrderInputModel): Promise<ExternalSaleOrderViewModel> {
+
+        const companyBranch: CompanyBranch = await CompanyBranch.findOne({
+            where: {
+                externalId: input.salePointId
+            }
+        });
+
+        if (!companyBranch)
+            throw new SaleOrderException('Ponto de venda não encontrado');
+
+        const transaction: Transaction = await this._database.sequelize.transaction();
+
+        try {
+
+            let personCustomer: Person;
+
+            if (input.personCustomer.id) {
+                personCustomer = await Person.findOne({
+                    where: {
+                        externalId: input.personCustomer.id
+                    }
+                });
+
+                // create new
+                if (!personCustomer) {
+                    personCustomer = await this._personService.externalCreateCustomer(
+                        input.personCustomer,
+                        companyBranch.companyId,
+                        { transaction }
+                    );
+                }
+
+                // update
+                // p.type = input.personCustomer.type;
+                // p.documentNumber = input.personCustomer.documentNumber;
+                // p.name = input.personCustomer.name;
+                // p.email = input.personCustomer.email;
+
+                if (personCustomer.address) {
+                    personCustomer.address.description = input.personCustomer.address.description;
+                    personCustomer.address.street = input.personCustomer.address.street;
+                    personCustomer.address.number = input.personCustomer.address.number;
+                    personCustomer.address.zipCode = input.personCustomer.address.zipCode;
+                    personCustomer.address.neighborhood = input.personCustomer.address.neighborhood;
+                    personCustomer.address.city = input.personCustomer.address.city;
+                    personCustomer.address.region = input.personCustomer.address.region;
+                    personCustomer.address.country = input.personCustomer.address.country;
+                    personCustomer.address.complement = input.personCustomer.address.complement;
+                    personCustomer.address.referencePoint = input.personCustomer.address.referencePoint;
+                    personCustomer.address.latitude = input.personCustomer.address.latitude;
+                    personCustomer.address.longitude = input.personCustomer.address.longitude;
+                } else {
+                    personCustomer.address = Address.create({
+                        description: input.personCustomer.address.description,
+                        street: input.personCustomer.address.street,
+                        number: input.personCustomer.address.number,
+                        zipCode: input.personCustomer.address.zipCode,
+                        neighborhood: input.personCustomer.address.neighborhood,
+                        city: input.personCustomer.address.city,
+                        region: input.personCustomer.address.region,
+                        country: input.personCustomer.address.country,
+                        complement: input.personCustomer.address.complement,
+                        referencePoint: input.personCustomer.address.referencePoint,
+                        latitude: input.personCustomer.address.latitude,
+                        longitude: input.personCustomer.address.longitude
+                    });
+                }
+
+                await personCustomer.address.save({ transaction });
+
+                personCustomer.addressId = personCustomer.address.id;
+                await personCustomer.save({ transaction });
+
+            } else {
+                // create new
+                personCustomer = await this._personService.externalCreateCustomer(
+                    input.personCustomer,
+                    companyBranch.companyId,
+                    { transaction }
+                );
+            }
+
+            const deliveryAddress = Address.create({
+                description: input.deliveryAddress.description,
+                street: input.deliveryAddress.street,
+                number: input.deliveryAddress.number,
+                zipCode: input.deliveryAddress.zipCode,
+                neighborhood: input.deliveryAddress.neighborhood,
+                city: input.deliveryAddress.city,
+                region: input.deliveryAddress.region,
+                country: input.deliveryAddress.country,
+                complement: input.deliveryAddress.complement,
+                referencePoint: input.deliveryAddress.referencePoint,
+                latitude: input.deliveryAddress.latitude,
+                longitude: input.deliveryAddress.longitude
+            });
+
+            await deliveryAddress.save({ transaction });
+
+            const index = await this._deliveryService.getNextIndex(companyBranch.companyId);
+
+            const saleOrder = SaleOrder.create({
+                companyBranchId: companyBranch.id,
+                personCustomerId: personCustomer.id,
+                deliveryAddressId: deliveryAddress.id,
+                totalSalePrice: 0,
+                status: SaleOrderStatus.WAITING_FOR_APPROVAL,
+                observation: input.observation,
+                index,
+                source: input.source,
+                dateOfIssue: moment.utc(input.dateOfIssue).toDate(),
+                scheduledAt: input.scheduledAt ? moment.utc(input.scheduledAt).toDate() : null
+            });
+
+            await saleOrder.save({ transaction });
+
+            const companyBranchProducts: CompanyBranchProduct[] = await CompanyBranchProduct.findAll({
+                where: {
+                    '$product.code$': { [Op.in]: input.products.map(p => p.productCode) }
+                },
+                include: [
+                    {
+                        model: Product,
+                        as: 'product'
+                    },
+                    {
+                        model: CompanyBranchProductPrice,
+                        as: 'prices',
+                        separate: true,
+                        where: {
+                            isExternal: true
+                        }
+                    }
+                ]
+            });
+
+            const saleOrderProducts = input.products.map(inputProduct => {
+
+                const companyBranchProduct = companyBranchProducts.find(cbp => cbp.product.code == inputProduct.productCode);
+
+                if (!companyBranchProduct)
+                    throw new SaleOrderException(`O produto ${inputProduct.productCode} não foi encontrado`);
+
+                const price = companyBranchProduct.prices[0];
+
+                if (!price)
+                    throw new SaleOrderException(`O produto ${inputProduct.productCode} não tem preço definido`);
+
+                return SaleOrderProduct.create({
+                    saleOrderId: saleOrder.id,
+                    companyBranchProductId: companyBranchProduct.id,
+                    companyBranchProductPriceId: price.id,
+                    quantity: inputProduct.quantity,
+                    salePrice: inputProduct.price
+                });
+            });
+
+            for (const p of saleOrderProducts) {
+                await p.save({ transaction });
+            }
+
+            saleOrder.calculeTotalSalePrice(saleOrderProducts);
+            await saleOrder.save({ transaction });
+
+            const paymentMethods: PaymentMethod[] = await PaymentMethod.findAll({
+                where: {
+                    code: { [Op.in]: input.payments.map(p => p.code) }
+                }
+            });
+
+            for (const inputPayment of input.payments) {
+
+                const paymentMethod = paymentMethods.find(pm => pm.code == inputPayment.code);
+
+                if (!paymentMethod)
+                    throw new SaleOrderException(`O método de pagamento ${inputPayment.code} não foi encontrado`);
+
+                const p = SaleOrderPayment.create({
+                    saleOrderId: saleOrder.id,
+                    paymentMethodId: paymentMethod.id,
+                    value: inputPayment.value,
+                    dueDate: input.scheduledAt ? moment.utc(input.scheduledAt).toDate() : moment.utc().toDate()
+                });
+
+                await p.save({ transaction });
+            }
+
+            await transaction.commit();
+
+            const newSaleOrder: SaleOrder = await SaleOrder.findOne({
+                where: {
+                    id: saleOrder.id
+                },
+                include: [
+                    {
+                        model: SaleOrderProduct,
+                        as: 'products',
+                        separate: true,
+                        include: [
+                            {
+                                model: CompanyBranchProduct,
+                                as: 'companyBranchProduct',
+                                include: [
+                                    {
+                                        model: Product,
+                                        as: 'product'
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            });
+
+            return ExternalSaleOrderViewModel.fromEntity(newSaleOrder);
+
         } catch (error) {
             await transaction.rollback();
             throw error;

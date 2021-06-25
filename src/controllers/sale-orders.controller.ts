@@ -5,6 +5,7 @@ import { AccessControlRole } from "../common/enums/access-control-role";
 import { checkRole } from "../middlewares/check-role";
 import { TokenHelper } from "../common/helpers/token.helper";
 import { SaleOrderService } from "../services/sale-order.service";
+import { checkApiKey } from "../middlewares/check-api-key";
 
 const SaleOrdersController = Router();
 
@@ -59,6 +60,15 @@ SaleOrdersController.delete('/:id', [checkToken, checkRole([AccessControlRole.EM
     try {
         await saleOrderService.delete(Number(req.params.id), TokenHelper.getPayload(res).userId);
         res.json({ ok: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
+SaleOrdersController.post('/external', checkApiKey, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await saleOrderService.externalCreate(req.body);
+        res.json(result);
     } catch (error) {
         next(error);
     }

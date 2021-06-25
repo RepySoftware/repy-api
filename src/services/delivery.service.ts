@@ -16,6 +16,7 @@ import { DeliveryInstruction } from "../models/entities/delivery-instruction";
 import { DeliveryInstructionStatus } from "../common/enums/delivery-instruction-status";
 import { SaleOrderService } from "./sale-order.service";
 import { StockService } from "./stock.service";
+import { SaleOrderException } from "../common/exceptions/sale-order.exception";
 
 @injectable()
 export class DeliveryService {
@@ -159,13 +160,11 @@ export class DeliveryService {
         await saleOrder.save();
     }
 
-    public async getNextIndex(userId: number): Promise<number> {
-
-        const user = await this._userService.getEntityById(userId);
+    public async getNextIndex(companyId: number): Promise<number> {
 
         const saleOrders: SaleOrder[] = await SaleOrder.findAll({
             where: {
-                '$companyBranch.companyId$': user.companyId,
+                '$companyBranch.companyId$': companyId,
                 status: { [Op.in]: [SaleOrderStatus.PENDING, SaleOrderStatus.ON_DELIVERY] }
             },
             include: [
@@ -178,11 +177,39 @@ export class DeliveryService {
 
         const deliveryInstructions: DeliveryInstruction[] = DeliveryInstruction.findAll({
             where: {
-                companyId: user.companyId,
+                companyId: companyId,
                 status: { [Op.in]: [DeliveryInstructionStatus.PENDING, DeliveryInstructionStatus.IN_PROGRESS] }
             }
         });
 
         return saleOrders.length + deliveryInstructions.length;
+    }
+
+    public async approve(input: { saleOrderId: number}, userId: number): Promise<void> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const saleOrder: SaleOrder = await SaleOrder.findOne({
+            where: {
+                id: input.saleOrderId,
+                '$companyBranch.companyId$': user.companyId,
+                status: SaleOrderStatus.WAITING_FOR_APPROVAL
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                }
+            ]
+        });
+
+        if (!saleOrder)
+            throw new SaleOrderException('Pedido não encontrado');
+
+        saleOrder.status = SaleOrderStatus.PENDING;
+
+        await saleOrder.save();
+
+        saleOrder.sendWebhook();
     }
 }

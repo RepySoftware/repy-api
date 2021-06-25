@@ -70,4 +70,16 @@ DeliveriesController.patch('/finalize', [checkToken, checkRole([
     }
 });
 
+DeliveriesController.patch('/approve', [checkToken, checkRole([
+    AccessControlRole.EMPLOYEE_AGENT,
+    AccessControlRole.EMPLOYEE_DRIVER
+])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await deliveryService.approve(req.body, TokenHelper.getPayload(res).userId)
+        res.json({ ok: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
 export { DeliveriesController };

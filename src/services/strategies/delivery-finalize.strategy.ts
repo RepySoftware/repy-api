@@ -187,6 +187,9 @@ export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalize
             }
 
             await transaction.commit();
+
+            saleOrder.sendWebhook();
+            
         } catch (error) {
             await transaction.rollback();
             throw error;

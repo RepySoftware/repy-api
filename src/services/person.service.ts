@@ -11,6 +11,7 @@ import { Person } from "../models/entities/person";
 import { PersonPhone } from "../models/entities/person-phone";
 import { User } from "../models/entities/user";
 import { ViewPersonSearch } from "../models/entities/views/view-person-search";
+import { ExternalPersonCustomerInputModel } from "../models/input-models/external/external-person-customer.input-model";
 import { PersonSearchInputModel } from "../models/input-models/filter/person-search-filter.input-model";
 import { PersonFilter } from "../models/input-models/filter/person.filter";
 import { PersonInputModel } from "../models/input-models/person.input-model";
@@ -357,5 +358,66 @@ export class PersonService {
     private verifyInputPerson(input: PersonInputModel): void {
         if (input.isCustomer && !input.address)
             throw new PersonException('Endereço é obrigatório para cliente');
+    }
+
+    public async externalCreateCustomer(input: ExternalPersonCustomerInputModel, companyId: number, options?: { transaction?: Transaction }): Promise<Person> {
+
+        const address = Address.create({
+            description: input.address.description,
+            street: input.address.street,
+            number: input.address.number,
+            zipCode: input.address.zipCode,
+            neighborhood: input.address.neighborhood,
+            city: input.address.city,
+            region: input.address.region,
+            country: input.address.country,
+            complement: input.address.complement,
+            referencePoint: input.address.referencePoint,
+            latitude: input.address.latitude,
+            longitude: input.address.longitude
+        });
+
+        const transaction: Transaction = options?.transaction || await this._database.sequelize.transaction();
+
+        try {
+
+            await address.save({ transaction });
+
+            const personCustomer = Person.create({
+                type: input.type,
+                documentNumber: input.documentNumber,
+                name: input.name,
+                email: input.email,
+                addressId: address.id,
+                companyId: companyId,
+                isSupplier: false,
+                isCustomer: true,
+                isGasCustomer: false,
+                externalId: input.id
+            });
+
+            await personCustomer.save({ transaction });
+
+            if (input.phones) {
+                for (let p of input.phones) {
+                    await PersonPhone.create({
+                        personId: personCustomer.id,
+                        phone: StringHelper.getOnlyNumbers(p)
+                    }).save({ transaction });
+                }
+            }
+
+            if (!options?.transaction)
+                await transaction.commit();
+
+            return personCustomer;
+
+        } catch (error) {
+
+            if (!options?.transaction)
+                await transaction.rollback();
+
+            throw error;
+        }
     }
 }

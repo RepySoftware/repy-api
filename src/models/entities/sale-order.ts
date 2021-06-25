@@ -1,4 +1,4 @@
-import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, HasMany, Table, UpdatedAt } from "sequelize-typescript";
+import { AllowNull, BelongsTo, Column, CreatedAt, Default, ForeignKey, HasMany, Table, UpdatedAt } from "sequelize-typescript";
 import { SaleOrderStatus } from "../../common/enums/sale-order-status";
 import { Entity } from "../abstraction/entity";
 import { Address } from "./address";
@@ -9,6 +9,8 @@ import { Person } from "./person";
 import { SaleOrderProduct } from "./sale-order-product";
 import * as moment from 'moment-timezone';
 import { SaleOrderPayment } from "./sale-order-payment";
+import axios from 'axios';
+import { Company } from "./company";
 
 @Table({
     tableName: 'SaleOrders',
@@ -18,17 +20,18 @@ export class SaleOrder extends Entity<SaleOrder> {
 
     public static create(input: {
         companyBranchId: number;
-        employeeAgentId: number;
-        employeeDriverId: number;
+        employeeAgentId?: number;
+        employeeDriverId?: number;
         personCustomerId: number;
         deliveryAddressId: number;
         totalSalePrice: number;
         status: SaleOrderStatus;
-        index: number;
+        index?: number;
         observation: string;
+        source?: string;
         dateOfIssue: Date;
-        scheduledAt: Date;
-        deliveredAt: Date;
+        scheduledAt?: Date;
+        deliveredAt?: Date;
     }): SaleOrder {
         return new SaleOrder(input);
     }
@@ -41,11 +44,10 @@ export class SaleOrder extends Entity<SaleOrder> {
     public companyBranch: CompanyBranch;
 
     @ForeignKey(() => Employee)
-    @AllowNull(false)
     @Column
-    public employeeAgentId: number;
+    public employeeAgentId?: number;
     @BelongsTo(() => Employee, 'employeeAgentId')
-    public employeeAgent: Employee;
+    public employeeAgent?: Employee;
 
     @ForeignKey(() => Employee)
     @Column
@@ -76,6 +78,7 @@ export class SaleOrder extends Entity<SaleOrder> {
     public status: SaleOrderStatus;
 
     @AllowNull(false)
+    @Default(0)
     @Column
     public index: number;
 
@@ -85,6 +88,11 @@ export class SaleOrder extends Entity<SaleOrder> {
     @AllowNull(true)
     @Column
     public showObservationToDriver: boolean;
+
+    @AllowNull(true)
+    @Default('REPY')
+    @Column
+    public source: string;
 
     @AllowNull(false)
     @Column
@@ -144,5 +152,25 @@ export class SaleOrder extends Entity<SaleOrder> {
         }
 
         this.status = value;
+    }
+
+    public async sendWebhook(): Promise<void> {
+
+        const companyBranch: CompanyBranch = await CompanyBranch.findOne({
+            where: { id: this.companyBranchId },
+            include: [
+                {
+                    model: Company,
+                    as: 'company'
+                }
+            ]
+        });
+
+        if (companyBranch.company.webhookSaleOrderChanges){
+            await axios.post(companyBranch.company.webhookSaleOrderChanges, {
+                id: this.id,
+                status: this.status
+            });
+        }
     }
 }

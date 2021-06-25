@@ -14,7 +14,7 @@ export class SaleOrderPayment extends Entity<SaleOrderPayment> {
         paymentMethodId: number,
         value: number,
         dueDate: Date,
-        payDate: Date
+        payDate?: Date
     }): SaleOrderPayment {
         return new SaleOrderPayment(input);
     }

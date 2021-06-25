@@ -39,6 +39,10 @@ export class CompanyBranch extends Entity<CompanyBranch> {
     public isDefault: boolean;
 
     @AllowNull(false)
+    @Column
+    public externalId: number;
+
+    @AllowNull(false)
     @CreatedAt
     @Column
     public createdAt: Date;

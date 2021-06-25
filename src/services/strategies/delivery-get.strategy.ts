@@ -96,7 +96,7 @@ export class DeliveryGetStrategy extends Strategy<{ userId: number }, Promise<De
         const saleOrders: SaleOrder[] = await SaleOrder.findAll({
             where: {
                 '$companyBranch.companyId$': user.companyId,
-                status: { [Op.in]: [SaleOrderStatus.PENDING, SaleOrderStatus.ON_DELIVERY] },
+                status: { [Op.in]: [SaleOrderStatus.WAITING_FOR_APPROVAL, SaleOrderStatus.PENDING, SaleOrderStatus.ON_DELIVERY] },
                 [Op.or]: [
                     { scheduledAt: { [Op.is]: null } },
                     { scheduledAt: { [Op.lte]: moment.utc().add(3, 'days').endOf('day').toDate() } } // show only next 3 days

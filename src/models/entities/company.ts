@@ -1,4 +1,4 @@
-import { AllowNull, BelongsTo, BelongsToMany, Column, CreatedAt, ForeignKey, HasMany, Table, UpdatedAt } from "sequelize-typescript";
+import { AllowNull, Column, CreatedAt, Table, UpdatedAt } from "sequelize-typescript";
 import { Entity } from "../abstraction/entity";
 
 @Table({
@@ -10,6 +10,9 @@ export class Company extends Entity<Company> {
     @AllowNull(false)
     @Column
     public name: string;
+
+    @Column
+    public webhookSaleOrderChanges?: string;
 
     @AllowNull(false)
     @CreatedAt

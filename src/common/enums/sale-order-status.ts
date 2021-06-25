@@ -1,4 +1,5 @@
 export enum SaleOrderStatus {
+    WAITING_FOR_APPROVAL = 'WAITING_FOR_APPROVAL',
     PENDING = 'PENDING',
     ON_DELIVERY = 'ON_DELIVERY',
     FINISHED = 'FINISHED',

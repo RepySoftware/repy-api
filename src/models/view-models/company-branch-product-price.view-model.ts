@@ -6,7 +6,6 @@ export class CompanyBranchProductPriceViewModel {
     public id: number;
     public name: string;
     public salePrice: number;
-    public maxPriceDiscount: number;
     public isDefault: boolean;
     public createdAt: string;
     public updatedAt: string;
@@ -18,7 +17,6 @@ export class CompanyBranchProductPriceViewModel {
         price.id = cbpp.id;
         price.name = cbpp.name;
         price.salePrice = cbpp.salePrice;
-        price.maxPriceDiscount = cbpp.maxPriceDiscount;
         price.isDefault = cbpp.isDefault;
         price.createdAt = DateHelper.toStringViewModel(cbpp.createdAt);
         price.updatedAt = DateHelper.toStringViewModel(cbpp.updatedAt);

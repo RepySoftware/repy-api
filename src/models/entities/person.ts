@@ -29,8 +29,9 @@ export class Person extends Entity<Person> {
         stateRegistration?: string;
         municipalRegistration?: string;
         isGasCustomer: boolean;
-        isActive: boolean;
+        isActive?: boolean;
         observation?: string;
+        externalId?: number;
     }): Person {
         return new Person(input);
     }
@@ -98,6 +99,9 @@ export class Person extends Entity<Person> {
 
     @Column
     public observation?: string;
+
+    @Column
+    public externalId: number;
 
     @AllowNull(false)
     @CreatedAt

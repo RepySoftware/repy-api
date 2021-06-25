@@ -26,12 +26,12 @@ export class CompanyBranchProductPrice extends Entity<CompanyBranchProductPrice>
     @AllowNull(false)
     @Default(0)
     @Column
-    public maxPriceDiscount: number;
+    public isDefault: boolean;
 
     @AllowNull(false)
     @Default(0)
     @Column
-    public isDefault: boolean;
+    public isExternal: boolean;
 
     @AllowNull(false)
     @CreatedAt

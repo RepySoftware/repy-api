@@ -42,6 +42,8 @@ export class DeliveryStartStrategy extends Strategy<{ id: number, userId: number
         saleOrder.setStatus(SaleOrderStatus.ON_DELIVERY);
 
         await saleOrder.save();
+
+        saleOrder.sendWebhook();
     }
 
     private async deliveryInstruction(params: { id: number, type: DeliveryType, userId: number }): Promise<void> {
