@@ -688,7 +688,7 @@ export class SaleOrderService {
 
         const companyBranch: CompanyBranch = await CompanyBranch.findOne({
             where: {
-                externalId: input.salePointId
+                id: input.salePointId
             }
         });
 

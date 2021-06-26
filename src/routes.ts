@@ -13,7 +13,7 @@ import { ProductsController } from "./controllers/product.controller";
 import { SaleOrdersController } from "./controllers/sale-orders.controller";
 import { StockController } from "./controllers/stock.controller";
 import { VehiclesController } from "./controllers/vehicles.controller";
-import { VERSION } from "./version";
+import { VERSION } from "../version";
 
 const routes = Router();
 
