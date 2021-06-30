@@ -1,0 +1,1 @@
+ALTER TABLE StockPosts MODIFY COLUMN Quantity int(11) NULL;

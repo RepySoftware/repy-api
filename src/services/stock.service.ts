@@ -15,6 +15,7 @@ import { StockPostViewModel } from "../models/view-models/stock-post.view-model"
 import { UserService } from "./user.service";
 import * as moment from 'moment-timezone';
 import { DepositTransferInputModel } from "../models/input-models/deposit-transfer.input-model";
+import { StockPostType } from "../common/enums/stock-post-type";
 
 @injectable()
 export class StockService {
@@ -148,7 +149,7 @@ export class StockService {
             ],
             limit,
             offset,
-            order: [['dateOfIssue', 'DESC']]
+            order: [['id', 'DESC']]
         });
 
         return posts.map(StockPostViewModel.fromEntity);
@@ -201,18 +202,38 @@ export class StockService {
                     await depositProduct.save({ transaction });
                 }
 
+                let quantity: number;
+                if (inputItem.type == StockPostType.IN)
+                    quantity = inputItem.quantity;
+                if (inputItem.type == StockPostType.OUT)
+                    quantity = inputItem.quantity * (-1);
+                else {
+                    quantity = null;
+                }
+
+                let observation: string;
+                if (inputItem.type == StockPostType.BALANCE) {
+                    observation = `[Balanço - Atual: ${inputItem.quantity} | Ant.: ${depositProduct.quantity}] ${inputItem.observation || ''}`;
+                }
+
                 const stockPost: StockPost = StockPost.create({
                     depositId: inputItem.depositId,
                     depositProductId: depositProduct.id,
-                    quantity: inputItem.quantity,
-                    observation: inputItem.observation,
+                    quantity,
+                    observation,
                     saleOrderId: inputItem?.saleOrderId,
                     dateOfIssue: moment.utc(inputItem.dateOfIssue).toDate()
                 });
 
                 await stockPost.save({ transaction });
 
-                depositProduct.quantity += inputItem.quantity;
+                if (inputItem.type == StockPostType.IN)
+                    depositProduct.quantity += inputItem.quantity;
+                if (inputItem.type == StockPostType.OUT)
+                    depositProduct.quantity -= inputItem.quantity;
+                else {
+                    depositProduct.quantity = inputItem.quantity;
+                }
 
                 await depositProduct.save({ transaction });
 
@@ -339,13 +360,15 @@ export class StockService {
                     {
                         companyBranchProductId: inputItem.companyBranchProductId,
                         depositId: inputItem.originDepositId,
-                        quantity: inputItem.quantity * (-1),
+                        type: StockPostType.OUT,
+                        quantity: inputItem.quantity,
                         dateOfIssue,
                         observation
                     },
                     {
                         companyBranchProductId: inputItem.companyBranchProductId,
                         depositId: inputItem.destinationDepositId,
+                        type: StockPostType.IN,
                         quantity: inputItem.quantity,
                         dateOfIssue,
                         observation
@@ -359,5 +382,47 @@ export class StockService {
             await transaction.rollback();
             throw error;
         }
+    }
+
+    public async clearDeposit(depositId: number, userId: number): Promise<void> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const deposit: Deposit = await Deposit.findOne({
+            where: {
+                id: depositId,
+                '$companyBranch.companyId$': user.companyId
+            },
+            include: [
+                {
+                    model: CompanyBranch,
+                    as: 'companyBranch'
+                },
+                {
+                    model: DepositProduct,
+                    as: 'products',
+                    separate: true,
+                    where: {
+                        quantity: { [Op.gt]: 0 }
+                    }
+                }
+            ]
+        });
+
+        if (!deposit)
+            throw new NotFoundException('Depósito não encontrado');
+
+        const dateOfIssue = moment.utc().toISOString();
+
+        await this.createPosts(deposit.products.map(dp => {
+            return {
+                companyBranchProductId: dp.companyBranchProductId,
+                depositId: deposit.id,
+                type: StockPostType.BALANCE,
+                quantity: 0,
+                dateOfIssue,
+                observation: 'Limpar depósito'
+            }
+        }), userId);
     }
 }

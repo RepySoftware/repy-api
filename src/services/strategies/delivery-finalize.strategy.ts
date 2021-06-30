@@ -23,6 +23,7 @@ import { User } from "../../models/entities/user";
 import { StockService } from "../stock.service";
 import { Vehicle } from "../../models/entities/vehicle";
 import { Deposit } from "../../models/entities/deposit";
+import { StockPostType } from "../../common/enums/stock-post-type";
 
 export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalizeInputModel, userId: number }, Promise<void>> {
 
@@ -175,7 +176,8 @@ export class DeliveryFinalizeStrategy extends Strategy<{ input: DeliveryFinalize
                         companyBranchProductId: p.companyBranchProductId,
                         depositId: saleOrder.employeeDriver?.vehicle?.depositId,
                         dateOfIssue: moment.utc().toISOString(),
-                        quantity: p.quantity * (-1),
+                        type: StockPostType.OUT,
+                        quantity: p.quantity,
                         observation: `[Venda #${saleOrder.id}]`,
                         saleOrderId: saleOrder.id
                     }

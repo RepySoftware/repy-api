@@ -1,4 +1,5 @@
 import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, Table, UpdatedAt } from "sequelize-typescript";
+import { StockPostType } from "../../common/enums/stock-post-type";
 import { Entity } from "../abstraction/entity";
 import { Deposit } from "./deposit";
 import { DepositProduct } from "./deposit-product";
@@ -13,7 +14,7 @@ export class StockPost extends Entity<StockPost> {
     public static create(input: {
         depositId: number;
         depositProductId: number;
-        quantity: number;
+        quantity?: number;
         saleOrderId?: number;
         observation?: string;
         dateOfIssue: Date;
@@ -35,9 +36,8 @@ export class StockPost extends Entity<StockPost> {
     @BelongsTo(() => DepositProduct, 'depositProductId')
     public depositProduct: DepositProduct;
 
-    @AllowNull(false)
     @Column
-    public quantity: number;
+    public quantity?: number;
 
     @Column
     public observation?: string;
@@ -61,4 +61,13 @@ export class StockPost extends Entity<StockPost> {
     @UpdatedAt
     @Column
     public updatedAt: Date;
+
+    public getType(): StockPostType {
+        if (this.quantity > 0)
+            return StockPostType.IN;
+        else if (this.quantity < 0)
+            return StockPostType.OUT;
+        else
+            return StockPostType.BALANCE;
+    }
 }
