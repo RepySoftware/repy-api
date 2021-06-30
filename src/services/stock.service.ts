@@ -403,7 +403,7 @@ export class StockService {
                     as: 'products',
                     separate: true,
                     where: {
-                        quantity: { [Op.gt]: 0 }
+                        quantity: { [Op.ne]: 0 }
                     }
                 }
             ]
