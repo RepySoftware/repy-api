@@ -6,6 +6,7 @@ import { EmployeeViewModel } from "./employee.view-model";
 export class UserViewModel {
 
     public id: number;
+    public key: string;
     public person?: PersonViewModel;
     public employee?: EmployeeViewModel;
     public username: string;
@@ -20,6 +21,7 @@ export class UserViewModel {
         const user = new UserViewModel();
 
         user.id = u.id;
+        user.key = u.key;
         user.person = u.person ? PersonViewModel.fromEntity(u.person) : null;
         user.employee = u.employee ? EmployeeViewModel.fromEntity(u.employee) : null;
         user.username = u.username;

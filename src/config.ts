@@ -20,7 +20,10 @@ export const CONFIG: {
     ZENVIA_TOKEN: string,
     GOOGLE_KEY: string,
 
-    DEVICE_GAS_LEVEL_HISTORY_READ_INTERVAL_MINUTES: number
+    DEVICE_GAS_LEVEL_HISTORY_READ_INTERVAL_MINUTES: number,
+
+    ONE_SIGNAL_APP_ID: string,
+    ONE_SIGNAL_API_KEY: string
 
 } = process.env as any;
 

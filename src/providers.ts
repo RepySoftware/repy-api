@@ -17,6 +17,7 @@ import { GeocodingService } from './services/geocoding.service';
 import { DepositService } from './services/deposit.service';
 import { VehicleService } from './services/vehicle.service';
 import { StockService } from './services/stock.service';
+import { NotificationService } from './services/notification.service';
 
 const ServicesCollection = new Container();
 
@@ -39,5 +40,6 @@ ServicesCollection.bind(GeocodingService).toSelf();
 ServicesCollection.bind(DepositService).toSelf();
 ServicesCollection.bind(VehicleService).toSelf();
 ServicesCollection.bind(StockService).toSelf();
+ServicesCollection.bind(NotificationService).toSelf();
 
 export { ServicesCollection };

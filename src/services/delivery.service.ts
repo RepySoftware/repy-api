@@ -17,6 +17,10 @@ import { DeliveryInstructionStatus } from "../common/enums/delivery-instruction-
 import { SaleOrderService } from "./sale-order.service";
 import { StockService } from "./stock.service";
 import { SaleOrderException } from "../common/exceptions/sale-order.exception";
+import { NotificationService } from "./notification.service";
+import { Employee } from "../models/entities/employee";
+import { User } from "../models/entities/user";
+import { NotFoundException } from "../common/exceptions/not-fount.exception";
 
 @injectable()
 export class DeliveryService {
@@ -24,7 +28,8 @@ export class DeliveryService {
     constructor(
         @inject(UserService) private _userService: UserService,
         @inject(Database) private _database: Database,
-        @inject(StockService) private _stockService: StockService
+        @inject(StockService) private _stockService: StockService,
+        @inject(NotificationService) private _notificationService: NotificationService,
     ) { }
 
     public async get(userId: number, strategy: string): Promise<DeliveryViewModel[] | DriverDeliveryViewModel[]> {
@@ -71,6 +76,10 @@ export class DeliveryService {
                 {
                     model: CompanyBranch,
                     as: 'companyBranch'
+                },
+                {
+                    model: Employee,
+                    as: 'employeeDriver'
                 }
             ]
         });
@@ -82,6 +91,8 @@ export class DeliveryService {
             }
         });
 
+        const oldFirstDelivery = saleOrders.find(so => so.index == 0) || deliveryInstructions.find(di => di.index == 0);
+
         const transaction: Transaction = await this._database.sequelize.transaction();
 
         try {
@@ -90,6 +101,12 @@ export class DeliveryService {
                 const item = saleOrderIds.find(x => x.id == so.id);
 
                 if (item) {
+
+                    // se uma entrega esta na posição 0, entregador vai ser notificado
+                    if (item.index == 0 && so.index != 0 && so.employeeDriverId) {
+                        this.notifyDelivery('Você tem uma nova entrega! 🚚', so.employeeDriverId);
+                    }
+
                     so.index = item.index;
                     await so.save({ transaction });
                 }
@@ -99,6 +116,12 @@ export class DeliveryService {
                 const item = deliveryInstructionIds.find(x => x.id == edi.id);
 
                 if (item) {
+
+                    // se uma instrução esta na posição 0, entregador vai ser notificado
+                    if (item.index == 0 && edi.index != 0) {
+                        this.notifyDelivery('Você tem uma nova instrução! 💬', edi.employeeDriverId);
+                    }
+
                     edi.index = item.index;
                     await edi.save({ transaction });
                 }
@@ -111,7 +134,7 @@ export class DeliveryService {
         }
     }
 
-    public async updateEmployeeDriver(input: { saleOrderId: number, employeeDriverId: number }, userId: number): Promise<void> {
+    public async updateEmployeeDriver(input: { saleOrderId: number, employeeDriverId: number, firstPosition: boolean }, userId: number): Promise<void> {
 
         const user = await this._userService.getEntityById(userId);
 
@@ -136,6 +159,27 @@ export class DeliveryService {
         }
 
         await saleOrder.save();
+
+        if (input.firstPosition && !!saleOrder.employeeDriverId) {
+            this.notifyDelivery('Você tem uma nova entrega! 🚚', saleOrder.employeeDriverId);
+        }
+    }
+
+    private async notifyDelivery(message: string, employeeId: number): Promise<void> {
+
+        const userToNotify: User = await User.findOne({
+            where: {
+                employeeId
+            }
+        });
+
+        if (!userToNotify)
+            throw new NotFoundException('Usuário entregador não encontrado');
+
+        await this._notificationService.createNotification([userToNotify.key], {
+            title: '🚨🚨 Atenção!',
+            message
+        });
     }
 
     public async updateShowObservationToDriver(input: { saleOrderId: number, value: boolean }, userId: number): Promise<void> {
@@ -185,7 +229,7 @@ export class DeliveryService {
         return saleOrders.length + deliveryInstructions.length;
     }
 
-    public async approve(input: { saleOrderId: number}, userId: number): Promise<void> {
+    public async approve(input: { saleOrderId: number }, userId: number): Promise<void> {
 
         const user = await this._userService.getEntityById(userId);
 

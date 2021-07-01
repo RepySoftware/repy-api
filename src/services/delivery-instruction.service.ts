@@ -9,13 +9,17 @@ import { Op } from "sequelize";
 import { Employee } from "../models/entities/employee";
 import { DefaultDeliveryInstruction } from "../models/entities/default-delivery-instruction";
 import { DeliveryService } from "./delivery.service";
+import { User } from "../models/entities/user";
+import { NotFoundException } from "../common/exceptions/not-fount.exception";
+import { NotificationService } from "./notification.service";
 
 @injectable()
 export class DeliveryInstructionService {
 
     constructor(
         @inject(UserService) private _userService: UserService,
-        @inject(DeliveryService) private _deliveryService: DeliveryService
+        @inject(DeliveryService) private _deliveryService: DeliveryService,
+        @inject(NotificationService) private _notificationService: NotificationService,
     ) { }
 
     public async getDefault(userId: number): Promise<DefaultDeliveryInstructionViewModel[]> {
@@ -49,6 +53,20 @@ export class DeliveryInstructionService {
         });
 
         await deliveryInstruction.save();
+
+        const userToNotify: User = await User.findOne({
+            where: {
+                employeeId: deliveryInstruction.employeeDriverId
+            }
+        });
+
+        if (!userToNotify)
+            throw new NotFoundException('Usuário entregador não encontrado');
+
+        await this._notificationService.createNotification([userToNotify.key], {
+            title: '🚨🚨 Atenção!',
+            message: 'Você tem uma nova entrega! 🚚'
+        });
 
         return await this.getById(deliveryInstruction.id, userId);
     }

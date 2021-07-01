@@ -10,6 +10,11 @@ import { Person } from "./person";
 })
 export class User extends Entity<User> {
 
+    @AllowNull(false)
+    @Unique
+    @Column
+    public key: string;
+
     @ForeignKey(() => Company)
     @AllowNull(false)
     @Column
