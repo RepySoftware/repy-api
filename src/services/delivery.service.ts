@@ -91,8 +91,6 @@ export class DeliveryService {
             }
         });
 
-        const oldFirstDelivery = saleOrders.find(so => so.index == 0) || deliveryInstructions.find(di => di.index == 0);
-
         const transaction: Transaction = await this._database.sequelize.transaction();
 
         try {

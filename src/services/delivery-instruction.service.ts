@@ -63,10 +63,12 @@ export class DeliveryInstructionService {
         if (!userToNotify)
             throw new NotFoundException('Usuário entregador não encontrado');
 
-        await this._notificationService.createNotification([userToNotify.key], {
-            title: '🚨🚨 Atenção!',
-            message: 'Você tem uma nova entrega! 🚚'
-        });
+        if (input.firstPosition) {
+            this._notificationService.createNotification([userToNotify.key], {
+                title: '🚨🚨 Atenção!',
+                message: 'Você tem uma nova entrega! 🚚'
+            });
+        }
 
         return await this.getById(deliveryInstruction.id, userId);
     }

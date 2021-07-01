@@ -3,4 +3,5 @@ export interface DeliveryInstructionInputModel {
     description: string;
     index?: number;
     checkableByDriver: boolean;
+    firstPosition: boolean;
 }
