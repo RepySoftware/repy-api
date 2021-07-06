@@ -66,7 +66,7 @@ export class DeliveryInstructionService {
         if (input.firstPosition) {
             this._notificationService.createNotification([userToNotify.key], {
                 title: '🚨🚨 Atenção!',
-                message: 'Você tem uma nova entrega! 🚚'
+                message: 'Você tem uma nova instrução!'
             });
         }
 
