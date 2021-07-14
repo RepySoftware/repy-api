@@ -12,7 +12,7 @@ import { PersonPhone } from "../models/entities/person-phone";
 import { User } from "../models/entities/user";
 import { ViewPersonSearch } from "../models/entities/views/view-person-search";
 import { ExternalPersonCustomerInputModel } from "../models/input-models/external/external-person-customer.input-model";
-import { PersonSearchInputModel } from "../models/input-models/filter/person-search-filter.input-model";
+import { PersonSearchFilter } from "../models/input-models/filter/person-search-filter.filter";
 import { PersonFilter } from "../models/input-models/filter/person.filter";
 import { PersonInputModel } from "../models/input-models/person.input-model";
 import { PersonSearchViewModel } from "../models/view-models/person-search.view-model";
@@ -297,7 +297,7 @@ export class PersonService {
         }
     }
 
-    public async search(input: PersonSearchInputModel, userId: number): Promise<PersonSearchViewModel[]> {
+    public async search(input: PersonSearchFilter, userId: number): Promise<PersonSearchViewModel[]> {
 
         const limit = Number(input.limit || 20);
         const offset = Number((input.index || 0) * limit);

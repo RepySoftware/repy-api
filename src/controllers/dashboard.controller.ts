@@ -19,4 +19,13 @@ DashboardController.get('/salesByDate', [checkToken, checkRole(AccessControlRole
     }
 });
 
+DashboardController.get('/getPersonsCustomersNextGasSales', [checkToken, checkRole(AccessControlRole.EMPLOYEE_AGENT)], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await dashboardService.getPersonsCustomersNextGasSales(req.query as any, TokenHelper.getPayload(res).userId);
+        res.json(result);
+    } catch (error) {
+        next(error);
+    }
+});
+
 export { DashboardController };

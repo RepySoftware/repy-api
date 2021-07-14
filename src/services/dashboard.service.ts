@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { Op } from "sequelize";
+import { Op, where, WhereOptions } from "sequelize";
 import { CompanyBranch } from "../models/entities/company-branch";
 import { SaleOrder } from "../models/entities/sale-order";
 import { SaleOrderProduct } from "../models/entities/sale-order-product";
@@ -12,6 +12,9 @@ import { Product } from "../models/entities/product";
 import { SalesByDateViewModel } from "../models/view-models/sales-by-date.view-model";
 import { SalesByDateItemViewModel } from "../models/view-models/sales-by-date-item.view-model";
 import { SaleOrderStatus } from "../common/enums/sale-order-status";
+import { PersonCustomerNextGasSaleViewModel } from "../models/view-models/person-customer-next-gas-sale.view-model";
+import { PersonCustomerNextGasSaleFilter } from "../models/input-models/filter/person-customer-next-gas-sale.filter";
+import { PersonCustomerNextGasSale } from "../models/entities/person-customer-next-gas-sale";
 
 @injectable()
 export class DashboardService {
@@ -95,5 +98,48 @@ export class DashboardService {
             totalIssuedSalePrice: items.map(x => x.totalIssuedSalePrice).reduce((a, b) => a + b, 0),
             totalDeliveredSalePrice: items.map(x => x.totalDeliveredSalePrice).reduce((a, b) => a + b, 0)
         };
+    }
+
+    public async getPersonsCustomersNextGasSales(input: PersonCustomerNextGasSaleFilter, userId: number): Promise<PersonCustomerNextGasSaleViewModel[]> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const limit = Number(input.limit || 20);
+        const offset = Number((input.index || 0) * limit);
+
+        let whereAnd: any[] = [
+            { companyId: user.companyId }
+        ]
+
+        if (input.personCustomer) {
+            if (input.personCustomer.startsWith('id:')) {
+                whereAnd.push({ personCustomerId: input.personCustomer.split(':')[1] });
+            } else {
+                whereAnd.push({ personCustomerName: { [Op.like]: `%${input.personCustomer}%` } });
+            }
+        }
+
+        if (input.startNextSaleMinDate)
+            whereAnd.push({ nextSaleMinDate: { [Op.gte]: moment.utc(input.startNextSaleMinDate).toDate() } });
+
+        if (input.endNextSaleMinDate)
+            whereAnd.push({ nextSaleMinDate: { [Op.lte]: moment.utc(input.endNextSaleMinDate).toDate() } });
+
+        if (input.startNextSaleMaxDate)
+            whereAnd.push({ nextSaleMaxDate: { [Op.gte]: moment.utc(input.startNextSaleMaxDate).toDate() } });
+
+        if (input.endNextSaleMaxDate)
+            whereAnd.push({ nextSaleMaxDate: { [Op.lte]: moment.utc(input.endNextSaleMaxDate).toDate() } });
+
+        const personsCustomersNextGasSales: PersonCustomerNextGasSale[] = await PersonCustomerNextGasSale.findAll({
+            where: {
+                [Op.and]: whereAnd
+            },
+            limit,
+            offset,
+            order: [['nextSaleMinDate', 'DESC']]
+        });
+
+        return personsCustomersNextGasSales.map(PersonCustomerNextGasSaleViewModel.fromEntity);
     }
 }

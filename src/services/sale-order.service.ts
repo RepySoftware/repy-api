@@ -803,7 +803,8 @@ export class SaleOrderService {
 
             const companyBranchProducts: CompanyBranchProduct[] = await CompanyBranchProduct.findAll({
                 where: {
-                    '$product.code$': { [Op.in]: input.products.map(p => p.productCode) }
+                    '$product.code$': { [Op.in]: input.products.map(p => p.productCode) },
+                    '$product.companyId$': companyBranch.companyId
                 },
                 include: [
                     {
