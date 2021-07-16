@@ -45,4 +45,12 @@ export class DeviceGasLevelHistoryRead extends Entity<DeviceGasLevelHistoryRead>
     @UpdatedAt
     @Column
     public updatedAt: Date;
+
+    public getGasWeight(): number {
+        return this.weight - this.cylinderWeight;
+    }
+
+    public getPercentage(): number {
+        return 100 / this.contentWeight * this.getGasWeight();
+    }
 }

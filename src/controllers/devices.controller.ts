@@ -30,6 +30,21 @@ DevicesController.get('/:id', [checkToken], async (req: Request, res: Response, 
     }
 });
 
+DevicesController.get('/historyReads/:deviceId', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        
+        const device = await deviceService.getHistoryReads(
+            Number(req.params.deviceId),
+            req.query,
+            TokenHelper.getPayload(res).userId
+        );
+
+        res.json(device);
+    } catch (error) {
+        next(error);
+    }
+});
+
 DevicesController.post('/syncData', async (req: Request, res: Response, next: NextFunction) => {
     try {
 

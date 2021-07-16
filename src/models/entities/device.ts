@@ -8,12 +8,20 @@ import * as moment from 'moment-timezone';
 import { DeviceIsOnline } from "../abstraction/device-is-online";
 import { Person } from "./person";
 import { DeviceVerifyNotification, DeviceVerifyNotificationResult } from "../abstraction/device-verify-notification";
+import { Company } from "./company";
 
 @Table({
     tableName: 'Devices',
     timestamps: true
 })
 export class Device extends Entity<Device> {
+
+    @ForeignKey(() => Company)
+    @AllowNull(false)
+    @Column
+    public companyId: number;
+    @BelongsTo(() => Company, 'companyId')
+    public company: Company;
 
     @AllowNull(false)
     @Unique

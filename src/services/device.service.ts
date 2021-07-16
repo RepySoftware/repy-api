@@ -15,6 +15,10 @@ import { DeviceSyncDataStrategy } from "./strategies/device-sync-data.strategy";
 import { Person } from "../models/entities/person";
 import { Database } from "../data/database-config";
 import { MessagingService } from "./messaging.service";
+import { DeviceGasLevelHistoryReadViewModel } from "../models/view-models/device-gas-level-history-read.view-model";
+import { DeviceGasLevelHistoryRead } from "../models/entities/device-gas-level-history-read";
+import { UserService } from "./user.service";
+import { DeviceGasLevelHistoryReadFilter } from "../models/input-models/filter/device-gas-level-histpry-read.filter";
 
 @injectable()
 export class DeviceService {
@@ -22,6 +26,7 @@ export class DeviceService {
     constructor(
         @inject(Database) private _database: Database,
         @inject(MessagingService) private _messagingService: MessagingService,
+        @inject(UserService) private _userService: UserService
     ) { }
 
     public async get(strategy: string, userId: number, filter: DeviceFilter): Promise<DeviceViewModel[]> {
@@ -109,5 +114,44 @@ export class DeviceService {
         }
 
         throw new NotAuthorizedException('Usuário não tem acesso ao dispositivo');
+    }
+
+    public async getHistoryReads(
+        deviceId: number,
+        filter: DeviceGasLevelHistoryReadFilter,
+        userId: number
+    ): Promise<DeviceGasLevelHistoryReadViewModel[]> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const limit = Number(filter.limit || 20);
+        const offset = Number((filter.index || 0) * limit);
+
+        const device: Device = await Device.findOne({
+            where: {
+                id: deviceId,
+                companyId: user.companyId
+            },
+            include: [
+                {
+                    model: DeviceGasLevel,
+                    as: 'deviceGasLevel'
+                }
+            ]
+        });
+
+        if (!device)
+            throw new NotFoundException('Dispositivo não encontrado');
+
+        const historyReads: DeviceGasLevelHistoryRead[] = await DeviceGasLevelHistoryRead.findAll({
+            where: {
+                deviceGasLevelId: device.deviceGasLevelId
+            },
+            limit,
+            offset,
+            order: [['createdAt', 'DESC']]
+        });
+
+        return historyReads.map(DeviceGasLevelHistoryReadViewModel.fromEntity);
     }
 }
