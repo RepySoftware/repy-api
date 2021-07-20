@@ -78,15 +78,15 @@ export class DashboardService {
                 items.push({
                     product: ProductViewModel.fromEntity(sop.companyBranchProduct.product),
                     quantityIssued: sop.quantity,
-                    quantityDelivered: sop.saleOrder.deliveredAt ? sop.quantity : 0,
+                    quantityDelivered: sop.saleOrder.status == SaleOrderStatus.FINISHED ? sop.quantity : 0,
                     totalIssuedSalePrice: sop.quantity * sop.salePrice,
-                    totalDeliveredSalePrice: sop.saleOrder.deliveredAt ? sop.quantity * sop.salePrice : 0
+                    totalDeliveredSalePrice: sop.saleOrder.status == SaleOrderStatus.FINISHED ? sop.quantity * sop.salePrice : 0
                 });
             } else {
                 resultProduct.quantityIssued += sop.quantity;
-                resultProduct.quantityDelivered += sop.saleOrder.deliveredAt ? sop.quantity : 0;
+                resultProduct.quantityDelivered += sop.saleOrder.status == SaleOrderStatus.FINISHED ? sop.quantity : 0;
                 resultProduct.totalIssuedSalePrice += sop.quantity * sop.salePrice;
-                resultProduct.totalDeliveredSalePrice += sop.saleOrder.deliveredAt ? sop.quantity * sop.salePrice : 0;
+                resultProduct.totalDeliveredSalePrice += sop.saleOrder.status == SaleOrderStatus.FINISHED ? sop.quantity * sop.salePrice : 0;
             }
         });
 
