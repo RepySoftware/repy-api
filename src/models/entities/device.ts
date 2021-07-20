@@ -1,4 +1,4 @@
-import { AllowNull, BelongsTo, Column, CreatedAt, DataType, ForeignKey, HasMany, Table, Unique, UpdatedAt } from "sequelize-typescript";
+import { AllowNull, BelongsTo, Column, CreatedAt, DataType, Default, ForeignKey, HasMany, Table, Unique, UpdatedAt } from "sequelize-typescript";
 import { DeviceType } from "../../common/enums/device-type";
 import { Entity } from "../abstraction/entity";
 import { Address } from "./address";
@@ -55,6 +55,11 @@ export class Device extends Entity<Device> {
     public notificationConfigurationId?: number;
     @BelongsTo(() => NotificationConfiguration, 'notificationConfigurationId')
     public notificationConfiguration?: NotificationConfiguration;
+
+    @AllowNull(false)
+    @Default(false)
+    @Column
+    public isBluetooth: boolean;
 
     @AllowNull(false)
     @CreatedAt
