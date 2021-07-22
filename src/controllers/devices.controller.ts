@@ -30,6 +30,15 @@ DevicesController.get('/:id', [checkToken], async (req: Request, res: Response, 
     }
 });
 
+DevicesController.put('/', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const device = await deviceService.update(req.body, TokenHelper.getPayload(res).userId);
+        res.json(device);
+    } catch (error) {
+        next(error);
+    }
+});
+
 DevicesController.get('/historyReads/:deviceId', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
     try {
         

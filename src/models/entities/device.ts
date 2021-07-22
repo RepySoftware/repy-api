@@ -62,6 +62,11 @@ export class Device extends Entity<Device> {
     public isBluetooth: boolean;
 
     @AllowNull(false)
+    @Default(false)
+    @Column
+    public settingsEnabled: boolean;
+
+    @AllowNull(false)
     @CreatedAt
     @Column
     public createdAt: Date;

@@ -14,6 +14,7 @@ import { SaleOrdersController } from "./controllers/sale-orders.controller";
 import { StockController } from "./controllers/stock.controller";
 import { VehiclesController } from "./controllers/vehicles.controller";
 import { VERSION } from "../version";
+import { CylindersController } from "./controllers/cylinders.controller";
 
 const routes = Router();
 
@@ -36,5 +37,6 @@ routes.use('/deliveryInstructions', DeliveryInstructionsController);
 routes.use('/deposits', DepositsController);
 routes.use('/vehicles', VehiclesController);
 routes.use('/stock', StockController);
+routes.use('/cylinders', CylindersController);
 
 export { routes };

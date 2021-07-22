@@ -18,6 +18,7 @@ import { DepositService } from './services/deposit.service';
 import { VehicleService } from './services/vehicle.service';
 import { StockService } from './services/stock.service';
 import { NotificationService } from './services/notification.service';
+import { CylinderService } from './services/cylinder.service';
 
 const ServicesCollection = new Container();
 
@@ -41,5 +42,6 @@ ServicesCollection.bind(DepositService).toSelf();
 ServicesCollection.bind(VehicleService).toSelf();
 ServicesCollection.bind(StockService).toSelf();
 ServicesCollection.bind(NotificationService).toSelf();
+ServicesCollection.bind(CylinderService).toSelf();
 
 export { ServicesCollection };

@@ -17,6 +17,7 @@ export class DeviceViewModel {
     public notificationConfiguration: NotificationConfigurationViewModel;
     public isOnline: boolean;
     public isBluetooth: boolean;
+    public settingsEnabled: boolean;
     public createdAt: string;
     public updatedAt: string;
     public deviceGasLevel: DeviceGasLevelViewModel;
@@ -34,6 +35,7 @@ export class DeviceViewModel {
         device.notificationConfiguration = d.notificationConfiguration ? NotificationConfigurationViewModel.fromEntity(d.notificationConfiguration) : null;
         device.isOnline = d.isOnline();
         device.isBluetooth = d.isBluetooth;
+        device.settingsEnabled = d.settingsEnabled;
         device.createdAt = DateHelper.toStringViewModel(d.createdAt);
         device.updatedAt = DateHelper.toStringViewModel(d.updatedAt);
 

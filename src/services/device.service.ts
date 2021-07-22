@@ -19,6 +19,9 @@ import { DeviceGasLevelHistoryReadViewModel } from "../models/view-models/device
 import { DeviceGasLevelHistoryRead } from "../models/entities/device-gas-level-history-read";
 import { UserService } from "./user.service";
 import { DeviceGasLevelHistoryReadFilter } from "../models/input-models/filter/device-gas-level-histpry-read.filter";
+import { DeviceUpdateInputModel } from "../models/input-models/abstraction/device-update.input-model";
+import { DeviceUpdateStrategy } from "./strategies/device-update.strategy";
+import { CustomException } from "../common/exceptions/setup/custom.exception";
 
 @injectable()
 export class DeviceService {
@@ -63,6 +66,25 @@ export class DeviceService {
         await this.validatePersonDevice(device.id, userId);
 
         return DeviceViewModel.fromEntity(device);
+    }
+
+    public async update(input: DeviceUpdateInputModel, userId: number): Promise<DeviceViewModel> {
+
+        const user = this._userService.getEntityById(userId);
+
+        const device: Device = await Device.findOne({
+            where: { id: input.id }
+        });
+
+        if (!device)
+            throw new NotFoundException('Dispositivo não encontrado');
+
+        if (!device.settingsEnabled)
+            throw new CustomException(400, 'Você não pode editar este dispositivo');
+
+        await this.validatePersonDevice(device.id, userId);
+
+        return await (new DeviceUpdateStrategy(device.type, this._database.sequelize).call(input));
     }
 
     public async syncData(input: DeviceSyncDataInputModel): Promise<DeviceSyncDataViewModel> {
