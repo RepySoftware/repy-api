@@ -48,6 +48,10 @@ export class DeviceService {
                     as: 'address'
                 },
                 {
+                    model: Person,
+                    as: 'person'
+                },
+                {
                     model: DeviceGasLevel,
                     as: 'deviceGasLevel',
                     include: [
