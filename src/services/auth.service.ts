@@ -10,6 +10,7 @@ import { UserTokenViewModel } from "../models/view-models/user-token.view-model"
 import { LoginStrategy } from "./strategies/login.strategy";
 import { Person } from "../models/entities/person";
 import { Employee } from "../models/entities/employee";
+import { Company } from "../models/entities/company";
 
 @injectable()
 export class AuthService {
@@ -36,6 +37,10 @@ export class AuthService {
                 {
                     model: Employee,
                     as: 'employee'
+                },
+                {
+                    model: Company,
+                    as: 'company'
                 }
             ]
         });

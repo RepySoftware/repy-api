@@ -2,6 +2,7 @@ import { User } from "../entities/user";
 import { PersonViewModel } from "./person.view-model";
 import { DateHelper } from "../../common/helpers/date.helper";
 import { EmployeeViewModel } from "./employee.view-model";
+import { CompanyViewModel } from "./company.view-model";
 
 export class UserViewModel {
 
@@ -9,6 +10,7 @@ export class UserViewModel {
     public key: string;
     public person?: PersonViewModel;
     public employee?: EmployeeViewModel;
+    public company: CompanyViewModel;
     public username: string;
     public password: string;
     public isAdmin: boolean;
@@ -24,6 +26,7 @@ export class UserViewModel {
         user.key = u.key;
         user.person = u.person ? PersonViewModel.fromEntity(u.person) : null;
         user.employee = u.employee ? EmployeeViewModel.fromEntity(u.employee) : null;
+        user.company = u.company ? CompanyViewModel.fromEntity(u.company) : null;
         user.username = u.username;
         user.isAdmin = u.isAdmin;
         user.isActive = u.isActive;

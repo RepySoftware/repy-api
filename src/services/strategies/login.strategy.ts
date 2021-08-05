@@ -7,6 +7,7 @@ import * as bcrypt from 'bcryptjs';
 import { AuthException } from "../../common/exceptions/auth.exception";
 import { PersonException } from "../../common/exceptions/person.exception";
 import { Employee } from "../../models/entities/employee";
+import { Company } from "../../models/entities/company";
 
 export class LoginStrategy extends Strategy<LoginInputModel, Promise<User>> {
 
@@ -31,6 +32,10 @@ export class LoginStrategy extends Strategy<LoginInputModel, Promise<User>> {
                 {
                     model: Employee,
                     as: 'employee'
+                },
+                {
+                    model: Company,
+                    as: 'company'
                 }
             ]
         });
