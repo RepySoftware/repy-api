@@ -12,6 +12,7 @@ export class ProductViewModel {
     public name: string;
     public description: string;
     public measurementUnit: MeasurementUnit;
+    public isGas: boolean;
     public createdAt: string;
     public updatedAt: string;
 
@@ -25,6 +26,7 @@ export class ProductViewModel {
         product.name = p.name;
         product.description = p.description;
         product.measurementUnit = p.measurementUnit;
+        product.isGas = p.isGas;
         product.createdAt = DateHelper.toStringViewModel(p.createdAt);
         product.updatedAt = DateHelper.toStringViewModel(p.updatedAt);
 

@@ -73,4 +73,44 @@ ProductsController.get('/', [checkToken, checkRole([AccessControlRole.EMPLOYEE_A
     }
 });
 
+ProductsController.get('/:productId/prices', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const prices = await productService.getPrices(Number(req.params.productId), TokenHelper.getPayload(res).userId);
+        res.json(prices);
+    } catch (error) {
+        next(error);
+    }
+});
+
+ProductsController.get('/:productId/prices/:companyBranchProductPriceId', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const price = await productService.getPriceById(
+            Number(req.params.productId),
+            Number(req.params.companyBranchProductPriceId),
+            TokenHelper.getPayload(res).userId
+        );
+        res.json(price);
+    } catch (error) {
+        next(error);
+    }
+});
+
+ProductsController.post('/prices', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const price = await productService.createPrice(req.body, TokenHelper.getPayload(res).userId);
+        res.json(price);
+    } catch (error) {
+        next(error);
+    }
+});
+
+ProductsController.put('/prices', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const price = await productService.updatePrice(req.body, TokenHelper.getPayload(res).userId);
+        res.json(price);
+    } catch (error) {
+        next(error);
+    }
+});
+
 export { ProductsController };

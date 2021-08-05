@@ -7,6 +7,7 @@ export class CompanyBranchProductPriceViewModel {
     public name: string;
     public salePrice: number;
     public isDefault: boolean;
+    public isActive: boolean;
     public createdAt: string;
     public updatedAt: string;
 
@@ -18,6 +19,7 @@ export class CompanyBranchProductPriceViewModel {
         price.name = cbpp.name;
         price.salePrice = cbpp.salePrice;
         price.isDefault = cbpp.isDefault;
+        price.isActive = cbpp.isActive;
         price.createdAt = DateHelper.toStringViewModel(cbpp.createdAt);
         price.updatedAt = DateHelper.toStringViewModel(cbpp.updatedAt);
 

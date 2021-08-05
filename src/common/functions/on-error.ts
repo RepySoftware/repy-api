@@ -9,6 +9,11 @@ export function onError(error, req, res, next) {
     if (error instanceof CustomException) {
         message = error.message;
         statusCode = error.statusCode;
+    } else if (error.sql) {
+        const sqlMessage = error.original.sqlMessage;
+
+        message = `Algo errado 🙁 - [${sqlMessage || 'sql_error'}]`;
+        statusCode = 400;
     } else {
         message = 'Algo errado 🙁';
         statusCode = 400;

@@ -8,6 +8,16 @@ import { CompanyBranchProduct } from "./company-branch-product";
 })
 export class CompanyBranchProductPrice extends Entity<CompanyBranchProductPrice> {
 
+    public static create(input: {
+        name: string;
+        companyBranchProductId: number;
+        salePrice: number;
+        isDefault: boolean;
+        isActive: boolean;
+    }): CompanyBranchProductPrice {
+        return new CompanyBranchProductPrice(input);
+    }
+
     @AllowNull(false)
     @Column
     public name: string;
@@ -24,14 +34,19 @@ export class CompanyBranchProductPrice extends Entity<CompanyBranchProductPrice>
     public salePrice: number;
 
     @AllowNull(false)
-    @Default(0)
+    @Default(false)
     @Column
     public isDefault: boolean;
 
     @AllowNull(false)
-    @Default(0)
+    @Default(false)
     @Column
     public isExternal: boolean;
+
+    @AllowNull(false)
+    @Default(true)
+    @Column
+    public isActive: boolean;
 
     @AllowNull(false)
     @CreatedAt
