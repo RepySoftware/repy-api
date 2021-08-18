@@ -15,6 +15,9 @@ export class DeviceGasLevelViewModel {
     public lastWeightUpdate: string;
     public percentage: number;
     public status: DeviceGasLevelStatus;
+    public daysToDangerPercentage: number;
+    public dangerDate: string;
+    public consumptionDays: number;
 
     public static fromEntity(dgl: DeviceGasLevel): DeviceGasLevelViewModel {
 
@@ -30,6 +33,9 @@ export class DeviceGasLevelViewModel {
         device.lastWeightUpdate = DateHelper.toStringViewModel(dgl.lastWeightUpdate);
         device.percentage = dgl.calculePercentage();
         device.status = dgl.getStatus();
+        device.daysToDangerPercentage = dgl.getDaysToDangerPercentage();
+        device.dangerDate = DateHelper.toStringViewModel(dgl.getDangerDate());
+        device.consumptionDays = dgl.getConsumptionDays();
 
         return device;
     }

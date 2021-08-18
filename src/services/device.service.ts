@@ -22,6 +22,9 @@ import { DeviceGasLevelHistoryReadFilter } from "../models/input-models/filter/d
 import { DeviceUpdateInputModel } from "../models/input-models/abstraction/device-update.input-model";
 import { DeviceUpdateStrategy } from "./strategies/device-update.strategy";
 import { CustomException } from "../common/exceptions/setup/custom.exception";
+import { Op } from "sequelize";
+import { ViewDeviceGasLevelDangerDay } from "../models/entities/views/view-device-gas-level-danger-day";
+import { ViewPersonSearch } from "../models/entities/views/view-person-search";
 
 @injectable()
 export class DeviceService {
@@ -34,7 +37,12 @@ export class DeviceService {
 
     public async get(strategy: string, userId: number, filter: DeviceFilter): Promise<DeviceViewModel[]> {
 
-        const devices = await (new DeviceGetStrategy(strategy).call({ userId, filter }));
+        const devices = await (new DeviceGetStrategy(
+            strategy,
+            this._userService,
+            this._database.sequelize
+        ).call({ userId, filter }));
+
         return devices.map(DeviceViewModel.fromEntity);
     }
 
@@ -68,6 +76,8 @@ export class DeviceService {
             throw new NotFoundException('Dispositivo não encontrado');
 
         await this.validatePersonDevice(device.id, userId);
+
+        await device.loadExtras(this._database.sequelize);
 
         return DeviceViewModel.fromEntity(device);
     }

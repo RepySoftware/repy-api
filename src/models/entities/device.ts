@@ -1,4 +1,4 @@
-import { AllowNull, BelongsTo, Column, CreatedAt, DataType, Default, ForeignKey, HasMany, Table, Unique, UpdatedAt } from "sequelize-typescript";
+import { AllowNull, BelongsTo, Column, CreatedAt, DataType, Default, ForeignKey, HasMany, Sequelize, Table, Unique, UpdatedAt } from "sequelize-typescript";
 import { DeviceType } from "../../common/enums/device-type";
 import { Entity } from "../abstraction/entity";
 import { Address } from "./address";
@@ -9,6 +9,7 @@ import { DeviceIsOnline } from "../abstraction/device-is-online";
 import { Person } from "./person";
 import { DeviceVerifyNotification, DeviceVerifyNotificationResult } from "../abstraction/device-verify-notification";
 import { Company } from "./company";
+import { DeviceLoadExtras } from "../abstraction/device-load-extras";
 
 @Table({
     tableName: 'Devices',
@@ -97,5 +98,10 @@ export class Device extends Entity<Device> {
     public async verifyNotification(): Promise<DeviceVerifyNotificationResult> {
         const device: DeviceVerifyNotification = this.deviceByType();
         return device.verifyNotification(this);
+    }
+
+    public async loadExtras(sequelize: Sequelize): Promise<void> {
+        const device: DeviceLoadExtras = this.deviceByType();
+        await device.loadExtras(sequelize);
     }
 }

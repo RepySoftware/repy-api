@@ -32,6 +32,7 @@ import { RelatedProduct } from "../models/entities/related-product";
 import { DeviceGasLevelHistoryRead } from "../models/entities/device-gas-level-history-read";
 import { ApiKey } from "../models/entities/api-keys";
 import { PersonCustomerNextGasSale } from "../models/entities/person-customer-next-gas-sale";
+import { ViewDeviceGasLevelDangerDay } from "../models/entities/views/view-device-gas-level-danger-day";
 
 @injectable()
 export class Database {
@@ -84,6 +85,11 @@ export class Database {
         this.sequelize.define(ViewPersonSearch.modelName, ViewPersonSearch.model, {
             timestamps: false,
             tableName: ViewPersonSearch.modelName
+        });
+
+        this.sequelize.define(ViewDeviceGasLevelDangerDay.modelName, ViewDeviceGasLevelDangerDay.model, {
+            timestamps: false,
+            tableName: ViewDeviceGasLevelDangerDay.modelName
         });
     }
 }

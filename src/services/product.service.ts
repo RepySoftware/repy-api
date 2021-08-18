@@ -382,8 +382,8 @@ export class ProductService {
                 companyBranchProductId: companyBranchProduct.id,
                 name: input.name,
                 salePrice: input.salePrice,
-                isDefault: input.isDefault,
-                isActive: input.isActive
+                isDefault: !!input.isDefault,
+                isActive: !!input.isActive
             });
 
             await price.save({ transaction });
@@ -458,8 +458,8 @@ export class ProductService {
 
             price.name = input.name;
             price.salePrice = input.salePrice;
-            price.isDefault = input.isDefault;
-            price.isActive = input.isActive;
+            price.isDefault = !!input.isDefault;
+            price.isActive = !!input.isActive;
 
             await price.save({ transaction });
 

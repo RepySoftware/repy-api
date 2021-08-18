@@ -6,15 +6,17 @@ import { DeviceIsOnline } from "../abstraction/device-is-online";
 import { Device } from "./device";
 import { DeviceVerifyNotification, DeviceVerifyNotificationResult } from "../abstraction/device-verify-notification";
 import { CONFIG } from "../../config";
-import { Transaction } from "sequelize/types";
+import { Sequelize, Transaction } from "sequelize/types";
 import { DeviceGasLevelHistoryRead } from "./device-gas-level-history-read";
 import { DeviceGasLevelStatus } from "../../common/enums/device-gas-level-status";
+import { ViewDeviceGasLevelDangerDay } from "./views/view-device-gas-level-danger-day";
+import { DeviceLoadExtras } from "../abstraction/device-load-extras";
 
 @Table({
     tableName: 'DevicesGasLevels',
     timestamps: false
 })
-export class DeviceGasLevel extends Entity<DeviceGasLevel> implements DeviceIsOnline, DeviceVerifyNotification {
+export class DeviceGasLevel extends Entity<DeviceGasLevel> implements DeviceIsOnline, DeviceVerifyNotification, DeviceLoadExtras {
 
     @ForeignKey(() => Cylinder)
     @AllowNull(false)
@@ -59,6 +61,39 @@ export class DeviceGasLevel extends Entity<DeviceGasLevel> implements DeviceIsOn
     @AllowNull(false)
     @Column
     public dangerPercentage: number;
+
+    private _daysToDangerPercentage: number;
+    private _dangerDate: Date;
+    private _consumptionDays: number;
+
+    public setDangerDay(value: ViewDeviceGasLevelDangerDay): void {
+        this._daysToDangerPercentage = value.vDaysToDangerPercentage;
+        this._dangerDate = value.vDangerDate;
+        this._consumptionDays = value.vConsumptionDays;
+    }
+
+    public async loadDangerDay(sequelize: Sequelize): Promise<void> {
+        const dangerDayModel = ViewDeviceGasLevelDangerDay.getDefinedModel(sequelize);
+        const dangerDay: ViewDeviceGasLevelDangerDay = await dangerDayModel.findOne({
+            where: { id: this.id }
+        });
+
+        this._daysToDangerPercentage = dangerDay.vDaysToDangerPercentage;
+        this._dangerDate = dangerDay.vDangerDate;
+        this._consumptionDays = dangerDay.vConsumptionDays;
+    }
+
+    public getDaysToDangerPercentage(): number {
+        return this._daysToDangerPercentage;
+    }
+
+    public getDangerDate(): Date {
+        return this._dangerDate;
+    }
+
+    public getConsumptionDays(): number {
+        return this._consumptionDays;
+    }
 
     public getCylinderWeight(): number {
         return this.cylinderWeight || (this.cylinder ? this.cylinder.defaultCylinderWeight : null);
@@ -178,5 +213,9 @@ export class DeviceGasLevel extends Entity<DeviceGasLevel> implements DeviceIsOn
         }
 
         return null;
+    }
+
+    public async loadExtras(sequelize: Sequelize): Promise<void> {
+        await this.loadDangerDay(sequelize);
     }
 }
