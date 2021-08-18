@@ -68,6 +68,11 @@ export class Device extends Entity<Device> {
     public settingsEnabled: boolean;
 
     @AllowNull(false)
+    @Default(true)
+    @Column
+    public isActive: boolean;
+
+    @AllowNull(false)
     @CreatedAt
     @Column
     public createdAt: Date;

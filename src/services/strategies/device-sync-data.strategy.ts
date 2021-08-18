@@ -26,7 +26,8 @@ export class DeviceSyncDataStrategy extends Strategy<DeviceSyncDataInputModel, P
         const device: Device = await Device.findOne({
             where: {
                 id: input.deviceId,
-                token: input.token
+                token: input.token,
+                isActive: true
             },
             include: [
                 {

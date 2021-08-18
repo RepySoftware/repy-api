@@ -49,7 +49,10 @@ export class DeviceService {
     public async getById(id: number, userId: number): Promise<DeviceViewModel> {
 
         const device: Device = await Device.findOne({
-            where: { id },
+            where: {
+                id,
+                isActive: true
+            },
             include: [
                 {
                     model: Address,
@@ -87,7 +90,10 @@ export class DeviceService {
         const user = this._userService.getEntityById(userId);
 
         const device: Device = await Device.findOne({
-            where: { id: input.id }
+            where: {
+                id: input.id,
+                isActive: true
+            }
         });
 
         if (!device)
@@ -106,7 +112,8 @@ export class DeviceService {
         const device: Device = await Device.findOne({
             where: {
                 id: input.deviceId,
-                token: input.token
+                token: input.token,
+                isActive: true
             }
         });
 

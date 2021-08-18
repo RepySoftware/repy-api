@@ -73,7 +73,10 @@ export class DeviceGetStrategy extends Strategy<{ userId: number, filter: Device
                     {
                         model: Device,
                         as: 'devices',
-                        include: this._defaultDeviceIncludes
+                        include: this._defaultDeviceIncludes,
+                        where: {
+                            isActive: true
+                        }
                     }
                 ]
             }
@@ -96,7 +99,8 @@ export class DeviceGetStrategy extends Strategy<{ userId: number, filter: Device
                 ...this._defaultDeviceIncludes
             ],
             where: {
-                companyId: user.companyId
+                companyId: user.companyId,
+                isActive: true
             }
         });
 

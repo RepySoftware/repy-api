@@ -23,6 +23,7 @@ export class DeviceUpdateStrategy extends Strategy<DeviceUpdateInputModel, Promi
         const device: Device = await Device.findOne({
             where: {
                 id: input.id,
+                isActive: true
             },
             include: [
                 {
