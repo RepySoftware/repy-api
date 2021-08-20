@@ -66,4 +66,13 @@ EmployeesController.patch('/geolocation', [checkToken, checkRole([AccessControlR
     }
 });
 
+EmployeesController.get('/vehicle/:vehicleId', [checkToken, checkRole([AccessControlRole.EMPLOYEE_AGENT, AccessControlRole.EMPLOYEE_DRIVER])], async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const employees = await employeeService.getByVehicles(TokenHelper.getPayload(res).userId, Number(req.params.vehicleId));
+        res.json(employees);
+    } catch (error) {
+        next(error);
+    }
+});
+
 export { EmployeesController };

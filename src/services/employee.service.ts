@@ -201,4 +201,19 @@ export class EmployeeService {
 
         return employees.map(EmployeeCoordinatesViewModel.fromEntity);
     }
+
+    public async getByVehicles(userId: number, vehicleId: number): Promise<EmployeeViewModel[]> {
+
+        const user = await this._userService.getEntityById(userId);
+
+        const employees: Employee[] = await Employee.findAll({
+            where: {
+                companyId: user.companyId,
+                id: { [Op.not]: user.employeeId },
+                vehicleId
+            }
+        });
+
+        return employees.map(EmployeeViewModel.fromEntity);
+    }
 }
