@@ -120,15 +120,7 @@ export class PersonService {
                     referencePoint: input.address.referencePoint
                 });
 
-                const coordinates = await this._geocodingService.addressToCoordinates(
-                    AddressHelper.format(address, { includeComplement: false })
-                );
-
-                if (!coordinates)
-                    throw new PersonException('Erro ao buscar endereço. Por favor revise.');
-
-                address.latitude = coordinates.latitude;
-                address.longitude = coordinates.longitude;
+                await address.setCoordinatesFromGeocoding(this._geocodingService);
 
                 await address.save({ transaction });
             }

@@ -1,6 +1,7 @@
 import { DeliveryInstructionStatus } from "../../common/enums/delivery-instruction-status";
 import { DateHelper } from "../../common/helpers/date.helper";
 import { DeliveryInstruction } from "../entities/delivery-instruction";
+import { AddressViewModel } from "./address.view-model";
 import { DefaultDeliveryInstructionViewModel } from "./default-delivery-instruction.view-model";
 import { EmployeeViewModel } from "./employee.view-model";
 
@@ -11,6 +12,7 @@ export class DeliveryInstructionViewModel {
     public description: string;
     public status: DeliveryInstructionStatus;
     public index: number;
+    public address?: AddressViewModel;
     public checkableByDriver: boolean;
     public startedAt: string;
     public finishedAt: string;
@@ -26,6 +28,7 @@ export class DeliveryInstructionViewModel {
         deliveryInstruction.status = edi.status;
         deliveryInstruction.description = edi.description;
         deliveryInstruction.index = edi.index;
+        deliveryInstruction.address = edi.address ? AddressViewModel.fromEntity(edi.address) : null;
         deliveryInstruction.checkableByDriver = edi.checkableByDriver;
         deliveryInstruction.startedAt = DateHelper.toStringViewModel(edi.startedAt);
         deliveryInstruction.finishedAt = DateHelper.toStringViewModel(edi.finishedAt);

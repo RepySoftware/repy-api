@@ -1,4 +1,8 @@
 import { AllowNull, Column, Table } from "sequelize-typescript";
+import { PersonException } from "../../common/exceptions/person.exception";
+import { CustomException } from "../../common/exceptions/setup/custom.exception";
+import { AddressHelper } from "../../common/helpers/address.helper";
+import { GeocodingService } from "../../services/geocoding.service";
 import { Entity } from "../abstraction/entity";
 
 @Table({
@@ -64,4 +68,17 @@ export class Address extends Entity<Address> {
 
     @Column
     public longitude?: number;
+
+    public async setCoordinatesFromGeocoding(geocodingService: GeocodingService): Promise<void> {
+
+        const coordinates = await geocodingService.addressToCoordinates(
+            AddressHelper.format(this, { includeComplement: false })
+        );
+
+        if (!coordinates)
+            throw new CustomException(400, 'Erro ao buscar endereço. Por favor revise.');
+
+        this.latitude = coordinates.latitude;
+        this.longitude = coordinates.longitude;
+    }
 }

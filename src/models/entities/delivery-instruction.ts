@@ -4,6 +4,7 @@ import { Entity } from "../abstraction/entity";
 import { Employee } from "./employee";
 import * as moment from 'moment-timezone';
 import { Company } from "./company";
+import { Address } from "./address";
 
 @Table({
     tableName: 'DeliveryInstructions',
@@ -17,6 +18,7 @@ export class DeliveryInstruction extends Entity<DeliveryInstruction> {
         status: DeliveryInstructionStatus;
         index: number;
         companyId: number;
+        addressId?: number;
         checkableByDriver: boolean;
     }): DeliveryInstruction {
         return new DeliveryInstruction(input);
@@ -48,6 +50,12 @@ export class DeliveryInstruction extends Entity<DeliveryInstruction> {
     public companyId: number;
     @BelongsTo(() => Company, 'companyId')
     public company: Company;
+
+    @ForeignKey(() => Address)
+    @Column
+    public addressId?: number;
+    @BelongsTo(() => Address, 'addressId')
+    public address?: Address;
 
     @Column
     public checkableByDriver: boolean;
