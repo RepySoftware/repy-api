@@ -8,6 +8,9 @@ export abstract class AddressHelper {
         options: { includeComplement?: boolean } = { includeComplement: true }
     ): string {
 
+        if (!address)
+            return null;
+
         let addressStr = '';
 
         if ((<Address>address).description) {
