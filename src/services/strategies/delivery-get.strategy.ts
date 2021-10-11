@@ -163,6 +163,10 @@ export class DeliveryGetStrategy extends Strategy<{ userId: number }, Promise<De
                 {
                     model: Employee,
                     as: 'employeeDriver'
+                },
+                {
+                    model: Address,
+                    as: 'address'
                 }
             ],
             order: [['index', 'ASC']],
