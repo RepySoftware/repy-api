@@ -57,6 +57,7 @@ export class DeliveryInstruction extends Entity<DeliveryInstruction> {
     @BelongsTo(() => Address, 'addressId')
     public address?: Address;
 
+    @AllowNull(false)
     @Column
     public checkableByDriver: boolean;
 
