@@ -95,6 +95,54 @@ create table DefaultDeliveryInstructions (
 
 alter table DefaultDeliveryInstructions add constraint FK_DefaultDeliveryInstructions_Companies foreign key (CompanyID) references Companies(ID);
 
+create table Deposits (
+    ID bigint not null primary key auto_increment,
+    Name varchar(100) not null,
+    CompanyBranchID bigint not null,
+    CreatedAt datetime not null default current_timestamp,
+    UpdatedAt datetime not null default current_timestamp on update current_timestamp
+);
+
+alter table Deposits add constraint FK_Deposits_CompanyBranches foreign key (CompanyBranchID) references CompanyBranches(ID);
+
+create table Vehicles (
+    ID bigint not null primary key auto_increment,
+    Description varchar(200) not null,
+    Nickname varchar(100),
+    LicensePlate varchar(100) not null,
+    CompanyID bigint not null,
+    DepositID bigint,
+    CreatedAt datetime not null default current_timestamp,
+    UpdatedAt datetime not null default current_timestamp on update current_timestamp
+);
+
+alter table Vehicles add constraint FK_Vehicles_Companies foreign key (CompanyID) references Companies(ID);
+
+alter table Vehicles add constraint FK_Vehicles_Deposits foreign key (DepositID) references Deposits(ID);
+
+create table Employees (
+    ID bigint not null primary key auto_increment,
+    Name varchar(100) not null,
+    DocumentNumber varchar(100),
+    Email varchar(100),
+    CompanyID bigint not null,
+    VehicleID bigint,
+    Color varchar(20),
+    IsManager bit not null,
+    IsAgent bit not null,
+    IsDriver bit not null,
+    IsActive bit not null default b'1',
+    CoordinatesID bigint,
+    CreatedAt datetime not null default current_timestamp,
+    UpdatedAt datetime not null default current_timestamp on update current_timestamp
+);
+
+alter table Employees add constraint FK_Employees_Companies foreign key (CompanyID) references Companies(ID);
+
+alter table Employees add constraint FK_Employees_Vehicles foreign key (VehicleID) references Vehicles(ID);
+
+alter table Employees add constraint FK_Employees_Coordinates foreign key (CoordinatesID) references Coordinates(ID);
+
 create table DeliveryInstructions (
     ID bigint not null primary key auto_increment,
     EmployeeDriverID bigint not null,
@@ -115,3 +163,14 @@ alter table DeliveryInstructions add constraint FK_DeliveryInstructions_Employee
 alter table DeliveryInstructions add constraint FK_DeliveryInstructions_Companies foreign key (CompanyID) references Companies(ID);
 
 alter table DeliveryInstructions add constraint FK_DeliveryInstructions_Addresses foreign key (AddressID) references Addresses(ID);
+
+create table DepositsProducts (
+    ID bigint not null primary key auto_increment,
+    DepositID bigint not null,
+    CompanyBranchProductID bigint not null,
+    Quantity decimal(10,2) not null
+);
+
+alter table DepositsProducts add constraint FK_DepositsProducts_Deposits foreign key (DepositID) references Deposits(ID);
+
+alter table DepositsProducts add constraint FK_DepositsProducts_CompanyBranchesProducts foreign key (CompanyBranchProductID) references CompanyBranchesProducts(ID);
