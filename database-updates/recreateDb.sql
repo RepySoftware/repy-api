@@ -20,7 +20,7 @@ create table ApiKeys (
     `Key` varchar(100) not null
 );
 
-alter table Addresses add constraint UK_Addresses_Key unique key (`Key`);
+alter table ApiKeys add constraint UK_Addresses_Key unique key (`Key`);
 
 create table Companies (
     ID bigint not null primary key auto_increment,
@@ -45,6 +45,31 @@ create table CompanyBranches (
 alter table CompanyBranches add constraint FK_CompanyBranches_Companies foreign key (CompanyID) references Companies(ID);
 
 alter table CompanyBranches add constraint FK_CompanyBranches_Addresses foreign key (AddressID) references Addresses(ID);
+
+create table ProductCategories (
+    ID bigint not null primary key auto_increment,
+    CompanyID bigint not null,
+    Name varchar(100) not null
+);
+
+alter table ProductCategories add constraint FK_ProductCategories_Companies foreign key (CompanyID) references Companies(ID);
+
+create table Products (
+    ID bigint not null primary key auto_increment,
+    CompanyID bigint not null,
+    CategoryID bigint not null,
+    Code varchar(100) not null,
+    Name varchar(100) not null,
+    Description varchar(200),
+    MeasurementUnit varchar(30) not null,
+    IsGas bit not null,
+    CreatedAt datetime not null default current_timestamp,
+    UpdatedAt datetime not null default current_timestamp on update current_timestamp
+);
+
+alter table Products add constraint FK_Products_Companies foreign key (CompanyID) references Companies(ID);
+
+alter table Products add constraint FK_Products_ProductCategories foreign key (CategoryID) references ProductCategories(ID);
 
 create table CompanyBranchesProducts (
     ID bigint not null primary key auto_increment,
@@ -148,7 +173,7 @@ create table DeliveryInstructions (
     EmployeeDriverID bigint not null,
     Description varchar(500) not null,
     Status varchar(30) not null,
-    Index int not null default 0,
+    `Index` int not null default 0,
     CompanyID bigint not null,
     AddressID bigint,
     CheckableByDriver bit not null,
@@ -289,31 +314,6 @@ create table PersonsPhones (
 
 alter table PersonsPhones add constraint FK_PersonsPhones_Persons foreign key (PersonID) references Persons(ID);
 
-create table ProductCategories (
-    ID bigint not null primary key auto_increment,
-    CompanyID bigint not null,
-    Name varchar(100) not null
-);
-
-alter table ProductCategories add constraint FK_ProductCategories_Companies foreign key (CompanyID) references Companies(ID);
-
-create table Products (
-    ID bigint not null primary key auto_increment,
-    CompanyID bigint not null,
-    CategoryID bigint not null,
-    Code varchar(100) not null,
-    Name varchar(100) not null,
-    Description varchar(200),
-    MeasurementUnit varchar(30) not null,
-    IsGas bit not null,
-    CreatedAt datetime not null default current_timestamp,
-    UpdatedAt datetime not null default current_timestamp on update current_timestamp
-);
-
-alter table Products add constraint FK_Products_Companies foreign key (CompanyID) references Companies(ID);
-
-alter table Products add constraint FK_Products_ProductCategories foreign key (CategoryID) references ProductCategories(ID);
-
 create table RelatedProducts (
     ID bigint not null primary key auto_increment,
     CompanyBranchProductID bigint not nulL,
@@ -334,7 +334,7 @@ create table SaleOrders (
     DeliveryAddressID bigint not null,
     TotalSalePrice decimal(10,2) not null,
     Status varchar(50) not null,
-    Index int not null default 0,
+    `Index` int not null default 0,
     Observation varchar(500),
     ShowObservationToDriver bit not null,
     Source varchar(50) not null default 'REPY',
