@@ -8,6 +8,8 @@ import { HttpResponseFormat } from "../common/enums/http-response-format";
 import { checkRole } from "../middlewares/check-role";
 import { AccessControlRole } from "../common/enums/access-control-role";
 
+import * as fs from 'fs';
+
 const DevicesController = Router();
 
 const deviceService = ServicesCollection.resolve(DeviceService);
@@ -57,19 +59,23 @@ DevicesController.get('/historyReads/:deviceId', [checkToken], async (req: Reque
 DevicesController.post('/syncData', async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-        const {
-            responseFormat,
-            rawDelimiter,
-            rawSubDelimiter
-        } = req.query;
+        // const {
+        //     responseFormat,
+        //     rawDelimiter,
+        //     rawSubDelimiter
+        // } = req.query;
 
-        const result = await deviceService.syncData(req.body);
-        HttpHelper.formatResponse(result, {
-            format: (responseFormat as HttpResponseFormat) || HttpResponseFormat.JSON,
-            res,
-            rawDelimiter: rawDelimiter as string,
-            rawSubDelimiter: rawSubDelimiter as string
-        });
+        // const result = await deviceService.syncData(req.body);
+        // HttpHelper.formatResponse(result, {
+        //     format: (responseFormat as HttpResponseFormat) || HttpResponseFormat.JSON,
+        //     res,
+        //     rawDelimiter: rawDelimiter as string,
+        //     rawSubDelimiter: rawSubDelimiter as string
+        // });
+
+        fs.appendFileSync('/home/projects/Repy/repy-devices.log', `${JSON.stringify(req)},`);
+
+        res.status(500).send();
     } catch (error) {
         next(error);
     }
