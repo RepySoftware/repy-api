@@ -73,7 +73,8 @@ DevicesController.post('/syncData', async (req: Request, res: Response, next: Ne
         //     rawSubDelimiter: rawSubDelimiter as string
         // });
 
-        fs.appendFileSync('/home/projects/Repy/repy-devices.log', `${JSON.stringify(req)},`);
+        // fs.appendFileSync('/home/projects/Repy/repy-devices.log', `${JSON.stringify(req)}`);
+        console.log(JSON.stringify(req))
 
         res.status(500).send();
     } catch (error) {
