@@ -403,3 +403,24 @@ alter table StockPosts add constraint FK_StockPosts_Deposits foreign key (Deposi
 alter table StockPosts add constraint FK_StockPosts_DepositsProducts foreign key (DepositProductID) references DepositsProducts(ID);
 
 alter table StockPosts add constraint FK_StockPosts_SaleOrders foreign key (SaleOrderID) references SaleOrders(ID);
+
+create table Users (
+    ID bigint not null primary key auto_increment,
+    `Key` varchar(60) not null,
+    CompanyID bigint not null,
+    PersonID bigint not null,
+    EmployeeID bigint not null,
+    Username varchar(100) not null,
+    Password varchar(100) not null,
+    IsAdmin bit not null,
+    IsActive bit not null default b'1',
+    CreatedAt datetime not null default current_timestamp,
+    UpdatedAt datetime not null default current_timestamp on update current_timestamp
+);
+
+alter table Users add constraint UK_Users_Key unique key (`Key`);
+alter table Users add constraint UK_Users_Username unique key (Username);
+
+alter table Users add constraint FK_Users_Companies foreign key (CompanyID) references Companies(ID);
+alter table Users add constraint FK_Users_Persons foreign key (PersonID) references Persons(ID);
+alter table Users add constraint FK_Users_Employees foreign key (EmployeeID) references Employees(ID);
