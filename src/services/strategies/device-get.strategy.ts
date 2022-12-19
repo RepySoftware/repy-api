@@ -111,16 +111,16 @@ export class DeviceGetStrategy extends Strategy<{ userId: number, filter: Device
 
     private async loadDevicesGasLevelsDangerDay(devices: Device[]): Promise<void> {
 
-        const dangerDayModel = ViewDeviceGasLevelDangerDay.getDefinedModel(this._sequelize);
-        const dangerDays: ViewDeviceGasLevelDangerDay[] = await dangerDayModel.findAll({
-            where: {
-                id: { [Op.in]: devices.filter(d => d.type == DeviceType.GAS_LEVEL).map(d => d.deviceGasLevelId) }
-            }
-        });
+        // const dangerDayModel = ViewDeviceGasLevelDangerDay.getDefinedModel(this._sequelize);
+        // const dangerDays: ViewDeviceGasLevelDangerDay[] = await dangerDayModel.findAll({
+        //     where: {
+        //         id: { [Op.in]: devices.filter(d => d.type == DeviceType.GAS_LEVEL).map(d => d.deviceGasLevelId) }
+        //     }
+        // });
 
-        dangerDays.forEach(dd => {
-            const device = devices.find(d => d.deviceGasLevelId == dd.vId);
-            device.deviceGasLevel.setDangerDay(dd);
-        });
+        // dangerDays.forEach(dd => {
+        //     const device = devices.find(d => d.deviceGasLevelId == dd.vId);
+        //     device.deviceGasLevel.setDangerDay(dd);
+        // });
     }
 }

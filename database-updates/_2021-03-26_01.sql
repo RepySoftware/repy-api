@@ -9,7 +9,7 @@ ALTER TABLE Addresses CHANGE Description Description varchar(400) NOT NULL AFTER
 
 
 CREATE OR REPLACE
-ALGORITHM = UNDEFINED VIEW `RepyDev`.`ViewPersonsSearch` AS
+ALGORITHM = UNDEFINED VIEW `ViewPersonsSearch` AS
 select
     `p`.`ID` AS `ID`,
     `p`.`Name` AS `Name`,
@@ -24,7 +24,7 @@ select
     select
         group_concat(`pp`.`Phone` separator ',')
     from
-        `RepyDev`.`PersonsPhones` `pp`
+        `PersonsPhones` `pp`
     where
         (`pp`.`PersonID` = `p`.`ID`)) AS `Phones`,
     `a`.`Description` AS `AddressDescription`,
@@ -41,14 +41,14 @@ select
     select
         group_concat(`pp`.`Phone` separator ',')
     from
-        `RepyDev`.`PersonsPhones` `pp`
+        `PersonsPhones` `pp`
     where
         (`pp`.`PersonID` = `p`.`ID`)) AS `PhonesSearch`,
     concat(ifnull(`p`.`Name`, ''), ifnull(`p`.`TradeName`, '')) AS `NameSearch`,
-    cast(concat(ifnull(`p`.`ID`, ''), ifnull(`p`.`Name`, ''), ifnull(`p`.`TradeName`, ''), ifnull(`p`.`DocumentNumber`, ''), ifnull(`p`.`IsSupplier`, ''), ifnull(`p`.`IsCustomer`, ''), ifnull(`p`.`IsActive`, ''), ifnull(`a`.`Description`, ''), ifnull(`a`.`Complement`, ''), ifnull(`a`.`ReferencePoint`, ''), ifnull((select group_concat(`pp`.`Phone` separator ',') from `RepyDev`.`PersonsPhones` `pp`), '')) as char(800) charset utf8) AS `GeneralSearch`
+    cast(concat(ifnull(`p`.`ID`, ''), ifnull(`p`.`Name`, ''), ifnull(`p`.`TradeName`, ''), ifnull(`p`.`DocumentNumber`, ''), ifnull(`p`.`IsSupplier`, ''), ifnull(`p`.`IsCustomer`, ''), ifnull(`p`.`IsActive`, ''), ifnull(`a`.`Description`, ''), ifnull(`a`.`Complement`, ''), ifnull(`a`.`ReferencePoint`, ''), ifnull((select group_concat(`pp`.`Phone` separator ',') from `PersonsPhones` `pp`), '')) as char(800) charset utf8) AS `GeneralSearch`
 from
-    (`RepyDev`.`Persons` `p`
-left join `RepyDev`.`Addresses` `a` on
+    (`Persons` `p`
+left join `Addresses` `a` on
     ((`p`.`AddressID` = `a`.`ID`)));
 
 CREATE DEFINER=`rootdb`@`%` FUNCTION `SPLIT_STR`(

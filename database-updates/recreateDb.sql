@@ -25,7 +25,7 @@ alter table ApiKeys add constraint UK_Addresses_Key unique key (`Key`);
 create table Companies (
     ID bigint not null primary key auto_increment,
     Name varchar(100) not null,
-    WekhookSaleOrderChanges varchar(300),
+    WebhookSaleOrderChanges varchar(300),
     CreatedAt datetime not null default current_timestamp,
     UpdatedAt datetime not null default current_timestamp on update current_timestamp
 );
@@ -34,7 +34,7 @@ create table CompanyBranches (
     ID bigint not null primary key auto_increment,
     CompanyID bigint not null,
     Name varchar(100) not null,
-    TraedName varchar(100),
+    TradeName varchar(100),
     DocumentNumber varchar(20),
     AddressID bigint not null,
     IsDefault bit not null default b'0',
@@ -204,6 +204,7 @@ create table DevicesGasLevels (
     ID bigint not null primary key auto_increment,
     CylinderID bigint not null,
     CurrentWeight decimal(12,4) not null,
+    CylinderWeight decimal(12,4),
     ContentWeight decimal(12,4),
     PercentageToNotify decimal(10,2),
     SetTare bit not null default b'0',
@@ -254,7 +255,7 @@ create table Persons (
     IcmsContributorType varchar(20),
     StateRegistration varchar(50),
     MunicipalRegistration varchar(50),
-    IsGasCostumer bit not null default b'0',
+    IsGasCustomer bit not null default b'0',
     IsActive bit not null default b'1',
     Observation varchar(200),
     ExternalId bigint,
@@ -424,3 +425,67 @@ alter table Users add constraint UK_Users_Username unique key (Username);
 alter table Users add constraint FK_Users_Companies foreign key (CompanyID) references Companies(ID);
 alter table Users add constraint FK_Users_Persons foreign key (PersonID) references Persons(ID);
 alter table Users add constraint FK_Users_Employees foreign key (EmployeeID) references Employees(ID);
+
+create table PersonsCustomersNextGasSales (
+    ID bigint not null primary key auto_increment,
+    PersonCustomerId bigint not null,
+    PersonCustomerName bigint not null,
+    CompanyId bigint not null,
+    SalesCount int not null,
+    LastSale datetime not null,
+    NextSaleMinDate datetime not null,
+    NextSaleAverageDate datetime not null,
+    NextSaleMaxDate datetime not null
+);
+
+CREATE OR REPLACE
+ALGORITHM = UNDEFINED VIEW `ViewPersonsSearch` AS
+select
+    `p`.`ID` AS `ID`,
+    `p`.`Name` AS `Name`,
+    `p`.`TradeName` AS `TradeName`,
+    `p`.`DocumentNumber` AS `DocumentNumber`,
+    `p`.`CompanyID` AS `CompanyID`,
+    `p`.`IsSupplier` AS `IsSupplier`,
+    `p`.`IsCustomer` AS `IsCustomer`,
+    `p`.`IsGasCustomer` AS `IsGasCustomer`,
+    `p`.`IsActive` AS `IsActive`,
+    (
+    select
+        group_concat(`pp`.`Phone` separator ',')
+    from
+        `PersonsPhones` `pp`
+    where
+        (`pp`.`PersonID` = `p`.`ID`)) AS `Phones`,
+    `a`.`Description` AS `AddressDescription`,
+    `a`.`Street` AS `AddressStreet`,
+    `a`.`Number` AS `AddressNumber`,
+    `a`.`Neighborhood` AS `AddressNeighborhood`,
+    `a`.`City` AS `AddressCity`,
+    `a`.`Region` AS `AddressRegion`,
+    `a`.`Country` AS `AddressCountry`,
+    `a`.`Complement` AS `AddressComplement`,
+    `a`.`ReferencePoint` AS `AddressReferencePoint`,
+    concat(ifnull(`a`.`Description`, ''), ifnull(`a`.`Street`, ''), ifnull(`a`.`Number`, ''), ifnull(`a`.`Neighborhood`, ''), ifnull(`a`.`Complement`, ''), ifnull(`a`.`ReferencePoint`, '')) AS `AddressSearch`,
+    (
+    select
+        group_concat(`pp`.`Phone` separator ',')
+    from
+        `PersonsPhones` `pp`
+    where
+        (`pp`.`PersonID` = `p`.`ID`)) AS `PhonesSearch`,
+    concat(ifnull(`p`.`Name`, ''), ifnull(`p`.`TradeName`, '')) AS `NameSearch`,
+    cast(concat(ifnull(`p`.`ID`, ''), ifnull(`p`.`Name`, ''), ifnull(`p`.`TradeName`, ''), ifnull(`p`.`DocumentNumber`, ''), ifnull(`p`.`IsSupplier`, ''), ifnull(`p`.`IsCustomer`, ''), ifnull(`p`.`IsActive`, ''), ifnull(`a`.`Description`, ''), ifnull(`a`.`Complement`, ''), ifnull(`a`.`ReferencePoint`, ''), ifnull((select group_concat(`pp`.`Phone` separator ',') from `PersonsPhones` `pp`), '')) as char(800) charset utf8) AS `GeneralSearch`
+from
+    (`Persons` `p`
+left join `Addresses` `a` on
+    ((`p`.`AddressID` = `a`.`ID`)));
+
+CREATE DEFINER=`rootdb`@`%` FUNCTION `SPLIT_STR`(
+  x VARCHAR(255),
+  delim VARCHAR(12),
+  pos INT
+) RETURNS varchar(255) CHARSET utf8
+RETURN REPLACE(SUBSTRING(SUBSTRING_INDEX(x, delim, pos),
+       LENGTH(SUBSTRING_INDEX(x, delim, pos -1)) + 1),
+       delim, '');
