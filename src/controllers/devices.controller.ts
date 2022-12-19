@@ -59,22 +59,21 @@ DevicesController.get('/historyReads/:deviceId', [checkToken], async (req: Reque
 DevicesController.post('/syncData', async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-        // const {
-        //     responseFormat,
-        //     rawDelimiter,
-        //     rawSubDelimiter
-        // } = req.query;
+        console.log('### DEVICE SYNC DATA ###', JSON.stringify(req));
 
-        // const result = await deviceService.syncData(req.body);
-        // HttpHelper.formatResponse(result, {
-        //     format: (responseFormat as HttpResponseFormat) || HttpResponseFormat.JSON,
-        //     res,
-        //     rawDelimiter: rawDelimiter as string,
-        //     rawSubDelimiter: rawSubDelimiter as string
-        // });
+        const {
+            responseFormat,
+            rawDelimiter,
+            rawSubDelimiter
+        } = req.query;
 
-        // fs.appendFileSync('/home/projects/Repy/repy-devices.log', `${JSON.stringify(req)}`);
-        console.log(JSON.stringify(req))
+        const result = await deviceService.syncData(req.body);
+        HttpHelper.formatResponse(result, {
+            format: (responseFormat as HttpResponseFormat) || HttpResponseFormat.JSON,
+            res,
+            rawDelimiter: rawDelimiter as string,
+            rawSubDelimiter: rawSubDelimiter as string
+        });
 
         res.status(500).send();
     } catch (error) {
