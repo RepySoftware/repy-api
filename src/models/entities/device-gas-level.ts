@@ -73,14 +73,14 @@ export class DeviceGasLevel extends Entity<DeviceGasLevel> implements DeviceIsOn
     }
 
     public async loadDangerDay(sequelize: Sequelize): Promise<void> {
-        const dangerDayModel = ViewDeviceGasLevelDangerDay.getDefinedModel(sequelize);
-        const dangerDay: ViewDeviceGasLevelDangerDay = await dangerDayModel.findOne({
-            where: { id: this.id }
-        });
+        // const dangerDayModel = ViewDeviceGasLevelDangerDay.getDefinedModel(sequelize);
+        // const dangerDay: ViewDeviceGasLevelDangerDay = await dangerDayModel.findOne({
+        //     where: { id: this.id }
+        // });
 
-        this._daysToDangerPercentage = dangerDay.vDaysToDangerPercentage;
-        this._dangerDate = dangerDay.vDangerDate;
-        this._consumptionDays = dangerDay.vConsumptionDays;
+        // this._daysToDangerPercentage = dangerDay.vDaysToDangerPercentage;
+        // this._dangerDate = dangerDay.vDangerDate;
+        // this._consumptionDays = dangerDay.vConsumptionDays;
     }
 
     public getDaysToDangerPercentage(): number {
