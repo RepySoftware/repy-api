@@ -43,7 +43,7 @@ DevicesController.put('/', [checkToken], async (req: Request, res: Response, nex
 
 DevicesController.get('/historyReads/:deviceId', [checkToken], async (req: Request, res: Response, next: NextFunction) => {
     try {
-        
+
         const device = await deviceService.getHistoryReads(
             Number(req.params.deviceId),
             req.query,
@@ -59,23 +59,34 @@ DevicesController.get('/historyReads/:deviceId', [checkToken], async (req: Reque
 DevicesController.post('/syncData', async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-        console.log('### DEVICE SYNC DATA ###', JSON.stringify(req));
+        // const {
+        //     responseFormat,
+        //     rawDelimiter,
+        //     rawSubDelimiter
+        // } = req.query;
 
-        const {
-            responseFormat,
-            rawDelimiter,
-            rawSubDelimiter
-        } = req.query;
+        // const result = await deviceService.syncData(req.body);
+        // HttpHelper.formatResponse(result, {
+        //     format: (responseFormat as HttpResponseFormat) || HttpResponseFormat.JSON,
+        //     res,
+        //     rawDelimiter: rawDelimiter as string,
+        //     rawSubDelimiter: rawSubDelimiter as string
+        // });
 
-        const result = await deviceService.syncData(req.body);
-        HttpHelper.formatResponse(result, {
-            format: (responseFormat as HttpResponseFormat) || HttpResponseFormat.JSON,
-            res,
-            rawDelimiter: rawDelimiter as string,
-            rawSubDelimiter: rawSubDelimiter as string
-        });
+        // console.log('### DEVICE SYNC DATA ###', JSON.stringify(req));
+
+        const file = `${process.cwd()}/../repy-devices.log`;
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const body = JSON.stringify(req.body);
+
+        const raw = `${ip}\t${body}\r`;
+
+        fs.appendFileSync(file, raw, { encoding: 'utf-8' });
+
+        console.log('repy-devices.log', raw);
 
         res.status(500).send();
+
     } catch (error) {
         next(error);
     }
